@@ -1,0 +1,27 @@
+﻿HEADER
+﻿  0.373000;Movement;0;
+﻿  0.374000;LevelName;Context2Vista;
+﻿  0.374000;LevelSize;Large;
+﻿ 11.984000;ItemVisited;Manuální vysokozdvižný vozík;
+﻿ 27.143999;ItemVisited;Reklamní balónky;
+﻿ 44.490002;ItemVisited;Ruční nákupní košík;
+﻿ 50.157001;ItemVisited;Hasící hadice;
+﻿ 50.158001;PhaseStarted;ReturningToStart;
+﻿ 76.762001;PhaseEnded;ReturningToStart;
+﻿ 76.763000;PhaseStarted;Pointing;
+﻿ 76.763000;ShouldPointTo;OriginDoor;
+﻿ 79.127998;FirstPointing;None(X=1785.457 Y=2207.354 Z=-8.000);
+﻿ 80.463997;ShouldPointTo;Manuální vysokozdvižný vozík;
+﻿ 80.463997;ConfirmedPointing;None(X=1781.269 Y=2242.226 Z=-8.000);
+﻿ 95.445000;FirstPointing;None(X=2293.421 Y=1406.553 Z=-8.000);
+﻿ 96.697998;ShouldPointTo;Reklamní balónky;
+﻿ 96.697998;ConfirmedPointing;None(X=2087.903 Y=1378.407 Z=-8.000);
+﻿105.607002;FirstPointing;None(X=191.127 Y=1908.453 Z=-8.000);
+﻿106.735001;ShouldPointTo;Ruční nákupní košík;
+﻿106.735001;ConfirmedPointing;None(X=216.373 Y=1886.114 Z=-8.000);
+﻿126.182999;FirstPointing;None(X=544.193 Y=250.763 Z=-8.000);
+﻿127.783997;ShouldPointTo;Hasící hadice;
+﻿127.783997;ConfirmedPointing;None(X=453.930 Y=172.517 Z=-8.000);
+﻿139.160004;FirstPointing;None(X=1322.969 Y=-98.532 Z=-8.000);
+﻿140.593002;Experiment;Finished;
+﻿140.593002;ConfirmedPointing;None(X=1365.866 Y=-420.588 Z=-8.000);

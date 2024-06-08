@@ -1,0 +1,18 @@
+﻿HEADER
+﻿  0.551000;Movement;1;
+﻿  0.551000;LevelName;;
+﻿  0.551000;LevelSize;;
+﻿ 11.588000;ItemVisited;Sušička;
+﻿ 11.589000;PhaseStarted;ReturningToStart;
+﻿ 34.042999;PhaseEnded;ReturningToStart;
+﻿ 34.043999;PhaseStarted;Pointing;
+﻿ 34.043999;ShouldPointTo;OriginDoor;
+﻿ 39.153999;FirstPointing;None(X=360.556 Y=-104.466 Z=-8.000);
+﻿ 63.821999;ShouldPointTo;Sušička;
+﻿ 63.823002;ConfirmedPointing;None(X=-509.610 Y=3.556 Z=-8.000);
+﻿ 74.389000;FirstPointing;None(X=1045.908 Y=230.531 Z=-8.000);
+﻿ 78.580002;ShouldPointTo;Lednice;
+﻿ 78.581001;ConfirmedPointing;None(X=1047.171 Y=219.535 Z=-8.000);
+﻿ 92.139000;FirstPointing;None(X=1058.633 Y=-414.301 Z=-8.000);
+﻿ 93.433998;Experiment;Finished;
+﻿ 93.433998;ConfirmedPointing;None(X=1065.682 Y=-408.089 Z=-8.000);

@@ -1,0 +1,27 @@
+﻿HEADER
+﻿  0.669000;Movement;0;
+﻿  0.669000;LevelName;Context1Nonvista;
+﻿  0.669000;LevelSize;Large;
+﻿ 14.312000;ItemVisited;Nástěnná lékarnička;
+﻿ 55.828999;ItemVisited;Štafle;
+﻿ 67.857002;ItemVisited;Žlutá cedule;
+﻿ 82.183998;ItemVisited;Automat na nápoje;
+﻿ 82.183998;PhaseStarted;ReturningToStart;
+﻿ 97.551003;PhaseEnded;ReturningToStart;
+﻿ 97.552002;PhaseStarted;Pointing;
+﻿ 97.553001;ShouldPointTo;OriginDoor;
+﻿101.004997;FirstPointing;None(X=1871.328 Y=2412.112 Z=-8.000);
+﻿102.049004;ShouldPointTo;Nástěnná lékarnička;
+﻿102.049004;ConfirmedPointing;None(X=1793.441 Y=2321.263 Z=-8.000);
+﻿112.657997;FirstPointing;None(X=2064.283 Y=-60.985 Z=-8.000);
+﻿113.980003;ShouldPointTo;Štafle;
+﻿113.980003;ConfirmedPointing;None(X=2000.406 Y=12.798 Z=-8.000);
+﻿133.345001;FirstPointing;None(X=1074.808 Y=477.260 Z=-8.000);
+﻿134.584000;ShouldPointTo;Žlutá cedule;
+﻿134.585007;ConfirmedPointing;None(X=1074.020 Y=569.261 Z=-8.000);
+﻿141.212006;FirstPointing;None(X=598.269 Y=520.786 Z=-8.000);
+﻿142.212997;ShouldPointTo;Automat na nápoje;
+﻿142.212997;ConfirmedPointing;None(X=632.286 Y=558.497 Z=-8.000);
+﻿165.699997;FirstPointing;None(X=143.564 Y=1802.938 Z=-8.000);
+﻿166.882004;Experiment;Finished;
+﻿166.882004;ConfirmedPointing;None(X=145.095 Y=1772.374 Z=-8.000);

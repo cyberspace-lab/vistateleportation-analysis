@@ -1,0 +1,27 @@
+﻿HEADER
+﻿  0.948000;Movement;0;
+﻿  0.949000;LevelName;Context2Vista;
+﻿  0.949000;LevelSize;Small;
+﻿ 13.701000;ItemVisited;Televize;
+﻿ 28.945999;ItemVisited;Konvice;
+﻿ 38.509998;ItemVisited;Dětská postýlka;
+﻿ 54.368000;ItemVisited;Lampa;
+﻿ 54.368000;PhaseStarted;ReturningToStart;
+﻿ 65.894997;PhaseEnded;ReturningToStart;
+﻿ 65.894997;PhaseStarted;Pointing;
+﻿ 65.896004;ShouldPointTo;OriginDoor;
+﻿ 67.774002;FirstPointing;None(X=978.280 Y=1160.032 Z=-8.000);
+﻿ 69.124001;ShouldPointTo;Televize;
+﻿ 69.124001;ConfirmedPointing;None(X=972.032 Y=1168.148 Z=-8.000);
+﻿ 80.637001;FirstPointing;None(X=325.418 Y=1113.100 Z=-8.000);
+﻿ 81.639000;ShouldPointTo;Konvice;
+﻿ 81.639999;ConfirmedPointing;None(X=319.824 Y=1157.292 Z=-8.000);
+﻿ 91.204002;FirstPointing;None(X=1109.474 Y=73.365 Z=-8.000);
+﻿ 92.289001;ShouldPointTo;Dětská postýlka;
+﻿ 92.291000;ConfirmedPointing;None(X=1061.783 Y=86.978 Z=-8.000);
+﻿104.847000;FirstPointing;None(X=-35.790 Y=344.252 Z=-8.000);
+﻿106.391998;ShouldPointTo;Lampa;
+﻿106.392998;ConfirmedPointing;None(X=-25.037 Y=347.795 Z=-8.000);
+﻿116.194000;FirstPointing;None(X=1175.347 Y=803.390 Z=-8.000);
+﻿117.474998;Experiment;Finished;
+﻿117.474998;ConfirmedPointing;None(X=1161.261 Y=806.999 Z=-8.000);

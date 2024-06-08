@@ -1,0 +1,27 @@
+﻿HEADER
+﻿  0.193000;Movement;1;
+﻿  0.194000;LevelName;Context1Nonvista;
+﻿  0.194000;LevelSize;Small;
+﻿ 19.891001;ItemVisited;Kalkulačka;
+﻿ 88.150002;ItemVisited;Kopírka;
+﻿101.891998;ItemVisited;Stolní květina;
+﻿113.445999;ItemVisited;Mýdlo na ruce;
+﻿113.445999;PhaseStarted;ReturningToStart;
+﻿133.438004;PhaseEnded;ReturningToStart;
+﻿133.438995;PhaseStarted;Pointing;
+﻿133.438995;ShouldPointTo;OriginDoor;
+﻿135.567993;FirstPointing;None(X=961.223 Y=1123.041 Z=-8.000);
+﻿137.628006;ShouldPointTo;Kalkulačka;
+﻿137.628998;ConfirmedPointing;None(X=984.829 Y=1141.440 Z=-8.000);
+﻿145.815002;FirstPointing;None(X=213.118 Y=1034.373 Z=-8.000);
+﻿146.942001;ShouldPointTo;Kopírka;
+﻿146.942001;ConfirmedPointing;None(X=167.732 Y=1025.189 Z=-8.000);
+﻿153.735992;FirstPointing;None(X=578.743 Y=-106.472 Z=-8.000);
+﻿154.848999;ShouldPointTo;Stolní květina;
+﻿154.848999;ConfirmedPointing;None(X=575.343 Y=-132.641 Z=-8.000);
+﻿167.240005;FirstPointing;None(X=1197.551 Y=619.379 Z=-8.000);
+﻿168.882004;ShouldPointTo;Mýdlo na ruce;
+﻿168.882004;ConfirmedPointing;None(X=1214.438 Y=634.894 Z=-8.000);
+﻿175.384995;FirstPointing;None(X=863.778 Y=-84.110 Z=-8.000);
+﻿176.580994;Experiment;Finished;
+﻿176.580994;ConfirmedPointing;None(X=863.838 Y=-111.174 Z=-8.000);

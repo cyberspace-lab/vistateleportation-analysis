@@ -1,0 +1,27 @@
+﻿HEADER
+﻿  0.537000;Movement;0;
+﻿  0.537000;LevelName;Context1Vista;
+﻿  0.537000;LevelSize;Small;
+﻿ 19.191000;ItemVisited;Láhev s vodou;
+﻿ 35.841999;ItemVisited;Odpadkový koš;
+﻿ 49.859001;ItemVisited;Telefon;
+﻿ 90.624001;ItemVisited;Tiskárna na výkresy;
+﻿ 90.625000;PhaseStarted;ReturningToStart;
+﻿106.815002;PhaseEnded;ReturningToStart;
+﻿106.816002;PhaseStarted;Pointing;
+﻿106.816002;ShouldPointTo;OriginDoor;
+﻿110.393997;FirstPointing;None(X=1010.630 Y=1187.263 Z=-8.000);
+﻿113.205002;ShouldPointTo;Láhev s vodou;
+﻿113.206001;ConfirmedPointing;None(X=959.314 Y=1125.614 Z=-8.000);
+﻿127.572998;FirstPointing;None(X=186.557 Y=1015.262 Z=-8.000);
+﻿129.341003;ShouldPointTo;Odpadkový koš;
+﻿129.341003;ConfirmedPointing;None(X=190.974 Y=1034.690 Z=-8.000);
+﻿144.223007;FirstPointing;None(X=533.153 Y=-170.983 Z=-8.000);
+﻿145.824005;ShouldPointTo;Telefon;
+﻿145.824005;ConfirmedPointing;None(X=524.451 Y=-108.765 Z=-8.000);
+﻿152.089005;FirstPointing;None(X=951.735 Y=869.567 Z=-8.000);
+﻿153.703003;ShouldPointTo;Tiskárna na výkresy;
+﻿153.703003;ConfirmedPointing;None(X=959.902 Y=865.513 Z=-8.000);
+﻿158.423004;FirstPointing;None(X=1060.085 Y=-260.223 Z=-8.000);
+﻿159.759995;Experiment;Finished;
+﻿159.759995;ConfirmedPointing;None(X=1049.135 Y=-232.570 Z=-8.000);
