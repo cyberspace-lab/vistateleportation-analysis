@@ -1,6 +1,6 @@
 library(stringr)
 
-extract_date <- function(filename){
+extract_date <- function(filename) {
   date <- str_extract(filename, "\\d+-\\d+")
   return(date)
 }
@@ -17,9 +17,17 @@ find_session_dates <- function(folder) {
 load_session <- function(folder, date) {
   message("Loading session ", date)
   res <- list()
-  res$position <- open_position_log(folder, date)
   res$generic <- open_generic_log(folder, date)
+  if (!has_finished(res$generic)) {
+    message("Session not finished, skipping and returning nll")
+    return(NULL)
+  }
+  res$position <- open_position_log(folder, date)
   return(res)
+}
+
+has_finished <- function(generic_log) {
+  return("Finished" %in% generic_log$information)
 }
 
 open_generic_log <- function(folder, date) {
@@ -52,4 +60,13 @@ find_log <- function(folder, type, date) {
   }
   return(list_files[1])
   # return the file path
+}
+
+get_object_position <- function() {
+  df_positions <- read.csv("temp/positions.csv")
+  # split the position column into x, y, z separated by ;
+  df_positions <- tidyr::separate(df_positions, Position,
+                                  into = c("x", "y", "z"),
+                                  sep = ";", convert = TRUE)
+  return(df_positions)
 }
