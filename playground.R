@@ -22,31 +22,22 @@ for (date in dates) {
   pointings <- rbind(pointings, pointing)
 }
 
-df_positions <- get_object_position()
+pointings <- add_object_positions(pointings)
+pointings <- add_pointing_positions(pointings)
+pointings$pointingpoint_x
+pointings$pointingpoint_y
 
-pointings <- pointings %>%
-  left_join(df_positions, by = c("target" = "Object",
-                                 "LevelName" = "LevelName",
-                                 "LevelSize" = "LevelSize"))
-
-df_pointing_positions <- df_positions %>%
-  filter(Object == "Pointing Position") %>%
-  # add word start to each of the columns names x y z so that it becomes start_x
-  rename_with(~str_c("pointingpoint_", .), c(x, y, z))
-
-df_start_positions
-
-pointings <- pointings %>%
-  left_join(select(df_start_positions, starts_with("pointingpoint"), LevelName, LevelSize),
-            by = c("LevelName" = "LevelName",
-                   "LevelSize" = "LevelSize"))
+pointings <- filter(pointings, !is.na(LevelName), LevelName != "")
 
 pointings %>%
   rowwise() %>%
   mutate(target_pointed_distance = euclid_distance(c(ConfirmedPointing_x, ConfirmedPointing_y), c(x, y)),
-         target_pointingpoint_distance = euclid_distance(c(x, y), c(pointingpoint_x, pointingpoint_y)),
-         pointed_pointingpoint_distance = euclid_distance(c(ConfirmedPointing_x, ConfirmedPointing_y),
-                                                          c(pointingpoint_x, pointingpoint_y))) %>%
-  select(LevelName, LevelSize, Movement, target, target_pointed_distance,
-         target_start_distance, pointed_start_distance) %>%
-  View()
+         pointingpoint_target_distance = euclid_distance(c(pointingpoint_x, pointingpoint_y), c(x, y)),
+         pointingpoint_pointed_distance = euclid_distance(c(pointingpoint_x, pointingpoint_y), 
+                                                          c(ConfirmedPointing_x, ConfirmedPointing_y)),
+         pointingpoint_target_angle = angle_from_positions(c(pointingpoint_x, pointingpoint_y), c(x, y)),
+         pointingpoint_pointed_angle = angle_from_positions(c(pointingpoint_x, pointingpoint_y),
+                                                            c(ConfirmedPointing_x, ConfirmedPointing_y)),
+         pointed_angle_difference = pointingpoint_pointed_angle - pointingpoint_target_angle)
+
+navr::angle_from_positions()
