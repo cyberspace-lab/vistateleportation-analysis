@@ -10,9 +10,33 @@ find_session_dates <- function(folder) {
   files <- list.files(folder, pattern = "*.txt")
   codes <- sapply(files, function(x) str_extract(x, "\\d+-\\d+"))
   if (!all(table(codes) == 3)) {
+    print(table(codes))
     stop("There is not three of everyone")
   }
   return(as.vector(unique(codes)))
+}
+
+load_participants <- function(folder) {
+  folders <- list.dirs(folder, full.names = TRUE, recursive = FALSE)
+  participants <- list()
+  for (folder in folders) {
+    message("------------------------------")
+    message("Loading participant ", folder)
+    participant <- basename(folder)
+    participants[[participant]] <- load_participant(folder)
+  }
+  return(participants)
+}
+
+load_participant <- function(folder) {
+  dates <- find_session_dates(folder)
+  sessions <- list()
+  for (date in dates) {
+    session <- load_session(folder, date)
+    if (is.null(session)) next
+    sessions[[date]] <- session
+  }
+  return(sessions)
 }
 
 load_session <- function(folder, date) {
@@ -24,6 +48,9 @@ load_session <- function(folder, date) {
     return(NULL)
   }
   res$position <- open_position_log(folder, date)
+  res$navr <- navr::NavrObject()
+  res$navr$data <- res$position
+  res$navr <- navr::prepare_navr(res$navr)
   return(res)
 }
 
@@ -36,6 +63,7 @@ open_generic_log <- function(folder, date) {
   df <- read.table(log, sep = ";", fill = TRUE, skip = 1, header = FALSE)
   df[, 4] <- NULL
   colnames(df) <- c("time", "event", "information")
+  df <- mutate(df, time = as.numeric(str_trim(time)))
   return(df)
 }
 
@@ -43,9 +71,10 @@ open_position_log <- function(folder, date) {
   log <- find_log(folder, "position", date)
   df <- read.table(log, sep = ";", fill = TRUE, skip = 1, header = FALSE)
   df[, 4] <- NULL
-  colnames(df) <- c("time", "position", "rotation")
-  df[, c("position.x", "position.y", "position.z")] <- unity_vector_to_numeric(df$position)
-  df[, c("rotation.x", "rotation.y", "rotation.z")] <- unity_vector_to_numeric(df$rotation)
+  colnames(df) <- c("timestamp", "pos", "rot")
+  df$timestamp <- as.numeric(str_trim(df$timestamp))
+  df[, c("position_x", "position_y", "position_z")] <- unity_vector_to_numeric(df$pos)
+  df[, c("rotation_x", "rotation_y", "rotation_z")] <- unity_vector_to_numeric(df$rot)
   return(df)
 }
 
@@ -77,24 +106,4 @@ get_pointing_position <- function() {
   df_pointing_positions <- df_positions %>%
     filter(Object == "Pointing Position") %>%
     rename_with(~str_c("pointingpoint_", .), c(x, y, z))
-}
-
-
-add_object_positions <- function(df_pointing) {
-  df_positions <- get_object_position()
-  df_pointing <- df_pointing %>%
-    left_join(df_positions, by = c("target" = "Object",
-                                   "LevelName" = "LevelName",
-                                   "LevelSize" = "LevelSize"))
-  return(df_pointing)
-}
-
-add_pointing_positions <- function(df_pointings) {
-  df_pointing_positions <- get_pointing_position()
-  df_pointings <- df_pointings %>%
-    left_join(select(df_pointing_positions, starts_with("pointingpoint"),
-                     LevelName, LevelSize),
-              by = c("LevelName" = "LevelName",
-                     "LevelSize" = "LevelSize"))
-  return(df_pointings)
 }
