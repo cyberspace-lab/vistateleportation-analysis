@@ -1,43 +1,46 @@
 library(stringr)
 library(navr)
 library(cyberframer)
+library(ggplot2)
 source("functions/loading.R")
+source("functions/processing.R")
 source("functions/analysis.R")
 
 folder <- "example-data/VT1/"
-dates <- find_session_dates(folder)
 
-session <- load_session(folder, dates[2])
-head(session$position)
+participant_data <- load_participant(folder)
+pointings <- create_participant_pointing(participant_data)
 
-create_pointing_table(session$generic)
-extract_settings(session$generic)
-session$position
+df_generic <- participant_data$`20240606-110843`$generic
 
-pointings <- data.frame()
-for (date in dates) {
-  session <- load_session(folder, date)
-  if (is.null(session)) next
-  pointing <- create_pointing_table(session$generic)
-  pointings <- rbind(pointings, pointing)
-}
+create_pointing_table(a)
+View(pointings)
+create_participant_pointing(participant_data)
 
-pointings <- add_object_positions(pointings)
-pointings <- add_pointing_positions(pointings)
-pointings$pointingpoint_x
-pointings$pointingpoint_y
+analysis_pointings <- analyze_pointing_data(pointings)
 
-pointings <- filter(pointings, !is.na(LevelName), LevelName != "")
+sesh <- participant_data$`20240606-110843`
+participant_data
+View(sesh$generic)
+extract_settings(sesh$generic)
 
-pointings %>%
-  rowwise() %>%
-  mutate(target_pointed_distance = euclid_distance(c(ConfirmedPointing_x, ConfirmedPointing_y), c(x, y)),
-         pointingpoint_target_distance = euclid_distance(c(pointingpoint_x, pointingpoint_y), c(x, y)),
-         pointingpoint_pointed_distance = euclid_distance(c(pointingpoint_x, pointingpoint_y), 
-                                                          c(ConfirmedPointing_x, ConfirmedPointing_y)),
-         pointingpoint_target_angle = angle_from_positions(c(pointingpoint_x, pointingpoint_y), c(x, y)),
-         pointingpoint_pointed_angle = angle_from_positions(c(pointingpoint_x, pointingpoint_y),
-                                                            c(ConfirmedPointing_x, ConfirmedPointing_y)),
-         pointed_angle_difference = pointingpoint_pointed_angle - pointingpoint_target_angle)
+results <- analyze_participant(participant_data)
 
-navr::angle_from_positions()
+View(results$pointing)
+ggplot(analysis_pointings) +
+  geom_point(aes(x = ConfirmedPointing_x, y = ConfirmedPointing_y), color = "blue", size = 10) +
+  geom_label(aes(x = ConfirmedPointing_x, y = ConfirmedPointing_y - 100, label = target), color="blue") +
+  geom_point(aes(x = x, y = y), color = "green", size = 10) +
+  geom_label(aes(x = x, y = y + 100, label = target), color="green") +
+  geom_point(aes(x = pointingpoint_x, y = pointingpoint_y), color = "purple", size = 5) +
+  facet_wrap(~LevelName + LevelSize)
+
+
+  geom_label(aes(x = x, y = y + 150, label = target), color="green")
+  geom_abline(intercept = 0, slope = 1, color = "red") +
+  labs(x = "Distance between target and pointed",
+       y = "Distance between pointing point and target") +
+  theme_minimal()
+
+participants <- load_participants("Data/")
+results <- analyze_participants(participants)
