@@ -44,3 +44,12 @@ ggplot(analysis_pointings) +
 
 participants <- load_participants("Data/")
 results <- analyze_participants(participants)
+results$distance
+write.csv(results$pointing, "pointing20240611-vt1-12.csv")
+write.csv(results$distance, "distance20240611-vt1-12.csv")
+write.csv(results$timing, "timing20240611-vt1-12.csv")
+
+analyze_distances(participants$VT1$`20240606-110843`)
+names(participants$VT1)
+
+analyze_participant(participants$VT1)
