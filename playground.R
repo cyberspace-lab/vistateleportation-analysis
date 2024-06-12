@@ -31,25 +31,14 @@ ggplot(analysis_pointings) +
   geom_point(aes(x = ConfirmedPointing_x, y = ConfirmedPointing_y), color = "blue", size = 10) +
   geom_label(aes(x = ConfirmedPointing_x, y = ConfirmedPointing_y - 100, label = target), color="blue") +
   geom_point(aes(x = x, y = y), color = "green", size = 10) +
-  geom_label(aes(x = x, y = y + 100, label = target), color="green") +
+  geom_label(aes(x = x, y = y + 100, label = target), color = "green") +
   geom_point(aes(x = pointingpoint_x, y = pointingpoint_y), color = "purple", size = 5) +
-  facet_wrap(~LevelName + LevelSize)
-
-
-  geom_label(aes(x = x, y = y + 150, label = target), color="green")
+  geom_label(aes(x = x, y = y + 150, label = target), color = "green") +
   geom_abline(intercept = 0, slope = 1, color = "red") +
   labs(x = "Distance between target and pointed",
        y = "Distance between pointing point and target") +
   theme_minimal()
 
-participants <- load_participants("Data/")
-results <- analyze_participants(participants)
-results$distance
-write.csv(results$pointing, "pointing20240611-vt1-12.csv")
-write.csv(results$distance, "distance20240611-vt1-12.csv")
-write.csv(results$timing, "timing20240611-vt1-12.csv")
-
 analyze_distances(participants$VT1$`20240606-110843`)
 names(participants$VT1)
-
 analyze_participant(participants$VT1)
