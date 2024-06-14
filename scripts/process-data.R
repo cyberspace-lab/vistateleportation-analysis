@@ -9,11 +9,9 @@ source("functions/analysis.R")
 participants <- load_participants("Data/")
 results <- analyze_participants(participants)
 
-write.csv(results$pointing, "pointing20240611-vt1-12.csv")
-write.csv(results$distance, "distance20240611-vt1-12.csv")
-write.csv(results$timing, "timing20240611-vt1-12.csv")
-
-str(results$pointing)
+write.csv(results$pointing, "pointing20240612.csv")
+write.csv(results$distance, "distance20240612.csv")
+write.csv(results$timing, "timing20240612.csv")
 
 agg_pointing <- results$pointing %>%
   filter(target != "OriginDoor") %>%
@@ -29,3 +27,9 @@ df_all <- agg_pointing %>%
   left_join(results$timing, by = c("participant" = "participant",
                                    "LevelName" = "LevelName",
                                    "LevelSize" = "LevelSize"))
+
+write.csv(df_all, "all_combined20240612.csv")
+
+### Read questionnarie
+df_questionnaire <- read.csv("Data/results-survey553517.csv")
+head(df_questionnaire)
