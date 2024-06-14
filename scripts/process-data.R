@@ -32,7 +32,7 @@ df_all <- agg_pointing %>%
 write.csv(df_all, "all_combined20240612.csv")
 
 ### Read questionnarie
-df_questionnaire <- read.csv("Data/results-survey553517_coded_reversed.csv", sep = ";")
+df_questionnaire <- read.csv("Data/results_survey_vistateleport.csv", sep = ";")
 head(df_questionnaire)
 
 colnames(df_questionnaire)
@@ -44,6 +44,12 @@ df_ssq1 <- df_questionnaire[,c("ID", "Movement1", "X.SQ001.","X.SQ002.",
                                "X.SQ007.", "X.SQ008.", "X.SQ009.", "X.SQ010.", 
                                "X.SQ011.", "X.SQ012.", "X.SQ013.", "X.SQ014.", 
                                "X.SQ015.", "X.SQ016.")]
+
+# Recodes to 1-4
+question_keys <- c("Vůbec" = 1, "Mírně" = 2, "Středně" = 3, "Velmi" = 4)
+df_ssq1 <- df_ssq1 %>%
+  mutate(across(-c(ID, Movement1), ~recode(.x, !!!question_keys)))
+
 
 ## sumacni Score + avg score SSQ1
 
@@ -95,6 +101,14 @@ df_ssq2 <- df_questionnaire [,c("ID", "Movement2", "Copy.SQ001.", "Copy.SQ002.",
                                 "Copy.SQ012.", "Copy.SQ013.", "Copy.SQ014.", "Copy.SQ015.", "Copy.SQ016.")]
 
 
+
+# Recodes to 1-4
+question_keys <- c("Vůbec" = 1, "Mírně" = 2, "Středně" = 3, "Velmi" = 4)
+df_ssq2 <- df_ssq2 %>%
+  mutate(across(-c(ID, Movement2), ~recode(.x, !!!question_keys)))
+
+
+
 df_ssq2 <- df_ssq2 %>%
   rowwise() %>%
   mutate(ssq_sum2 = sum(across(-c(ID, Movement2))),
@@ -141,6 +155,23 @@ df_ssq1 <- df_ssq1 %>%
 df_vrleq1 <- df_questionnaire[,c("ID", "Movement1", "X.VRQ001.", "X.VRQ002.", "X.VRQ003.", "X.VRQ004.",
                                  "X.VRQ005.", "X.VRQ006.", "X.VRQ007.", "X.VRQ008.", "X.VRQ009.", "X.VRQ010.")]
 
+# Recodes to 1-5
+question_keys2 <- c("Rozhodně souhlasím" = 1, "Spíše souhlasím" = 2, "Ani souhlasím, ani nesouhlasím" = 3, 
+                    "Spíše nesouhlasím" = 4, "Rozhodně nesouhlasím" = 5)
+df_vrleq1 <- df_vrleq1 %>%
+  mutate(across(-c(ID, Movement1), ~recode(.x, !!!question_keys2)))
+
+
+
+# Reverse question 2,4,6,8,10
+df_vrleq1 <- df_vrleq1 %>%
+  mutate(across(c("X.VRQ002.", "X.VRQ004.", "X.VRQ006.", "X.VRQ008.", "X.VRQ010."),
+                  ~ case_when(.x == 5 ~ 1, .x == 4 ~ 2, .x == 2 ~ 4, .x == 1 ~ 5, .x == 3 ~ 3))) 
+ 
+
+
+  ## sumacni Score + avg score vrleq1
+
 df_vrleq1 <- df_vrleq1 %>%
   rowwise() %>%
   mutate(vrleq_sum1 = sum(across(-c(ID, Movement1))),
@@ -151,6 +182,20 @@ df_vrleq1 <- df_vrleq1 %>%
 df_vrleq2 <- df_questionnaire[,c("ID", "Movement2", "Copy.VRQ001.", "Copy.VRQ002.", "Copy.VRQ003.", "Copy.VRQ004.",
                                  "Copy.VRQ005.", "Copy.VRQ006.", "Copy.VRQ007.", "Copy.VRQ008.", "Copy.VRQ009.", 
                                  "Copy.VRQ010.")]
+
+# Recodes to 1-5
+question_keys2 <- c("Rozhodně souhlasím" = 1, "Spíše souhlasím" = 2, "Ani souhlasím, ani nesouhlasím" = 3, 
+                    "Spíše nesouhlasím" = 4, "Rozhodně nesouhlasím" = 5)
+df_vrleq2 <- df_vrleq2 %>%
+  mutate(across(-c(ID, Movement2), ~recode(.x, !!!question_keys2)))
+
+# Reverse question 2,4,6,8,10
+df_vrleq2 <- df_vrleq2 %>%
+  mutate(across(c("Copy.VRQ002.", "Copy.VRQ004.", "Copy.VRQ006.", "Copy.VRQ008.", "Copy.VRQ010."),
+                ~ case_when(.x == 5 ~ 1, .x == 4 ~ 2, .x == 2 ~ 4, .x == 1 ~ 5, .x == 3 ~ 3))) 
+
+
+## sumacni Score + avg score vrleq2
 
 df_vrleq2 <- df_vrleq2 %>%
   rowwise() %>%
