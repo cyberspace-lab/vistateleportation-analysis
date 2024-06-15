@@ -75,7 +75,7 @@ analyze_pointing_data <- function(pointings) {
                                                              c(ConfirmedPointing_x, ConfirmedPointing_y)),
           pointed_angle_difference = angle_diff(pointingpoint_pointed_angle, pointingpoint_target_angle)) %>%
     ungroup() %>%
-    select(target, LevelName, LevelSize, session, target_pointed_distance_difference,
+    select(target, Movement, LevelName, LevelSize, session, target_pointed_distance_difference,
            pointingpoint_target_distance, pointingpoint_pointed_distance,
            pointingpoint_target_angle, pointingpoint_pointed_angle, pointed_angle_difference)
   return(analysis_pointings)
