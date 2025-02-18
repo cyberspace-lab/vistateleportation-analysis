@@ -8,7 +8,7 @@ source("functions/loading.R")
 source("functions/processing.R")
 source("functions/analysis.R")
 
-participants <- load_participants("Data/")
+participants <- load_participants("temp/data/")
 results <- analyze_participants(participants)
 
 write.csv(results$pointing, "pointing20240612.csv")
@@ -48,9 +48,9 @@ df_ssq1 <- df_ssq1 %>%
          ssq_desorientation1_total = (ssq_desorientation1 * 13.92),
          ssq_total1 = (ssq_desorientation1 + ssq_oculomotor1 + ssq_nausea1) * 3.74) %>%
   ungroup()
-### SECOND SSQ
 
-df_ssq2 <- df_questionnaire [,c("ID", "Movement2", "Copy.SQ001.", "Copy.SQ002.",
+### SECOND SSQ ---------------
+df_ssq2 <- df_questionnaire [, c("ID", "Movement2", "Copy.SQ001.", "Copy.SQ002.",
                                 "Copy.SQ003.", "Copy.SQ004.", "Copy.SQ005.",
                                 "Copy.SQ006.", "Copy.SQ007.", "Copy.SQ008.",
                                 "Copy.SQ009.", "Copy.SQ010.", "Copy.SQ011.",
@@ -75,7 +75,7 @@ df_ssq2 <- df_ssq2 %>%
          ssq_total2 = (ssq_desorientation2 + ssq_oculomotor2 + ssq_nausea2) * 3.74) %>%
   ungroup()
 
-### FIRST VRLEQ -----
+### FIRST VRLEQ ---------------
 df_vrleq1 <- df_questionnaire[,c("ID", "Movement1", "X.VRQ001.",
                                  "X.VRQ002.", "X.VRQ003.", "X.VRQ004.",
                                  "X.VRQ005.", "X.VRQ006.", "X.VRQ007.",
@@ -104,7 +104,6 @@ df_vrleq2 <- mutate(df_vrleq2, across(-c(ID, Movement2), ~recode(.x, !!!question
   ungroup()
 
 ## df_questionnaires
-
 convert_to_long <- function(df, val) {
   out <- df %>%
     # just a safeguard
