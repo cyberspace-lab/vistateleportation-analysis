@@ -27,13 +27,18 @@ extract_settings(sesh$generic)
 results <- analyze_participant(participant_data)
 
 View(results$pointing)
+
 ggplot(analysis_pointings) +
-  geom_point(aes(x = ConfirmedPointing_x, y = ConfirmedPointing_y), color = "blue", size = 10) +
-  geom_label(aes(x = ConfirmedPointing_x, y = ConfirmedPointing_y - 100, label = target), color="blue") +
+  geom_point(aes(x = ConfirmedPointing_x, y = ConfirmedPointing_y),
+             color = "blue", size = 10) +
+  geom_label(aes(x = ConfirmedPointing_x, y = ConfirmedPointing_y - 100, label = target),
+             color = "blue") +
   geom_point(aes(x = x, y = y), color = "green", size = 10) +
   geom_label(aes(x = x, y = y + 100, label = target), color = "green") +
-  geom_point(aes(x = pointingpoint_x, y = pointingpoint_y), color = "purple", size = 5) +
-  geom_label(aes(x = x, y = y + 150, label = target), color = "green") +
+  geom_point(aes(x = pointingpoint_x, y = pointingpoint_y),
+             color = "purple", size = 5) +
+  geom_label(aes(x = pointingpoint_x, y = pointingpoint_y + 150,
+                 label = target), color = "purple") +
   geom_abline(intercept = 0, slope = 1, color = "red") +
   labs(x = "Distance between target and pointed",
        y = "Distance between pointing point and target") +

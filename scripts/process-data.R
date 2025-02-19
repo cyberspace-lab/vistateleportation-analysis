@@ -4,6 +4,7 @@ library(cyberframer)
 library(ggplot2)
 library(dplyr)
 library(tidyr)
+
 source("functions/loading.R")
 source("functions/processing.R")
 source("functions/analysis.R")
@@ -17,6 +18,7 @@ write.csv(results$timing, "timing20240612.csv")
 
 ### Read questionnarie
 df_questionnaire <- read.csv("temp/results_survey_vistateleport.csv", sep = ";")
+
 question_keys <- c("Vůbec" = 1, "Mírně" = 2, "Středně" = 3, "Velmi" = 4)
 question_keys2 <- c("Rozhodně souhlasím" = 1, "Spíše souhlasím" = 2,
                     "Ani souhlasím, ani nesouhlasím" = 3,
@@ -80,9 +82,12 @@ df_vrleq1 <- df_questionnaire[,c("ID", "Movement1", "X.VRQ001.",
                                  "X.VRQ002.", "X.VRQ003.", "X.VRQ004.",
                                  "X.VRQ005.", "X.VRQ006.", "X.VRQ007.",
                                  "X.VRQ008.", "X.VRQ009.", "X.VRQ010.")]
-df_vrleq1 <- mutate(df_vrleq1, across(-c(ID, Movement1), ~recode(.x, !!!question_keys2))) %>%
-  mutate(across(c("X.VRQ002.", "X.VRQ004.", "X.VRQ006.", "X.VRQ008.", "X.VRQ010."),
-                ~ case_when(.x == 5 ~ 1, .x == 4 ~ 2, .x == 2 ~ 4, .x == 1 ~ 5, .x == 3 ~ 3))) %>%
+df_vrleq1 <- mutate(df_vrleq1, across(-c(ID, Movement1),
+                     ~recode(.x, !!!question_keys2))) %>%
+  mutate(across(c("X.VRQ002.", "X.VRQ004.", "X.VRQ006.",
+                  "X.VRQ008.", "X.VRQ010."),
+                ~ case_when(.x == 5 ~ 1, .x == 4 ~ 2, .x == 2 ~ 4,
+                            .x == 1 ~ 5, .x == 3 ~ 3))) %>%
   rowwise() %>%
   mutate(Movement1 = recode(Movement1, !!!movement_keys),
          vrleq_sum1 = sum(across(-c(ID, Movement1))),
@@ -90,13 +95,16 @@ df_vrleq1 <- mutate(df_vrleq1, across(-c(ID, Movement1), ~recode(.x, !!!question
   ungroup()
 
 ### SECOND VRLEQ ------
-df_vrleq2 <- df_questionnaire[,c("ID", "Movement2", "Copy.VRQ001.",
+df_vrleq2 <- df_questionnaire[, c("ID", "Movement2", "Copy.VRQ001.",
                                  "Copy.VRQ002.", "Copy.VRQ003.", "Copy.VRQ004.",
                                  "Copy.VRQ005.", "Copy.VRQ006.", "Copy.VRQ007.",
                                  "Copy.VRQ008.", "Copy.VRQ009.", "Copy.VRQ010.")]
-df_vrleq2 <- mutate(df_vrleq2, across(-c(ID, Movement2), ~recode(.x, !!!question_keys2))) %>%
-  mutate(across(c("Copy.VRQ002.", "Copy.VRQ004.", "Copy.VRQ006.", "Copy.VRQ008.", "Copy.VRQ010."),
-                ~ case_when(.x == 5 ~ 1, .x == 4 ~ 2, .x == 2 ~ 4, .x == 1 ~ 5, .x == 3 ~ 3)))  %>%
+df_vrleq2 <- mutate(df_vrleq2, across(-c(ID, Movement2),
+                    ~recode(.x, !!!question_keys2))) %>%
+  mutate(across(c("Copy.VRQ002.", "Copy.VRQ004.", "Copy.VRQ006.",
+                  "Copy.VRQ008.", "Copy.VRQ010."),
+                ~ case_when(.x == 5 ~ 1, .x == 4 ~ 2, .x == 2 ~ 4,
+                            .x == 1 ~ 5, .x == 3 ~ 3)))  %>%
   rowwise() %>%
   mutate(Movement2 = recode(Movement2, !!!movement_keys),
          vrleq_sum2 = sum(across(-c(ID, Movement2))),
@@ -106,7 +114,6 @@ df_vrleq2 <- mutate(df_vrleq2, across(-c(ID, Movement2), ~recode(.x, !!!question
 ## df_questionnaires
 convert_to_long <- function(df, val) {
   out <- df %>%
-    # just a safeguard
     ungroup() %>%
     pivot_longer(cols = -c(ID, Movement),
                  names_to = "score", values_to = "value") %>%
@@ -123,8 +130,10 @@ df_vrleq1_long <- convert_to_long(select(df_vrleq1, ID, Movement = Movement1,
 df_vrleq2_long <- convert_to_long(select(df_vrleq2, ID, Movement = Movement2,
                                          starts_with("vrleq_")), "2")
 
-df_questionnaire_summaries <- bind_rows(df_ssq1_long, df_ssq2_long, df_vrleq1_long, df_vrleq2_long) %>%
-  pivot_wider(id_cols = c(ID, Movement), names_from = score, values_from = value)
+df_questionnaire_summaries <- bind_rows(df_ssq1_long, df_ssq2_long,
+                                        df_vrleq1_long, df_vrleq2_long) %>%
+  pivot_wider(id_cols = c(ID, Movement),
+              names_from = score, values_from = value)
 
 write.csv(df_questionnaire_summaries, "questionnaire_summaries20240612.csv")
 
@@ -145,5 +154,6 @@ df_all <- agg_pointing %>%
                                    "LevelSize" = "LevelSize"))
 str(df_all)
 df_all %>%
-  left_join(df_questionnaire_summaries, by = c("participant" = "ID", "Movement.x" = "Movement")) %>%
+  left_join(df_questionnaire_summaries,
+            by = c("participant" = "ID", "Movement.x" = "Movement")) %>%
   write.csv("all_combined20240612.csv")
