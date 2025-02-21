@@ -1,5 +1,6 @@
 library(stringr)
 library(dplyr)
+library(navr)
 
 extract_date <- function(filename) {
   date <- str_extract(filename, "\\d+-\\d+")
@@ -42,20 +43,24 @@ load_participant <- function(folder) {
 load_session <- function(folder, date) {
   message("Loading session ", date)
   res <- list()
-  res$generic <- open_generic_log(folder, date)
-  if (!has_finished(res$generic)) {
+  res$events <- open_generic_log(folder, date)
+  if (!has_finished(res$events)) {
     message("Session not finished, skipping and returning nll")
     return(NULL)
   }
-  res$position <- open_position_log(folder, date)
+  df_pos <- open_position_log(folder, date)
   res$navr <- navr::NavrObject()
-  res$navr$data <- res$position
+  res$navr$data <- df_pos
   res$navr <- navr::prepare_navr(res$navr)
+  res$training <- is_training_level(res$events)
+  if (!res$training) {
+    res$pointing <- create_session_pointing(res, date, skip_training = TRUE)
+  }
   return(res)
 }
 
-has_finished <- function(generic_log) {
-  return("Finished" %in% generic_log$information)
+has_finished <- function(events_log) {
+  return("Finished" %in% events_log$information)
 }
 
 open_generic_log <- function(folder, date) {
@@ -73,8 +78,10 @@ open_position_log <- function(folder, date) {
   df[, 4] <- NULL
   colnames(df) <- c("timestamp", "pos", "rot")
   df$timestamp <- as.numeric(str_trim(df$timestamp))
-  df[, c("position_x", "position_y", "position_z")] <- unity_vector_to_numeric(df$pos)
-  df[, c("rotation_x", "rotation_y", "rotation_z")] <- unity_vector_to_numeric(df$rot)
+  df[, c("position_x", "position_y", "position_z")] <-
+    unity_vector_to_numeric(df$pos)
+  df[, c("rotation_x", "rotation_y", "rotation_z")] <-
+    unity_vector_to_numeric(df$rot)
   return(df)
 }
 
@@ -92,18 +99,3 @@ find_log <- function(folder, type, date) {
   # return the file path
 }
 
-get_object_position <- function() {
-  df_positions <- read.csv("temp/positions.csv")
-  # split the position column into x, y, z separated by ;
-  df_positions <- tidyr::separate(df_positions, Position,
-                                  into = c("x", "y", "z"),
-                                  sep = ";", convert = TRUE)
-  return(df_positions)
-}
-
-get_pointing_position <- function() {
-  df_positions <- get_object_position()
-  df_pointing_positions <- df_positions %>%
-    filter(Object == "Pointing Position") %>%
-    rename_with(~str_c("pointingpoint_", .), c(x, y, z))
-}
