@@ -1,0 +1,110 @@
+```{r}
+library(tidyverse)
+library(lme4)
+library(report)
+library(ggeffects)
+
+here::i_am("reports/analysis.qmd")
+source(here::here("functions", "visualisation.R"))
+
+df_pointing <- read.csv(here::here("temp", "processed", "pointing20250221.csv"))
+df_distance <- read.csv(here::here("temp", "processed", "distance20250221.csv"))
+df_timing <- read.csv(here::here("temp", "processed", "timing20250221.csv"))
+knitr::opts_chunk$set(echo = FALSE)
+
+df_pointing_model <- df_pointing %>%
+  filter(target != "OriginDoor") %>%
+  mutate(abs_angle_error = abs(pointed_angle_difference),
+         abs_distance_error = abs(target_pointed_distance_difference))
+```
+
+## Pointing analysis
+```{r}
+df_pointing %>%
+  filter(target != "OriginDoor") %>%
+  group_by(participant, UnrealLevelName) %>%
+  summarize(across(target_pointed_distance_difference:pointed_angle_difference,
+                   list(mean = mean, median = median))) %>%
+  ungroup()
+```
+
+Validation based on the origin door 
+```{r}
+df_pointing %>%
+  mutate(training = target == "OriginDoor") %>%
+  select(participant, target, training, target_pointed_distance_difference, 
+         pointed_angle_difference) %>%
+  pivot_longer(cols = target_pointed_distance_difference:pointed_angle_difference,
+               names_to = "metric", values_to = "value") %>%
+  ggplot(aes(x = value, fill = metric)) +
+  geom_histogram() +
+  facet_wrap(~metric+training, scales = "free") +
+  theme_minimal(base_size = 16) +
+  labs(title = "Validation based on the origin door") +
+  theme(legend.position = "none")
+```
+
+```{r}
+lmer_pointed_distance <- lmer(target_pointed_distance_difference ~ Movement + LevelSize + Vista + 
+                              Movement:LevelSize + Movement:Vista + LevelSize:Vista +
+                              (1|UnrealLevelName) +
+                              (1|participant), data = df_pointing_model)
+summary(lmer_pointed_distance)
+report(lmer_pointed_distance)
+predict_response(lmer_pointed_distance, margins="empirical")
+```
+
+```{r}
+ggpredict(lmer_pointed_distance, terms = "Vista") %>%
+  plot() +
+  theme_minimal() +
+  labs(title = "Effect of Vista on Pointing Distance Error",
+       y = "Pointing Distance Difference",
+       x = "Vista")
+```
+
+## Angle error
+```{r}
+df_pointing_model %>%
+  ggplot(aes(x = pointed_angle_difference)) +
+  geom_histogram() +
+  theme_minimal() +
+  labs(title = "Angle error",
+       y = "Count",
+       x = "Angle Error")
+```
+
+```{r}
+colnames(df_pointing_model)
+lmer_pointed_angle <- glmer(abs_angle_error ~ Movement + LevelSize + Vista + 
+                            Movement:LevelSize + Movement:Vista + LevelSize:Vista +
+                            (1|UnrealLevelName) +
+                            (1|participant), data = df_pointing_model, family = gaussian(link = "log"))
+```
+This model has Level name as a random effect, but its variance is 0. So we remove it.
+
+```{r}
+df_pointing_model$scaledlog_abs_angle_error <- scale(log(df_pointing_model$abs_angle_error))
+lmer_pointed_angle <- glmer(abs_angle_error ~ Movement + LevelSize + Vista + 
+                            Movement:LevelSize + Movement:Vista + LevelSize:Vista +
+                            (1|UnrealLevelName) +
+                            (1|participant), data = df_pointing_model,
+                            family = Gamma(link = "log"))
+report(lmer_pointed_angle)
+predict_response(lmer_pointed_angle)
+```
+
+## Distance error
+
+```{r}
+colnames(df_distance)
+```
+
+```{r}
+lm_distance <- lm(distance_items ~ Movement + LevelSize + Vista + 
+                      Movement:LevelSize + Movement:Vista + LevelSize:Vista, data = df_distance)
+summary(lm_distance)
+report(lm_distance)
+```
+
+
