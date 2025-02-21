@@ -5,6 +5,7 @@ library(ggplot2)
 library(dplyr)
 library(tidyr)
 
+source("functions/getters.R")
 source("functions/loading.R")
 source("functions/processing.R")
 source("functions/analysis.R")
@@ -12,9 +13,10 @@ source("functions/analysis.R")
 participants <- load_participants("temp/data/")
 results <- analyze_participants(participants)
 
-write.csv(results$pointing, "pointing20240612.csv")
-write.csv(results$distance, "distance20240612.csv")
-write.csv(results$timing, "timing20240612.csv")
+dir.create("temp/processed", recursive = TRUE, showWarnings = FALSE)
+write.csv(results$pointing, "temp/processed/pointing20250221.csv")
+write.csv(results$distance, "temp/processed/distance20250221.csv")
+write.csv(results$timing, "temp/processed/timing20250221.csv")
 
 ### Read questionnarie
 df_questionnaire <- read.csv("temp/results_survey_vistateleport.csv", sep = ";")
@@ -135,7 +137,7 @@ df_questionnaire_summaries <- bind_rows(df_ssq1_long, df_ssq2_long,
   pivot_wider(id_cols = c(ID, Movement),
               names_from = score, values_from = value)
 
-write.csv(df_questionnaire_summaries, "questionnaire_summaries20240612.csv")
+write.csv(df_questionnaire_summaries, "temp/processed/questionnaire_summaries20250221.csv")
 
 ## Merging all data -----
 agg_pointing <- results$pointing %>%
@@ -152,8 +154,7 @@ df_all <- agg_pointing %>%
   left_join(results$timing, by = c("participant" = "participant",
                                    "LevelName" = "LevelName",
                                    "LevelSize" = "LevelSize"))
-str(df_all)
 df_all %>%
   left_join(df_questionnaire_summaries,
             by = c("participant" = "ID", "Movement.x" = "Movement")) %>%
-  write.csv("all_combined20240612.csv")
+  write.csv("temp/processed/all_combined20250221.csv")

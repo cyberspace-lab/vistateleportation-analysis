@@ -14,6 +14,11 @@ extract_settings <- function(df_events) {
     pivot_wider(names_from = event, values_from = information)
   df_settings$Movement <- case_match(as.numeric(df_settings$Movement),
                                      c(0) ~ "Teleport", c(1) ~ "OpticFlow")
+  df_settings$Vista <- case_match(df_settings$LevelName,
+                                  str_subset(df_settings$LevelName, "Context\\dVista") ~ "Vista",
+                                  str_subset(df_settings$LevelName, "Context\\dNonvista") ~ "Nonvista")
+  df_settings <- df_settings %>%
+    mutate(UnrealLevelName = str_c(str_remove(LevelName, "Vista|Nonvista"), "_", LevelSize))
   return(df_settings)
 }
 
