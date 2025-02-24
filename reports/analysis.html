@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.40">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>analysis – Digital Forest</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-549806ee2085284f45b00abea8c6df48.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-ddd961a2510921635943dfbbd19534c4.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Digital Forest</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link active" href="../reports/analysis.html" aria-current="page"> 
+<span class="menu-text">Analysis</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#pointing-analysis" id="toc-pointing-analysis" class="nav-link active" data-scroll-target="#pointing-analysis">Pointing analysis</a></li>
+  <li><a href="#angle-error" id="toc-angle-error" class="nav-link" data-scroll-target="#angle-error">Angle error</a></li>
+  <li><a href="#distance-error" id="toc-distance-error" class="nav-link" data-scroll-target="#distance-error">Distance error</a></li>
+  <li><a href="#timing" id="toc-timing" class="nav-link" data-scroll-target="#timing">Timing</a></li>
+  <li><a href="#behavioral" id="toc-behavioral" class="nav-link" data-scroll-target="#behavioral">Behavioral</a>
+  <ul class="collapse">
+  <li><a href="#ssq" id="toc-ssq" class="nav-link" data-scroll-target="#ssq">SSQ</a></li>
+  <li><a href="#movement-effect-on-ssq" id="toc-movement-effect-on-ssq" class="nav-link" data-scroll-target="#movement-effect-on-ssq">Movement effect on ssq</a></li>
+  <li><a href="#ssq-and-performance" id="toc-ssq-and-performance" class="nav-link" data-scroll-target="#ssq-and-performance">SSQ and performance</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
+
+
+
+
+<section id="pointing-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="pointing-analysis">Pointing analysis</h2>
+<p>Validation based on the origin door</p>
+<div class="cell">
+<div class="cell-output cell-output-stderr">
+<pre><code>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analysis_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>Linear mixed model fit by REML ['lmerMod']
+Formula: target_pointed_distance_difference ~ Movement + LevelSize + Vista +  
+    Movement:LevelSize + Movement:Vista + LevelSize:Vista + (1 |  
+    UnrealLevelName) + (1 | participant)
+   Data: df_pointing_model
+
+REML criterion at convergence: 6770.6
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-2.8428 -0.6114 -0.0491  0.5551  5.6283 
+
+Random effects:
+ Groups          Name        Variance Std.Dev.
+ participant     (Intercept) 30981.5  176.02  
+ UnrealLevelName (Intercept)   654.2   25.58  
+ Residual                    83520.6  289.00  
+Number of obs: 480, groups:  participant, 15; UnrealLevelName, 4
+
+Fixed effects:
+                                Estimate Std. Error t value
+(Intercept)                       -77.74      60.09  -1.294
+MovementTeleport                  154.79      45.71   3.386
+LevelSizeSmall                    334.48      52.42   6.380
+VistaVista                         54.70      45.78   1.195
+MovementTeleport:LevelSizeSmall  -105.73      52.99  -1.995
+MovementTeleport:VistaVista       -92.14      53.05  -1.737
+LevelSizeSmall:VistaVista        -104.49      52.76  -1.980
+
+Correlation of Fixed Effects:
+            (Intr) MvmntT LvlSzS VstVst MT:LSS MvT:VV
+MovmntTlprt -0.380                                   
+LevelSzSmll -0.436  0.292                            
+VistaVista  -0.379  0.332  0.289                     
+MvmntTl:LSS  0.220 -0.577 -0.505  0.003              
+MvmntTlp:VV  0.218 -0.573  0.002 -0.579 -0.004       
+LvlSzSml:VV  0.220  0.000 -0.503 -0.576  0.000  0.000</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>We fitted a linear mixed model (estimated using REML and nloptwrap optimizer)
+to predict target_pointed_distance_difference with Movement, LevelSize and
+Vista (formula: target_pointed_distance_difference ~ Movement + LevelSize +
+Vista + Movement:LevelSize + Movement:Vista + LevelSize:Vista). The model
+included UnrealLevelName as random effects (formula: list(~1 | UnrealLevelName,
+~1 | participant)). The model's total explanatory power is substantial
+(conditional R2 = 0.36) and the part related to the fixed effects alone
+(marginal R2) is of 0.12. The model's intercept, corresponding to Movement =
+OpticFlow, LevelSize = Large and Vista = Nonvista, is at -77.74 (95% CI
+[-195.82, 40.34], t(470) = -1.29, p = 0.196). Within this model:
+
+  - The effect of Movement [Teleport] is statistically significant and positive
+(beta = 154.79, 95% CI [64.96, 244.61], t(470) = 3.39, p &lt; .001; Std. beta =
+0.43, 95% CI [0.18, 0.68])
+  - The effect of LevelSize [Small] is statistically significant and positive
+(beta = 334.48, 95% CI [231.47, 437.50], t(470) = 6.38, p &lt; .001; Std. beta =
+0.93, 95% CI [0.65, 1.22])
+  - The effect of Vista [Vista] is statistically non-significant and positive
+(beta = 54.70, 95% CI [-35.26, 144.66], t(470) = 1.19, p = 0.233; Std. beta =
+0.15, 95% CI [-0.10, 0.40])
+  - The effect of Movement [Teleport] × LevelSize [Small] is statistically
+significant and negative (beta = -105.73, 95% CI [-209.86, -1.60], t(470) =
+-2.00, p = 0.047; Std. beta = -0.30, 95% CI [-0.59, -4.47e-03])
+  - The effect of Movement [Teleport] × Vista [Vista] is statistically
+non-significant and negative (beta = -92.14, 95% CI [-196.39, 12.11], t(470) =
+-1.74, p = 0.083; Std. beta = -0.26, 95% CI [-0.55, 0.03])
+  - The effect of LevelSize [Small] × Vista [Vista] is statistically significant
+and negative (beta = -104.49, 95% CI [-208.17, -0.80], t(470) = -1.98, p =
+0.048; Std. beta = -0.29, 95% CI [-0.58, -2.24e-03])
+
+Standardized parameters were obtained by fitting the model on a standardized
+version of the dataset. 95% Confidence Intervals (CIs) and p-values were
+computed using a Wald t-distribution approximation.</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>$Movement
+# Predicted values of target_pointed_distance_difference
+
+Movement  | Predicted |          95% CI
+---------------------------------------
+OpticFlow |    -77.74 | -195.82,  40.34
+Teleport  |     77.04 |  -41.04, 195.12
+
+Adjusted for:
+*       LevelSize =    Large
+*           Vista = Nonvista
+* UnrealLevelName = 0 (population-level)
+*     participant = 0 (population-level)
+
+$LevelSize
+# Predicted values of target_pointed_distance_difference
+
+LevelSize | Predicted |          95% CI
+---------------------------------------
+Large     |    -77.74 | -195.82,  40.34
+Small     |    256.74 |  138.61, 374.87
+
+Adjusted for:
+*        Movement = OpticFlow
+*           Vista =  Nonvista
+* UnrealLevelName = 0 (population-level)
+*     participant = 0 (population-level)
+
+$Vista
+# Predicted values of target_pointed_distance_difference
+
+Vista    | Predicted |         95% CI
+-------------------------------------
+Nonvista |    -77.74 | -195.82, 40.34
+Vista    |    -23.04 | -141.27, 95.19
+
+Adjusted for:
+*        Movement = OpticFlow
+*       LevelSize =     Large
+* UnrealLevelName = 0 (population-level)
+*     participant = 0 (population-level)
+
+attr(,"class")
+[1] "ggalleffects" "list"        
+attr(,"model.name")
+[1] "lmer_pointed_distance"</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analysis_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="angle-error" class="level2">
+<h2 class="anchored" data-anchor-id="angle-error">Angle error</h2>
+<div class="cell">
+<div class="cell-output cell-output-stderr">
+<pre><code>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analysis_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "X"                                  "FirstPointing_time"                
+ [3] "ConfirmedPointing_time"             "FirstPointing_x"                   
+ [5] "ConfirmedPointing_x"                "FirstPointing_y"                   
+ [7] "ConfirmedPointing_y"                "FirstPointing_z"                   
+ [9] "ConfirmedPointing_z"                "target"                            
+[11] "start_time"                         "id"                                
+[13] "Movement"                           "LevelName"                         
+[15] "LevelSize"                          "Vista"                             
+[17] "UnrealLevelName"                    "session"                           
+[19] "training"                           "Level"                             
+[21] "object_x"                           "object_y"                          
+[23] "object_z"                           "pointingpoint_x"                   
+[25] "pointingpoint_y"                    "pointingpoint_z"                   
+[27] "pointingpoint_target_distance"      "pointingpoint_pointed_distance"    
+[29] "target_pointed_distance_difference" "pointingpoint_target_angle"        
+[31] "pointingpoint_pointed_angle"        "pointed_angle_difference"          
+[33] "participant"                        "abs_angle_error"                   </code></pre>
+</div>
+</div>
+<p>This model has Level name as a random effect, but its variance is 0. So we remove it.</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>We fitted a general linear mixed model (Gamma family with a log link)
+(estimated using ML and Nelder-Mead optimizer) to predict abs_angle_error with
+Movement, LevelSize and Vista (formula: abs_angle_error ~ Movement + LevelSize
++ Vista + Movement:LevelSize + Movement:Vista + LevelSize:Vista). The model
+included UnrealLevelName as random effects (formula: list(~1 | UnrealLevelName,
+~1 | participant)). The model's total explanatory power is moderate
+(conditional R2 = 0.20) and the part related to the fixed effects alone
+(marginal R2) is of 0.02. The model's intercept, corresponding to Movement =
+OpticFlow, LevelSize = Large and Vista = Nonvista, is at 3.28 (95% CI [2.93,
+3.63], t(470) = 18.37, p &lt; .001). Within this model:
+
+  - The effect of Movement [Teleport] is statistically non-significant and
+negative (beta = -0.15, 95% CI [-0.47, 0.16], t(470) = -0.95, p = 0.342; Std.
+beta = -0.15, 95% CI [-0.47, 0.16])
+  - The effect of LevelSize [Small] is statistically non-significant and negative
+(beta = -0.18, 95% CI [-0.59, 0.22], t(470) = -0.90, p = 0.371; Std. beta =
+-0.18, 95% CI [-0.59, 0.22])
+  - The effect of Vista [Vista] is statistically non-significant and negative
+(beta = -0.09, 95% CI [-0.41, 0.22], t(470) = -0.58, p = 0.564; Std. beta =
+-0.09, 95% CI [-0.41, 0.22])
+  - The effect of Movement [Teleport] × LevelSize [Small] is statistically
+non-significant and positive (beta = 0.12, 95% CI [-0.24, 0.49], t(470) = 0.68,
+p = 0.498; Std. beta = 0.12, 95% CI [-0.24, 0.49])
+  - The effect of Movement [Teleport] × Vista [Vista] is statistically
+non-significant and positive (beta = 0.06, 95% CI [-0.31, 0.42], t(470) = 0.31,
+p = 0.760; Std. beta = 0.06, 95% CI [-0.31, 0.42])
+  - The effect of LevelSize [Small] × Vista [Vista] is statistically
+non-significant and negative (beta = -0.11, 95% CI [-0.47, 0.25], t(470) =
+-0.58, p = 0.560; Std. beta = -0.11, 95% CI [-0.47, 0.25])
+
+Standardized parameters were obtained by fitting the model on a standardized
+version of the dataset. 95% Confidence Intervals (CIs) and p-values were
+computed using a Wald t-distribution approximation.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>You are calculating adjusted predictions on the population-level (i.e.
+  `type = "fixed"`) for a *generalized* linear mixed model.
+  This may produce biased estimates due to Jensen's inequality. Consider
+  setting `bias_correction = TRUE` to correct for this bias.
+  See also the documentation of the `bias_correction` argument.</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>$Movement
+# Predicted values of abs_angle_error
+
+Movement  | Predicted |       95% CI
+------------------------------------
+OpticFlow |     26.67 | 18.44, 38.57
+Teleport  |     22.91 | 15.84, 33.14
+
+Adjusted for:
+*       LevelSize =    Large
+*           Vista = Nonvista
+* UnrealLevelName = 0 (population-level)
+*     participant = 0 (population-level)
+
+$LevelSize
+# Predicted values of abs_angle_error
+
+LevelSize | Predicted |       95% CI
+------------------------------------
+Large     |     26.67 | 18.44, 38.57
+Small     |     22.17 | 15.33, 32.08
+
+Adjusted for:
+*        Movement = OpticFlow
+*           Vista =  Nonvista
+* UnrealLevelName = 0 (population-level)
+*     participant = 0 (population-level)
+
+$Vista
+# Predicted values of abs_angle_error
+
+Vista    | Predicted |       95% CI
+-----------------------------------
+Nonvista |     26.67 | 18.44, 38.57
+Vista    |     24.30 | 16.79, 35.17
+
+Adjusted for:
+*        Movement = OpticFlow
+*       LevelSize =     Large
+* UnrealLevelName = 0 (population-level)
+*     participant = 0 (population-level)
+
+attr(,"class")
+[1] "ggalleffects" "list"        
+attr(,"model.name")
+[1] "lmer_pointed_angle"</code></pre>
+</div>
+</div>
+</section>
+<section id="distance-error" class="level2">
+<h2 class="anchored" data-anchor-id="distance-error">Distance error</h2>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "X"               "Movement"        "LevelName"       "LevelSize"      
+ [5] "Vista"           "UnrealLevelName" "distance_items"  "distance_return"
+ [9] "session"         "participant"    </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = distance_items ~ Movement + LevelSize + Vista + 
+    Movement:LevelSize + Movement:Vista + LevelSize:Vista, data = df_distance)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-3873.2 -1108.3  -401.8   699.7 10297.2 
+
+Coefficients:
+                                Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)                      10614.7      528.4  20.089  &lt; 2e-16 ***
+MovementTeleport                   199.9      691.8   0.289  0.77318    
+LevelSizeSmall                   -5166.6      691.8  -7.468 1.84e-11 ***
+VistaVista                       -2204.4      691.8  -3.186  0.00186 ** 
+MovementTeleport:LevelSizeSmall   -466.5      798.9  -0.584  0.56044    
+MovementTeleport:VistaVista        382.0      798.9   0.478  0.63345    
+LevelSizeSmall:VistaVista         1213.9      798.9   1.520  0.13140    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 2188 on 113 degrees of freedom
+Multiple R-squared:  0.5852,    Adjusted R-squared:  0.5632 
+F-statistic: 26.57 on 6 and 113 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>We fitted a linear model (estimated using OLS) to predict distance_items with
+Movement, LevelSize and Vista (formula: distance_items ~ Movement + LevelSize +
+Vista + Movement:LevelSize + Movement:Vista + LevelSize:Vista). The model
+explains a statistically significant and substantial proportion of variance (R2
+= 0.59, F(6, 113) = 26.57, p &lt; .001, adj. R2 = 0.56). The model's intercept,
+corresponding to Movement = OpticFlow, LevelSize = Large and Vista = Nonvista,
+is at 10614.68 (95% CI [9567.83, 11661.52], t(113) = 20.09, p &lt; .001). Within
+this model:
+
+  - The effect of Movement [Teleport] is statistically non-significant and
+positive (beta = 199.88, 95% CI [-1170.76, 1570.52], t(113) = 0.29, p = 0.773;
+Std. beta = 0.06, 95% CI [-0.35, 0.47])
+  - The effect of LevelSize [Small] is statistically significant and negative
+(beta = -5166.59, 95% CI [-6537.24, -3795.95], t(113) = -7.47, p &lt; .001; Std.
+beta = -1.56, 95% CI [-1.97, -1.15])
+  - The effect of Vista [Vista] is statistically significant and negative (beta =
+-2204.42, 95% CI [-3575.06, -833.78], t(113) = -3.19, p = 0.002; Std. beta =
+-0.67, 95% CI [-1.08, -0.25])
+  - The effect of Movement [Teleport] × LevelSize [Small] is statistically
+non-significant and negative (beta = -466.46, 95% CI [-2049.14, 1116.22],
+t(113) = -0.58, p = 0.560; Std. beta = -0.14, 95% CI [-0.62, 0.34])
+  - The effect of Movement [Teleport] × Vista [Vista] is statistically
+non-significant and positive (beta = 381.99, 95% CI [-1200.69, 1964.67], t(113)
+= 0.48, p = 0.633; Std. beta = 0.12, 95% CI [-0.36, 0.59])
+  - The effect of LevelSize [Small] × Vista [Vista] is statistically
+non-significant and positive (beta = 1213.95, 95% CI [-368.73, 2796.63], t(113)
+= 1.52, p = 0.131; Std. beta = 0.37, 95% CI [-0.11, 0.84])
+
+Standardized parameters were obtained by fitting the model on a standardized
+version of the dataset. 95% Confidence Intervals (CIs) and p-values were
+computed using a Wald t-distribution approximation.</code></pre>
+</div>
+</div>
+</section>
+<section id="timing" class="level2">
+<h2 class="anchored" data-anchor-id="timing">Timing</h2>
+</section>
+<section id="behavioral" class="level1">
+<h1>Behavioral</h1>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>'data.frame':   30 obs. of  14 variables:
+ $ X                       : int  1 2 3 4 5 6 7 8 9 10 ...
+ $ ID                      : chr  "VT1" "VT2" "VT3" "VT4" ...
+ $ Movement                : chr  "OpticFlow" "Teleport" "OpticFlow" "Teleport" ...
+ $ ssq_sum                 : int  25 19 20 21 24 24 18 17 19 27 ...
+ $ ssq_avg                 : num  1.56 1.19 1.25 1.31 1.5 ...
+ $ ssq_nausea              : int  11 9 7 12 11 9 7 7 7 11 ...
+ $ ssq_nausea_total        : num  104.9 85.9 66.8 114.5 104.9 ...
+ $ ssq_oculomotor          : int  13 9 11 8 10 12 8 8 10 14 ...
+ $ ssq_oculomotor_total    : num  98.5 68.2 83.4 60.6 75.8 ...
+ $ ssq_desorientation      : int  9 7 8 8 11 10 9 7 9 12 ...
+ $ ssq_desorientation_total: num  125.3 97.4 111.4 111.4 153.1 ...
+ $ ssq_total               : num  123.4 93.5 97.2 104.7 119.7 ...
+ $ vrleq_sum               : int  23 12 21 23 43 26 18 10 17 32 ...
+ $ vrleq_avg               : num  2.3 1.2 2.1 2.3 4.3 2.6 1.8 1 1.7 3.2 ...</code></pre>
+</div>
+</div>
+<section id="ssq" class="level2">
+<h2 class="anchored" data-anchor-id="ssq">SSQ</h2>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analysis_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by 'Movement'. You can override using the
+`.groups` argument.</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 9 × 3
+  question                 OpticFlow     Teleport     
+  &lt;chr&gt;                    &lt;glue&gt;        &lt;glue&gt;       
+1 ssq_avg                  1.43(0.34)    1.35(0.28)   
+2 ssq_desorientation       10.2(2.54)    9.33(2.99)   
+3 ssq_desorientation_total 141.98(35.37) 129.92(41.65)
+4 ssq_nausea               9.47(2.42)    8.8(1.42)    
+5 ssq_nausea_total         90.31(23.05)  83.95(13.59) 
+6 ssq_oculomotor           11.27(3.37)   10.53(2.83)  
+7 ssq_oculomotor_total     85.4(25.54)   79.84(21.41) 
+8 ssq_sum                  22.93(5.39)   21.6(4.44)   
+9 ssq_total                115.69(28.64) 107.21(22.02)</code></pre>
+</div>
+</div>
+</section>
+<section id="movement-effect-on-ssq" class="level2">
+<h2 class="anchored" data-anchor-id="movement-effect-on-ssq">Movement effect on ssq</h2>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "X"                        "ID"                      
+ [3] "Movement"                 "ssq_sum"                 
+ [5] "ssq_avg"                  "ssq_nausea"              
+ [7] "ssq_nausea_total"         "ssq_oculomotor"          
+ [9] "ssq_oculomotor_total"     "ssq_desorientation"      
+[11] "ssq_desorientation_total" "ssq_total"               
+[13] "vrleq_sum"                "vrleq_avg"               </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>We fitted a linear mixed model (estimated using REML and nloptwrap optimizer)
+to predict ssq_causes with Movement (formula: ssq_causes ~ Movement). The model
+included ID as random effect (formula: ~1 | ID). The model's total explanatory
+power is substantial (conditional R2 = 0.49) and the part related to the fixed
+effects alone (marginal R2) is of 0.02. The model's intercept, corresponding to
+Movement = OpticFlow, is at 1.43 (95% CI [1.27, 1.60], t(26) = 17.99, p &lt;
+.001). Within this model:
+
+  - The effect of Movement [Teleport] is statistically non-significant and
+negative (beta = -0.08, 95% CI [-0.25, 0.08], t(26) = -1.03, p = 0.312; Std.
+beta = -0.27, 95% CI [-0.81, 0.27])
+
+Standardized parameters were obtained by fitting the model on a standardized
+version of the dataset. 95% Confidence Intervals (CIs) and p-values were
+computed using a Wald t-distribution approximation.</code></pre>
+</div>
+</div>
+</section>
+<section id="ssq-and-performance" class="level2">
+<h2 class="anchored" data-anchor-id="ssq-and-performance">SSQ and performance</h2>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>We fitted a general linear mixed model (Gamma family with a log link)
+(estimated using ML and Nelder-Mead optimizer) to predict abs_angle_error with
+ssq and Movement (formula: abs_angle_error ~ ssq * Movement). The model
+included participant as random effect (formula: ~1 | participant). The model's
+total explanatory power is moderate (conditional R2 = 0.19) and the part
+related to the fixed effects alone (marginal R2) is of 0.02. The model's
+intercept, corresponding to ssq = 0 and Movement = OpticFlow, is at 3.14 (95%
+CI [2.90, 3.37], t(474) = 26.52, p &lt; .001). Within this model:
+
+  - The effect of ssq is statistically non-significant and positive (beta = 0.02,
+95% CI [-0.12, 0.16], t(474) = 0.28, p = 0.782; Std. beta = 0.02, 95% CI
+[-0.12, 0.16])
+  - The effect of Movement [Teleport] is statistically non-significant and
+negative (beta = -0.12, 95% CI [-0.31, 0.07], t(474) = -1.25, p = 0.211; Std.
+beta = -0.12, 95% CI [-0.31, 0.07])
+  - The effect of ssq × Movement [Teleport] is statistically non-significant and
+negative (beta = -0.24, 95% CI [-0.50, 0.02], t(474) = -1.83, p = 0.068; Std.
+beta = -0.24, 95% CI [-0.50, 0.02])
+
+Standardized parameters were obtained by fitting the model on a standardized
+version of the dataset. 95% Confidence Intervals (CIs) and p-values were
+computed using a Wald t-distribution approximation.</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>$ssq
+# Predicted values of abs_angle_error
+
+  ssq | Predicted |       95% CI
+--------------------------------
+-1.10 |     22.53 | 16.57, 30.63
+-0.58 |     22.77 | 17.42, 29.75
+-0.07 |     23.00 | 17.99, 29.41
+ 0.45 |     23.24 | 18.16, 29.74
+ 0.96 |     23.48 | 17.93, 30.75
+ 1.47 |     23.72 | 17.40, 32.35
+ 1.99 |     23.97 | 16.68, 34.44
+ 2.50 |     24.22 | 15.88, 36.93
+
+Adjusted for:
+*    Movement = OpticFlow
+* participant = 0 (population-level)
+
+$Movement
+# Predicted values of abs_angle_error
+
+Movement  | Predicted |       95% CI
+------------------------------------
+OpticFlow |     23.03 | 18.04, 29.41
+Teleport  |     20.42 | 15.95, 26.13
+
+Adjusted for:
+*         ssq = -0.00
+* participant = 0 (population-level)
+
+attr(,"class")
+[1] "ggalleffects" "list"        
+attr(,"model.name")
+[1] "lmer_ssq_angle"</code></pre>
+</div>
+</div>
+<p>There is no effect of ssq on performance in angle error</p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
