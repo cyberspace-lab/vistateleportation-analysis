@@ -1,0 +1,17 @@
+project:
+  type: website
+  render:
+    - reports/analysis.qmd
+
+website:
+  title: "Vista Teleportation"
+  navbar:
+    left:
+      - href: reports/analysis.qmd
+        text: Analysis
+
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    toc: true

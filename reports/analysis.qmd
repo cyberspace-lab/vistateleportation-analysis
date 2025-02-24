@@ -1,8 +1,9 @@
-```{r}
+```{r, echo = FALSE, message = FALSE, warnings = FALSE}
 library(tidyverse)
 library(lme4)
 library(report)
 library(ggeffects)
+library(gt)
 
 here::i_am("reports/analysis.qmd")
 source(here::here("functions", "visualisation.R"))
@@ -24,18 +25,19 @@ df_combined_trials_model <- df_combined_trials %>%
 
 df_pointing_model <- df_pointing %>%
   filter(target != "OriginDoor") %>%
-  mutate(abs_angle_error = abs(pointed_angle_difference),1
-         abs_distance_error = abs(target_pointed_distance_difference))
+  mutate(abs_angle_error = abs(pointed_angle_difference))
 ```
 
 ## Pointing analysis
-```{r}
+```{r, eval = FALSE}
 df_pointing %>%
   filter(target != "OriginDoor") %>%
-  group_by(participant, UnrealLevelName) %>%
   summarize(across(target_pointed_distance_difference:pointed_angle_difference,
                    list(mean = mean, median = median))) %>%
-  ungroup()
+  ungroup() %>%
+  gt() %>%
+    tab_header(title = "Pointing descriptive statistics") %>%
+    fmt_number(columns = where(is.numeric), decimals = 2)
 ```
 
 Validation based on the origin door 
@@ -157,7 +159,7 @@ lmer_ssq_causes <- df_questionnaire %>%
 report(lmer_ssq_causes)
 ```
 
-##
+## SSQ and performance
 
 ```{r effect of ssq on performance}
 lmer_ssq_angle <- df_combined_trials_model %>%
@@ -170,13 +172,3 @@ predict_response(lmer_ssq_angle)
 ```
 
 There is no effect of ssq on performance in angle error 
-
-```{r}
-str(df_combined_trials_model)
-lmer_ssq_distance <- df_combined_trials_model %>%
-  mutate(ssq = scale(ssq_nausea_total)) %>%
-  lmer(distance_items ~  ssq*Movement +
-     (1|participant), data = .)    
-report(lmer_ssq_distance)
-predict_response(lmer_ssq_distance)
-```
