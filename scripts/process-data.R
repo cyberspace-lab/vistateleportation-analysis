@@ -80,7 +80,7 @@ df_ssq2 <- df_ssq2 %>%
   ungroup()
 
 ### FIRST VRLEQ ---------------
-df_vrleq1 <- df_questionnaire[,c("ID", "Movement1", "X.VRQ001.",
+df_vrleq1 <- df_questionnaire[, c("ID", "Movement1", "X.VRQ001.",
                                  "X.VRQ002.", "X.VRQ003.", "X.VRQ004.",
                                  "X.VRQ005.", "X.VRQ006.", "X.VRQ007.",
                                  "X.VRQ008.", "X.VRQ009.", "X.VRQ010.")]
@@ -98,9 +98,9 @@ df_vrleq1 <- mutate(df_vrleq1, across(-c(ID, Movement1),
 
 ### SECOND VRLEQ ------
 df_vrleq2 <- df_questionnaire[, c("ID", "Movement2", "Copy.VRQ001.",
-                                 "Copy.VRQ002.", "Copy.VRQ003.", "Copy.VRQ004.",
-                                 "Copy.VRQ005.", "Copy.VRQ006.", "Copy.VRQ007.",
-                                 "Copy.VRQ008.", "Copy.VRQ009.", "Copy.VRQ010.")]
+                                  "Copy.VRQ002.", "Copy.VRQ003.", "Copy.VRQ004.",
+                                  "Copy.VRQ005.", "Copy.VRQ006.", "Copy.VRQ007.",
+                                  "Copy.VRQ008.", "Copy.VRQ009.", "Copy.VRQ010.")]
 df_vrleq2 <- mutate(df_vrleq2, across(-c(ID, Movement2),
                     ~recode(.x, !!!question_keys2))) %>%
   mutate(across(c("Copy.VRQ002.", "Copy.VRQ004.", "Copy.VRQ006.",
@@ -140,10 +140,13 @@ df_questionnaire_summaries <- bind_rows(df_ssq1_long, df_ssq2_long,
 write.csv(df_questionnaire_summaries, "temp/processed/questionnaire_summaries20250221.csv")
 
 ## Merging all data -----
+str(results$pointing)
 agg_pointing <- results$pointing %>%
   filter(target != "OriginDoor") %>%
+  mutate(abs_angle_error = abs(pointed_angle_difference),
+         abs_distance_error = abs(target_pointed_distance_difference)) %>%
   group_by(participant, LevelName, LevelSize) %>%
-  summarize(across(target_pointed_distance_difference:pointed_angle_difference,
+  summarize(across(target_pointed_distance_difference:abs_distance_error,
                    list(mean = mean, median = median))) %>%
   ungroup()
 
@@ -158,3 +161,15 @@ df_all %>%
   left_join(df_questionnaire_summaries,
             by = c("participant" = "ID", "Movement.x" = "Movement")) %>%
   write.csv("temp/processed/all_combined20250221.csv")
+
+df_all_trials <- df_pointing %>%
+  left_join(results$distance, by = c("participant" = "participant",
+                                     "LevelName" = "LevelName",
+                                     "LevelSize" = "LevelSize")) %>%
+  left_join(results$timing, by = c("participant" = "participant",
+                                   "LevelName" = "LevelName",
+                                   "LevelSize" = "LevelSize"))
+df_all_trials %>%
+  left_join(df_questionnaire_summaries,
+            by = c("participant" = "ID", "Movement.x" = "Movement")) %>%
+  write.csv("temp/processed/all_combined_trials20250221.csv")

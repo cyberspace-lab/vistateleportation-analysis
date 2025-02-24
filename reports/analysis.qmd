@@ -10,11 +10,21 @@ source(here::here("functions", "visualisation.R"))
 df_pointing <- read.csv(here::here("temp", "processed", "pointing20250221.csv"))
 df_distance <- read.csv(here::here("temp", "processed", "distance20250221.csv"))
 df_timing <- read.csv(here::here("temp", "processed", "timing20250221.csv"))
+df_questionnaire <- read.csv(here::here("temp", "processed", "questionnaire_summaries20250221.csv"))
+df_combined <- read.csv(here::here("temp", "processed", "all_combined20250221.csv"))
+df_combined_trials <- read.csv(here::here("temp", "processed", "all_combined_trials20250221.csv"))
+
 knitr::opts_chunk$set(echo = FALSE)
+
+df_combined_trials_model <- df_combined_trials %>%
+  mutate(ssq_total = scale(ssq_total)) %>%
+  filter(target != "OriginDoor") %>%
+  mutate(abs_angle_error = abs(pointed_angle_difference),
+         abs_distance_error = abs(target_pointed_distance_difference))
 
 df_pointing_model <- df_pointing %>%
   filter(target != "OriginDoor") %>%
-  mutate(abs_angle_error = abs(pointed_angle_difference),
+  mutate(abs_angle_error = abs(pointed_angle_difference),1
          abs_distance_error = abs(target_pointed_distance_difference))
 ```
 
@@ -29,6 +39,7 @@ df_pointing %>%
 ```
 
 Validation based on the origin door 
+
 ```{r}
 df_pointing %>%
   mutate(training = target == "OriginDoor") %>%
@@ -79,12 +90,13 @@ colnames(df_pointing_model)
 lmer_pointed_angle <- glmer(abs_angle_error ~ Movement + LevelSize + Vista + 
                             Movement:LevelSize + Movement:Vista + LevelSize:Vista +
                             (1|UnrealLevelName) +
-                            (1|participant), data = df_pointing_model, family = gaussian(link = "log"))
+                            (1|participant), data = df_pointing_model, 
+                            family = Gamma(link = "log"))
 ```
+
 This model has Level name as a random effect, but its variance is 0. So we remove it.
 
 ```{r}
-df_pointing_model$scaledlog_abs_angle_error <- scale(log(df_pointing_model$abs_angle_error))
 lmer_pointed_angle <- glmer(abs_angle_error ~ Movement + LevelSize + Vista + 
                             Movement:LevelSize + Movement:Vista + LevelSize:Vista +
                             (1|UnrealLevelName) +
@@ -107,4 +119,64 @@ summary(lm_distance)
 report(lm_distance)
 ```
 
+## Timing
 
+# Behavioral
+
+```{r}
+str(df_questionnaire)
+```
+
+## SSQ
+
+```{r}
+df_questionnaire %>%
+  select(ID, Movement, starts_with("ssq")) %>%
+  pivot_longer(cols = starts_with("ssq"), names_to = "question", values_to = "value") %>%
+  ggplot(aes(x = Movement, y = value)) +
+    geom_boxplot() +
+    facet_wrap(~question, scales = "free") +
+    theme_minimal()
+
+df_questionnaire %>%
+  select(ID, Movement, starts_with("ssq")) %>%
+  pivot_longer(cols = starts_with("ssq"), names_to = "question", values_to = "value") %>%
+  group_by(Movement, question) %>%
+  summarize(mean = str_glue("{round(mean(value), 2)}({round(sd(value), 2)})")) %>%
+  ungroup() %>%
+  pivot_wider(names_from = Movement, values_from = mean)
+```
+
+## Movement effect on ssq
+
+```{r}
+colnames(df_questionnaire)
+lmer_ssq_causes <- df_questionnaire %>%
+  mutate(ssq_causes = ssq_avg) %>%
+  lmer(ssq_causes ~ Movement + (1|ID), data = .)
+report(lmer_ssq_causes)
+```
+
+##
+
+```{r effect of ssq on performance}
+lmer_ssq_angle <- df_combined_trials_model %>%
+  mutate(ssq = scale(ssq_nausea_total)) %>%
+  glmer(abs_angle_error ~  ssq*Movement +
+     (1|participant), data = .,
+     family = Gamma(link = "log"))
+report(lmer_ssq_angle)
+predict_response(lmer_ssq_angle)
+```
+
+There is no effect of ssq on performance in angle error 
+
+```{r}
+str(df_combined_trials_model)
+lmer_ssq_distance <- df_combined_trials_model %>%
+  mutate(ssq = scale(ssq_nausea_total)) %>%
+  lmer(distance_items ~  ssq*Movement +
+     (1|participant), data = .)    
+report(lmer_ssq_distance)
+predict_response(lmer_ssq_distance)
+```
