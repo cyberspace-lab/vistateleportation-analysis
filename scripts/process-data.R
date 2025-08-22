@@ -18,8 +18,6 @@ if (file.exists("temp/participants.RData")) {
   save(participants, file = "temp/participants.RData")
 }
 
-participants[['run1_5']][['20250401-141938']]$events
-
 results <- analyze_participants(participants)
 dir.create("temp/processed", recursive = TRUE, showWarnings = FALSE)
 
@@ -32,7 +30,6 @@ write.csv(results$timing, "temp/processed/timing20250804.csv")
 ## Run 1 ---------------------------------------------------------
 ### Read questionnaire
 df_questionnaire <- read.csv("temp/run1_survey_vistateleport.csv", sep = ";")
-
 question_keys <- c("Vůbec" = 1, "Mírně" = 2, "Středně" = 3, "Velmi" = 4)
 question_keys2 <- c("Rozhodně souhlasím" = 1, "Spíše souhlasím" = 2,
                     "Ani souhlasím, ani nesouhlasím" = 3,
@@ -120,8 +117,19 @@ names(surveys_run2$surveys)
 surveys_run2$surveys$VTDG$data
 surveys_run2$surveys$VTDG$questions
 
+fix_olivers_mistake <- function(df_tab) {
+  fixed <- df_tab %>%
+    filter(!grepl("test", participant, ignore.case = TRUE)) %>%
+    arrange(completedAt) %>%
+    mutate(participant = case_when(
+      row_number() <= 3 & participant == "run1_1" ~ paste0("run1_", row_number()),
+      TRUE ~ participant
+    ))
+  return(fixed)
+}
 ## the question order is 1 18 2 4 5 ... and then regularly to 16
 teleport_ssq <- surveys_run2$surveys$SSQT$data %>%
+  fix_olivers_mistake() %>%
   rename(question3 = question2, question2 = question18) %>%
   mutate(across(starts_with("question"),
                 ~as.numeric(str_remove(., "item")))) %>%
@@ -131,6 +139,7 @@ teleport_ssq <- surveys_run2$surveys$SSQT$data %>%
   pivot_longer(cols = -c(ID, Movement), names_to = "score", values_to = "value")
 
 opticflow_ssq <- surveys_run2$surveys$SSQ_OF$data %>%
+  fix_olivers_mistake() %>%
   rename(question3 = question2, question2 = question18) %>%
   mutate(across(starts_with("question"),
                 ~as.numeric(str_remove(., "item")))) %>%
@@ -140,28 +149,42 @@ opticflow_ssq <- surveys_run2$surveys$SSQ_OF$data %>%
   pivot_longer(cols = -c(ID, Movement), names_to = "score", values_to = "value")
 
 ## VRLQ - použít otázky 17-26
-names(surveys_run2$surveys)
-
 teleport_vrleq <- surveys_run2$surveys$VRLEQT$data %>%
-  select(participant, num_range("question", 17:26)) %>%
+  fix_olivers_mistake() %>%
+  select(ID = participant, num_range("question", 17:26)) %>%
   rename_with(~paste0("question", seq_along(.)), starts_with("question")) %>%
   process_vrleq() %>%
-  select(participant, starts_with("vrleq_")) %>%
+  select(ID, starts_with("vrleq_")) %>%
   mutate(Movement = "Teleport") %>%
-  pivot_longer(cols = -c(participant, Movement), names_to = "score", values_to = "value")
+  pivot_longer(cols = -c(ID, Movement), names_to = "score", values_to = "value")
 
 opticflow_vrleq <- surveys_run2$surveys$VRLEQOF$data %>%
-  select(participant, num_range("question", 17:26)) %>%
+  fix_olivers_mistake() %>%
+  select(ID = participant, num_range("question", 17:26)) %>%
   rename_with(~paste0("question", seq_along(.)), starts_with("question")) %>%
   process_vrleq() %>%
-  select(participant, starts_with("vrleq_")) %>%
+  select(ID, starts_with("vrleq_")) %>%
   mutate(Movement = "OpticFlow") %>%
-  pivot_longer(cols = -c(participant, Movement), names_to = "score", values_to = "value")
+  pivot_longer(cols = -c(ID, Movement), names_to = "score", values_to = "value")
 
-df_surveys_run2 <- bind_rows(teleport_ssq, opticflow_ssq, teleport_vrleq, opticflow_vrleq)
+## Demography
+df_demog <- surveys_run2$surveys$VTDG$data %>%
+  fix_olivers_mistake() %>%
+  select(ID = participant, Age = question2, Gender = question1) %>%
+  # recode question 1 so that Item 2 = Male and Item 3 = Female
+  mutate(Gender = recode(Gender, "Item 1" = "Muž", "Item 2" = "Žena", "Item 3" = "Jiné"),
+         Age = as.numeric(Age)) %>%
+  bind_rows(select(df_questionnaire, ID, Age, Gender)) %>%
+  distinct()
+## Merge all surveys
+
+df_surveys_run2 <- bind_rows(teleport_ssq, opticflow_ssq, teleport_vrleq, opticflow_vrleq) %>%
+  pivot_wider(id_cols = c(ID, Movement),
+              names_from = score, values_from = value)
+df_surveys <- bind_rows(df_surveys_run1, df_surveys_run2) %>%
+  left_join(df_demog, by = "ID")
 
 ## Merging all data ------------------------------------------------
-str(results$pointing)
 agg_pointing <- results$pointing %>%
   filter(target != "OriginDoor") %>%
   mutate(abs_angle_error = abs(pointed_angle_difference),
@@ -178,12 +201,13 @@ df_all <- agg_pointing %>%
   left_join(results$timing, by = c("participant" = "participant",
                                    "LevelName" = "LevelName",
                                    "LevelSize" = "LevelSize"))
-df_all %>%
-  left_join(df_questionnaire_summaries,
-            by = c("participant" = "ID", "Movement.x" = "Movement")) %>%
-  write.csv("temp/processed/all_combined20250221.csv")
 
-df_all_trials <- df_pointing %>%
+df_all %>%
+  left_join(df_surveys,
+            by = c("participant" = "ID", "Movement.x" = "Movement")) %>%
+  write.csv("temp/processed/all_combined20250822.csv")
+
+df_all_trials <- results$pointing %>%
   left_join(results$distance, by = c("participant" = "participant",
                                      "LevelName" = "LevelName",
                                      "LevelSize" = "LevelSize")) %>%
@@ -191,6 +215,6 @@ df_all_trials <- df_pointing %>%
                                    "LevelName" = "LevelName",
                                    "LevelSize" = "LevelSize"))
 df_all_trials %>%
-  left_join(df_questionnaire_summaries,
+  left_join(df_surveys,
             by = c("participant" = "ID", "Movement.x" = "Movement")) %>%
-  write.csv("temp/processed/all_combined_trials20250221.csv")
+  write.csv("temp/processed/all_combined_trials20250822.csv")
