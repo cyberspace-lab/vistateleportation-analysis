@@ -83,10 +83,11 @@ analyze_participant <- function(participant_data, skip_training = TRUE) {
   session_names <- names(participant_data)
   for (session_name in session_names) {
     session <- participant_data[[session_name]]
-    if(skip_training && session$training) {
+    if (skip_training && session$training) {
       message("Skipping training level ", session_name)
       next
     }
+    message("Analyzing session ", session_name)
     timing <- analyze_timings(session$events)
     if (is.null(timing)) next
     timing$session <- session_name

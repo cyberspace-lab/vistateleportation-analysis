@@ -10,13 +10,21 @@ source("functions/loading.R")
 source("functions/processing.R")
 source("functions/analysis.R")
 
-participants <- load_participants("temp/data/")
-results <- analyze_participants(participants)
+if (file.exists("temp/participants.RData")) {
+  load("temp/participants.RData")
+} else {
+  participants <- load_participants("temp/data/")
+  save(participants, file = "temp/participants.RData")
+}
 
+participants[['run1_5']][['20250401-141938']]$events
+
+results <- analyze_participants(participants)
 dir.create("temp/processed", recursive = TRUE, showWarnings = FALSE)
-write.csv(results$pointing, "temp/processed/pointing20250221.csv")
-write.csv(results$distance, "temp/processed/distance20250221.csv")
-write.csv(results$timing, "temp/processed/timing20250221.csv")
+
+write.csv(results$pointing, "temp/processed/pointing20250804.csv")
+write.csv(results$distance, "temp/processed/distance20250804.csv")
+write.csv(results$timing, "temp/processed/timing20250804.csv")
 
 ### Read questionnarie
 df_questionnaire <- read.csv("temp/results_survey_vistateleport.csv", sep = ";")
