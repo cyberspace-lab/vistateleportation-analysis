@@ -3,6 +3,7 @@ library(tidyverse)
 library(lme4)
 library(report)
 library(ggeffects)
+knitr::opts_chunk$set(echo = FALSE)
 
 here::i_am("reports/analysis.qmd")
 source(here::here("functions", "visualisation.R"))
@@ -10,49 +11,97 @@ source(here::here("functions", "visualisation.R"))
 df_pointing <- read.csv(here::here("temp", "processed", "pointing20250221.csv"))
 df_distance <- read.csv(here::here("temp", "processed", "distance20250221.csv"))
 df_timing <- read.csv(here::here("temp", "processed", "timing20250221.csv"))
-knitr::opts_chunk$set(echo = FALSE)
-df_pointing <- df_pointing %>%
-  mutate(LevelName = str_c(str_remove(LevelName, "Vista|Nonvista"), "_", LevelSize))
-df_pointing_model <- df_pointing %>%
-  filter(target != "OriginDoor")
+
+df_trials <- read.csv(here::here("temp", "processed", "trial_data.csv"))
+df_data <- read.csv(here::here("temp", "processed", "combined_data.csv"))
+
+glimpse(df_trials)
+
+df_trials <- df_trials %>%
+  mutate(LevelName = str_c(str_remove(LevelName, "Vista|Nonvista"), "_", LevelSize),
+        is_training = target == "OriginDoor",
+        run = ifelse(grepl("run", participant), "Run2", "Run1"))
+
+df_data <- df_data %>%
+  mutate(run = ifelse(grepl("run", participant), "Run2", "Run1"))
+df_trials_model <- df_trials %>%
+  filter(!is_training)
 ```
 
-## Pointing analysis
-```{r}
-df_pointing %>%
-  filter(target != "OriginDoor") %>%
-  group_by(participant, LevelName, LevelSize) %>%
-  summarize(across(target_pointed_distance_difference:pointed_angle_difference,
-                   list(mean = mean, median = median))) %>%
-  ungroup()
-```
+## Descriptives
+
+How long it took to complete the experiment in various conditions, especially comparing the same size vista vs non-vista levels and its interaction with movement mode
+
+
+## Visualisations
+
+## Validation of the pointing data
 
 Validation based on the origin door 
 ```{r}
-df_pointing %>%
-  mutate(training = target == "OriginDoor") %>%
-  select(participant, target, training, target_pointed_distance_difference, 
+df_trials %>%
+  select(participant, target, is_training, target_pointed_distance_difference,
          pointed_angle_difference) %>%
   pivot_longer(cols = target_pointed_distance_difference:pointed_angle_difference,
                names_to = "metric", values_to = "value") %>%
   ggplot(aes(x = value, fill = metric)) +
   geom_histogram() +
-  facet_wrap(~metric+training, scales = "free") +
+  facet_wrap(~metric+is_training, scales = "free") +
   theme_minimal(base_size = 16) +
   labs(title = "Validation based on the origin door") +
   theme(legend.position = "none")
 ```
 
+Testing if the different variation of the verbal instructyion made any difference
+
+```{r validation of the RUN on the origin door}
+df_trials %>%
+  filter(is_training) %>%
+  ggplot(aes(x = run, y = target_pointed_distance_difference, fill = run)) +
+  geom_boxplot() +
+  theme_minimal(base_size = 16) +
+  labs(title = "Effect of the run (verbal instruction) on pointing distance error to the origin door",
+       x = "Run",
+       y = "Pointing Distance Difference")
+```
+
+## Movement behaviors in different movement modes and vista non vista spaces
+
+## Pointing distance error 
+
+Overall analysis - do they overrshoot, undershoot?
+
 ```{r}
-lmer_pointed_distance <- lmer(target_pointed_distance_difference ~ Movement + LevelSize + Vista + 
-                              Movement:LevelSize + Movement:Vista + LevelSize:Vista +
-                              (1|LevelName) +
-                              (1|participant), data = df_pointing_model)
+# Start with a simpler model to avoid singularity
+lmer_pointed_distance <- lmer(target_pointed_distance_difference ~ Movement + LevelSize + Vista + LevelSize:Movement + Movement:Vista + (1|participant), data = df_trials_model)
+
+# Check for singularity
+VarCorr(lmer_pointed_distance)
 summary(lmer_pointed_distance)
-report(lmer_pointed_distance)
+report_table(lmer_pointed_distance)
 predict_response(lmer_pointed_distance, margins="empirical")
 ```
 
+## Pointing angle error
+
+```{r}
+df_trials_model %>%
+  ggplot(aes(x = log(abs(pointed_angle_difference)))) +
+  geom_histogram() +
+  theme_minimal() +
+  labs(title = "Angle error",
+       y = "Count",
+       x = "Angle Error")
+```
+
+```{r}
+lmer_pointed_angle <- glmer(log(abs(pointed_angle_difference)) ~ Movement + LevelSize + Vista + Movement:LevelSize + Movement:Vista + (1|participant), 
+               data = df_trials_model, family = gaussian(link = "log"))
+
+VarCorr(lmer_pointed_angle)
+summary(lmer_pointed_angle)
+report_table(lmer_pointed_angle)
+```
 ```{r}
 ggpredict(lmer_pointed_distance, terms = "Vista") %>%
   plot() +
@@ -62,13 +111,8 @@ ggpredict(lmer_pointed_distance, terms = "Vista") %>%
        x = "Vista")
 ```
 
-## Angle error
-```{r}
-df_pointing_model %>%
-  ggplot(aes(x = abs(pointed_angle_difference))) +
-  geom_histogram() +
-  theme_minimal() +
-  labs(title = "Angle error",
-       y = "Count",
-       x = "Angle Error")
-```
+
+## Smaller analyses
+
+### Pointing duration to see when people donsidered the distance the most
+
