@@ -1,3 +1,10 @@
+---
+title: "Vista Teleportation Analysis: Spatial Cognition in Virtual Environments"
+author: "Your Name"
+date: "`r Sys.Date()`"
+format: html
+---
+
 ```{r}
 library(tidyverse)
 library(lme4)
@@ -19,8 +26,8 @@ glimpse(df_trials)
 
 df_trials <- df_trials %>%
   mutate(LevelName = str_c(str_remove(LevelName, "Vista|Nonvista"), "_", LevelSize),
-        is_training = target == "OriginDoor",
-        run = ifelse(grepl("run", participant), "Run2", "Run1"))
+         is_training = target == "OriginDoor",
+         run = ifelse(grepl("run", participant), "Run2", "Run1"))
 
 df_data <- df_data %>%
   mutate(run = ifelse(grepl("run", participant), "Run2", "Run1"))
@@ -31,7 +38,6 @@ df_trials_model <- df_trials %>%
 ## Descriptives
 
 How long it took to complete the experiment in various conditions, especially comparing the same size vista vs non-vista levels and its interaction with movement mode
-
 
 ## Visualisations
 
@@ -70,13 +76,20 @@ df_trials %>%
 ## Pointing distance error 
 
 Overall analysis - do they overrshoot, undershoot?
+```{r}
+ggplot(df_trials_model, aes(x = target_pointed_distance_difference)) +
+  geom_histogram() +
+  theme_minimal(base_size = 16) +
+  labs(title = "Pointing distance error",
+       y = "Count",
+       x = "Pointing Distance Difference")
+```
 
 ```{r}
 # Start with a simpler model to avoid singularity
-lmer_pointed_distance <- lmer(target_pointed_distance_difference ~ Movement + LevelSize + Vista + LevelSize:Movement + Movement:Vista + (1|participant), data = df_trials_model)
+lmer_pointed_distance <- lmer(target_pointed_distance_difference ~ Movement + LevelSize + Vista + LevelSize:Movement + Vista:Movement + Vista:LevelSize + (1|participant), data = df_trials_model)
 
 # Check for singularity
-VarCorr(lmer_pointed_distance)
 summary(lmer_pointed_distance)
 report_table(lmer_pointed_distance)
 predict_response(lmer_pointed_distance, margins="empirical")
@@ -95,8 +108,7 @@ df_trials_model %>%
 ```
 
 ```{r}
-lmer_pointed_angle <- glmer(log(abs(pointed_angle_difference)) ~ Movement + LevelSize + Vista + Movement:LevelSize + Movement:Vista + (1|participant), 
-               data = df_trials_model, family = gaussian(link = "log"))
+lmer_pointed_angle <- glmer(abs(pointed_angle_difference) ~ Movement + LevelSize + Vista + Movement:LevelSize + Movement:Vista + (1|participant), data = df_trials_model, family = gaussian(link = "log"))
 
 VarCorr(lmer_pointed_angle)
 summary(lmer_pointed_angle)
@@ -111,8 +123,59 @@ ggpredict(lmer_pointed_distance, terms = "Vista") %>%
        x = "Vista")
 ```
 
-
 ## Smaller analyses
 
 ### Pointing duration to see when people donsidered the distance the most
 
+## Navigated duration and distance
+
+```{r}
+ggplot(df_data) +
+  geom_histogram(aes(x = distance_items), bins = 30) +
+  theme_minimal() +
+  labs(title = "Distribution of Navigated Duration",
+       x = "Navigated Duration",
+       y = "Count")
+
+ggplot(df_data, aes(Movement.x, distance_items)) +
+  geom_boxplot() +
+  facet_wrap(~Vista.x)
+
+glmer((distance_items + distance_return)~ Movement.x + Vista.x + LevelSize + Movement.x:Vista.x + Movement.x:LevelSize + (1|participant), data = df_data, family = gaussian(link = "log")) %>%
+summary()  
+```
+
+
+```{r}
+ggplot(df_data, aes(Movement.x, distance_items)) +
+  geom_boxplot()
+
+ggplot(df_data, aes(Movement.x, duration_searching)) +
+  geom_boxplot()
+
+
+ggplot(df_data, aes(log(duration_searching))) +
+  geom_histogram(bins = 30) +
+  theme_minimal() +
+  labs(title = "Distribution of Search Duration (log-transformed)",
+       x = "Log(Search Duration)",
+       y = "Count")
+
+glmer(duration_searching ~ Movement.x + Vista.x + LevelSize + (1|participant), data = df_data, family = gaussian(link = "log")) %>%
+summary()
+
+
+glmer((duration_return + duration_searching)~ Movement.x + Vista.x + LevelSize + Movement.x:Vista.x + Movement.x:LevelSize + (1|participant), data = df_data, family = gaussian(link = "log")) %>%
+summary()
+
+
+glmer((duration_return + duration_searching)~ Movement.x + Vista.x + LevelSize + Movement.x:Vista.x + Movement.x:LevelSize + (1|participant), data = df_data, family = gaussian(link = "log")) %>%
+summary()
+
+```
+
+
+```{r}
+lmer()
+View(df_data)
+```
