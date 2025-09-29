@@ -78,18 +78,18 @@ process_ssq <- function(ssq_data) {
     mutate(ssq_sum = sum(across(starts_with("question"), as.numeric)),
            ssq_avg = ssq_sum / 16,
            ssq_nausea = question1 + question6 + question7 +
-            question8 + question9 + question15 + question16,
+              question8 + question9 + question15 + question16,
            ssq_nausea_total = ssq_nausea * 9.54,
            ssq_oculomotor = question1 + question2 + question3 + question4 +
-            question5 + question9 + question11,
+              question5 + question9 + question11,
            ssq_oculomotor_total = ssq_oculomotor * 7.58,
            ssq_desorientation = question5 + question8 + question10 +
-             question11 + question12 + question13 + question14,
+              question11 + question12 + question13 + question14,
            ssq_desorientation_total = ssq_desorientation * 13.92,
            ssq_total = (ssq_desorientation + ssq_oculomotor + ssq_nausea) * 3.74,
            vrsq_oculomotor = question1 + question2 + question4 + question5 / 12,
            vrsq_disorientation = question3 + question10 + question11 + question12 +
-            question13 + question14 / 15,
+              question13 + question14 / 15,
            vrsq_total = (vrsq_oculomotor + vrsq_disorientation)/2) %>%
     ungroup()
   return(ssq_results)

@@ -15,12 +15,12 @@ knitr::opts_chunk$set(echo = FALSE)
 here::i_am("reports/analysis.qmd")
 source(here::here("functions", "visualisation.R"))
 
-df_pointing <- read.csv(here::here("temp", "processed", "pointing20250221.csv"))
-df_distance <- read.csv(here::here("temp", "processed", "distance20250221.csv"))
-df_timing <- read.csv(here::here("temp", "processed", "timing20250221.csv"))
+df_pointing <- read.csv(here::here("temp", "processed", "pointing20250804.csv"))
+df_distance <- read.csv(here::here("temp", "processed", "distance20250804.csv"))
+df_timing <- read.csv(here::here("temp", "processed", "timing20250804.csv"))
 
-df_trials <- read.csv(here::here("temp", "processed", "trial_data.csv"))
-df_data <- read.csv(here::here("temp", "processed", "combined_data.csv"))
+df_trials <- read.csv(here::here("temp", "processed", "all_combined_trials20250822.csv"))
+df_data <- read.csv(here::here("temp", "processed", "all_combined20250822.csv"))
 
 glimpse(df_trials)
 
@@ -58,17 +58,17 @@ df_trials %>%
   theme(legend.position = "none")
 ```
 
-Testing if the different variation of the verbal instructyion made any difference
+Testing if the different variation of the verbal isntruction made any difference
 
 ```{r validation of the RUN on the origin door}
 df_trials %>%
   filter(is_training) %>%
-  ggplot(aes(x = run, y = target_pointed_distance_difference, fill = run)) +
-  geom_boxplot() +
-  theme_minimal(base_size = 16) +
-  labs(title = "Effect of the run (verbal instruction) on pointing distance error to the origin door",
-       x = "Run",
-       y = "Pointing Distance Difference")
+  group_by(run) %>%
+  summarize(mean_distance = mean(target_pointed_distance_difference, na.rm = TRUE),
+            sd_distance = sd(target_pointed_distance_difference, na.rm = TRUE),
+            mean_angle = mean(abs(pointed_angle_difference), na.rm = TRUE),
+            sd_angle = sd(abs(pointed_angle_difference), na.rm = TRUE),
+            n = n())
 ```
 
 ## Movement behaviors in different movement modes and vista non vista spaces
@@ -76,6 +76,7 @@ df_trials %>%
 ## Pointing distance error 
 
 Overall analysis - do they overrshoot, undershoot?
+
 ```{r}
 ggplot(df_trials_model, aes(x = target_pointed_distance_difference)) +
   geom_histogram() +
@@ -95,6 +96,34 @@ report_table(lmer_pointed_distance)
 predict_response(lmer_pointed_distance, margins="empirical")
 ```
 
+Importantly, the vista is not a significant predictor on its own, but it inteacts with both movement and vista spaces. People overall overshoot the target in small levels by about 3 virtual meters. 
+
+While on its own, the movement mode does not significantly affect the pointing distance error, it interacts with both the vista condition and the level size. The marginal effects show the Teleportation leading to higher distaces
+
+```{r}
+ggpredict(lmer_pointed_distance, terms = "Vista") %>%
+  plot() +
+  theme_minimal() +
+  labs(title = "Effect of Vista on Pointing Distance Error",
+       y = "Pointing Distance Difference",
+       x = "Vista")
+```
+
+### Relative distance error
+A relative measure to account for the fact that larger distances might lead to larger absolute errors
+
+```{r}
+lmer_pointed_relative_distance <- df_trials_model %>%
+  mutate(target_pointed_distance_difference_relative = pointingpoint_pointed_distance / pointingpoint_target_distance) %>%
+  lmer(target_pointed_distance_difference_relative ~ Movement + LevelSize + Vista + LevelSize:Movement + Vista:Movement + Vista:LevelSize + (1|participant), data = .)
+
+summary(lmer_pointed_relative_distance)
+report_table(lmer_pointed_relative_distance)
+```
+
+We can observe that the relative distance error is also affected by the same factors as the absolute distance error, and in the same directions, but only the level size becomes a significant predictor. 
+
+
 ## Pointing angle error
 
 ```{r}
@@ -102,7 +131,7 @@ df_trials_model %>%
   ggplot(aes(x = log(abs(pointed_angle_difference)))) +
   geom_histogram() +
   theme_minimal() +
-  labs(title = "Angle error",
+  labs(title = "Absolute Angle Error",
        y = "Count",
        x = "Angle Error")
 ```
@@ -114,20 +143,14 @@ VarCorr(lmer_pointed_angle)
 summary(lmer_pointed_angle)
 report_table(lmer_pointed_angle)
 ```
-```{r}
-ggpredict(lmer_pointed_distance, terms = "Vista") %>%
-  plot() +
-  theme_minimal() +
-  labs(title = "Effect of Vista on Pointing Distance Error",
-       y = "Pointing Distance Difference",
-       x = "Vista")
-```
+
+We can see that the angle error was affected by the size of the environment, with larger environments leading to larger errors. However, there was no significant effect of movement mode or vista condition on angle error.
 
 ## Smaller analyses
 
-### Pointing duration to see when people donsidered the distance the most
+### Pointing duration to see when people considered the distance the most
 
-## Navigated duration and distance
+## Navigated distance
 
 ```{r}
 ggplot(df_data) +
@@ -141,20 +164,20 @@ ggplot(df_data, aes(Movement.x, distance_items)) +
   geom_boxplot() +
   facet_wrap(~Vista.x)
 
-glmer((distance_items + distance_return)~ Movement.x + Vista.x + LevelSize + Movement.x:Vista.x + Movement.x:LevelSize + (1|participant), data = df_data, family = gaussian(link = "log")) %>%
-summary()  
+glmer((distance_items + distance_return) ~ Movement.x + Vista.x + LevelSize + (1|participant), data = df_data, family = gaussian(link = "log")) %>%
+summary()
+
+lmer_distance <- glmer((distance_items + distance_return)~ Movement.x + Vista.x + LevelSize + Movement.x:Vista.x + Movement.x:LevelSize + (1|participant), data = df_data, family = gaussian(link = "log"))
+
+summary(lmer_distance)
+predict_response(lmer_distance, margins="empirical")
 ```
 
+Movement did not significantly affect the distance travelled, but vista spaces led to significantly shorter distances travelled.
+## Navigated duration
 
 ```{r}
-ggplot(df_data, aes(Movement.x, distance_items)) +
-  geom_boxplot()
-
-ggplot(df_data, aes(Movement.x, duration_searching)) +
-  geom_boxplot()
-
-
-ggplot(df_data, aes(log(duration_searching))) +
+ggplot(df_data, aes(x = log(duration_searching))) +
   geom_histogram(bins = 30) +
   theme_minimal() +
   labs(title = "Distribution of Search Duration (log-transformed)",
@@ -164,18 +187,10 @@ ggplot(df_data, aes(log(duration_searching))) +
 glmer(duration_searching ~ Movement.x + Vista.x + LevelSize + (1|participant), data = df_data, family = gaussian(link = "log")) %>%
 summary()
 
-
-glmer((duration_return + duration_searching)~ Movement.x + Vista.x + LevelSize + Movement.x:Vista.x + Movement.x:LevelSize + (1|participant), data = df_data, family = gaussian(link = "log")) %>%
+glmer((duration_return + duration_searching) ~ Movement.x + Vista.x + LevelSize + Movement.x:Vista.x + Movement.x:LevelSize + (1|participant), data = df_data, family = gaussian(link = "log")) %>%
 summary()
-
-
-glmer((duration_return + duration_searching)~ Movement.x + Vista.x + LevelSize + Movement.x:Vista.x + Movement.x:LevelSize + (1|participant), data = df_data, family = gaussian(link = "log")) %>%
-summary()
-
 ```
 
+while the movement method did affect the navigated duration when considered on its own, it did not significantly affect the duration when the model included the interaction parameters.
 
-```{r}
-lmer()
-View(df_data)
-```
+# Questionnaire data
