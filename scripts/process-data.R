@@ -112,10 +112,6 @@ write.csv(df_surveys_run1, "temp/processed/questionnaire_summaries_run1.csv")
 surveys_run2 <- jsonlite::fromJSON("temp/run2_survey_vistateleport.json")
 surveys_run2 <- organize_psychotron_data(surveys_run2)
 surveys_run2 <- split_participant_email(surveys_run2)
-names(surveys_run2$surveys)
-
-surveys_run2$surveys$VTDG$data
-surveys_run2$surveys$VTDG$questions
 
 fix_olivers_mistake <- function(df_tab) {
   fixed <- df_tab %>%

@@ -6,7 +6,7 @@ drive_auth()
 
 # Loading questionnaires ---------
 drive_download(file = as_id("1pgQyD39k5KPln4wkyJXhH5215Krmq5Mb"),
-                path = file.path("temp", "run1_survey_vistateleport.csv"))
+               path = file.path("temp", "run1_survey_vistateleport.csv"))
 drive_download(file = as_id("1pHEZzkKUFpZYzUsPc7N4YinztXeFdmIM"),
                path = file.path("temp", "run2_survey_vistateleport.json"))
 
@@ -24,7 +24,9 @@ unzip(file.path("temp", "data.zip"), exdir = file.path("temp", "data"))
 # Loading processed data
 dir.create(file.path("temp", "processed"), showWarnings = FALSE)
 processed_data_id <- as_id("1Kc0MbFtfw11-D878F3NCbKDo1qX_Wrz7")
-drive_download(file = processed_data_id, path = file.path("temp", "processed", "combined_data.csv"))
+drive_download(file = processed_data_id,
+               path = file.path("temp", "processed", "combined_data.csv"))
 
 trial_data_id <- as_id("1R49jsVgxh0Vh9FoiczpqIsBx9wIgId_O")
-drive_download(file = trial_data_id, path = file.path("temp", "processed", "trial_data.csv"))
+drive_download(file = trial_data_id,
+               path = file.path("temp", "processed", "trial_data.csv"))
