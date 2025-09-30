@@ -112,7 +112,12 @@ lmer_pointed_distance <- lmer(target_pointed_distance_difference ~ Movement + Le
 
 # Check for singularity
 summary(lmer_pointed_distance)
-report_table(lmer_pointed_distance)
+
+report_table(lmer_pointed_distance) %>%
+    knitr::kable()
+```
+
+```{r lmer-pointed-distance-predictions}
 predict_my_responses(lmer_pointed_distance) %>%
   knitr::kable()
 ```
@@ -138,7 +143,11 @@ lmer_pointed_relative_distance <- df_trials_model %>%
   mutate(target_pointed_distance_difference_relative = pointingpoint_pointed_distance / pointingpoint_target_distance) %>%
   lmer(target_pointed_distance_difference_relative ~ Movement + LevelSize + Vista + Movement:Vista + Movement:LevelSize + (1|participant), data = .)
 
-report_table(lmer_pointed_relative_distance)
+report_table(lmer_pointed_relative_distance) %>%
+    knitr::kable()
+```
+
+```{r lmer-relative-distance-predictions}
 predict_my_responses(lmer_pointed_relative_distance) %>%
   knitr::kable()
 ```
@@ -185,6 +194,7 @@ ggplot(df_trials_model, aes(x = log(pointing_duration), fill=Movement)) +
 lmer_point_duration <- glmer(pointing_duration ~ Movement + LevelSize + Vista + Movement:LevelSize + Movement:Vista + (1|participant),
   data = df_trials_model, family = gaussian(link = "log"))
 summary(lmer_point_duration)
+
 predict_my_responses(lmer_point_duration) %>%
   knitr::kable()
 ```
@@ -198,10 +208,12 @@ ggplot(df_data) +
   labs(title = "Distribution of Navigated Duration",
        x = "Navigated Duration",
        y = "Count")
-lme_distance <- glm((distance_items + distance_return) ~ Movement + Vista + LevelSize + Movement:Vista + Movement:LevelSize,
+
+glm_distance <- glm((distance_items + distance_return) ~ Movement + Vista + LevelSize + Movement:Vista + Movement:LevelSize,
   data = df_data, family = gaussian(link = "log"))
-summary(lme_distance)
-predict_my_responses(lme_distance) %>%
+summary(glm_distance)
+
+predict_my_responses(glm_distance) %>%
   knitr::kable()
 ```
 
@@ -222,6 +234,7 @@ ggplot(df_data, aes(x = log(duration_searching), fill = Movement)) +
 glm_duration <- glm((duration_return + duration_searching) ~ Movement + Vista + LevelSize + Movement:Vista + Movement:LevelSize,
     data = df_data, family = gaussian(link = "log"))
 summary(glm_duration)
+
 predict_my_responses(glm_duration) %>%
   knitr::kable()
 ```
