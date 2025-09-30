@@ -123,6 +123,7 @@ fix_olivers_mistake <- function(df_tab) {
     ))
   return(fixed)
 }
+
 ## the question order is 1 18 2 4 5 ... and then regularly to 16
 teleport_ssq <- surveys_run2$surveys$SSQT$data %>%
   fix_olivers_mistake() %>%
@@ -198,9 +199,14 @@ df_all <- agg_pointing %>%
                                    "LevelName" = "LevelName",
                                    "LevelSize" = "LevelSize"))
 
+df_all <- df_all %>%
+  mutate(Movement = Movement.x,
+         Vista = Vista.x) %>%
+  select(-c(Movement.x, Movement.y, Vista.x, Vista.y))
+
 df_all %>%
   left_join(df_surveys,
-            by = c("participant" = "ID", "Movement.x" = "Movement")) %>%
+            by = c("participant" = "ID", "Movement" = "Movement")) %>%
   write.csv("temp/processed/all_combined20250822.csv")
 
 df_all_trials <- results$pointing %>%
