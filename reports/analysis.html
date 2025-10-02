@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Your Name">
-<meta name="dcterms.date" content="2025-09-30">
+<meta name="dcterms.date" content="2025-10-02">
 
 <title>Vista Teleportation Analysis: Spatial Cognition in Virtual Environments – Vista Teleportation</title>
 <style>
@@ -191,7 +191,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">September 30, 2025</p>
+      <p class="date">October 2, 2025</p>
     </div>
   </div>
   
@@ -359,79 +359,305 @@ VistaVista  -0.362  0.422  0.018
 MvmntTl:LSS  0.266 -0.581 -0.719 -0.014       
 MvmntTlp:VV  0.261 -0.578 -0.014 -0.719  0.005</code></pre>
 </div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Parameter                               | Coefficient |            95% CI
--------------------------------------------------------------------------
-(Intercept)                             |       -8.67 | [ -79.89,  62.56]
-Movement [Teleport]                     |       40.94 | [ -20.47, 102.34]
-LevelSize [Small]                       |      264.67 | [ 213.98, 315.36]
-Vista [Vista]                           |      -29.99 | [ -80.68,  20.69]
-Movement [Teleport] × LevelSize [Small] |       -0.98 | [ -71.69,  69.72]
-Movement [Teleport] × Vista [Vista]     |      -81.81 | [-152.51, -11.11]
-                                        |      160.51 |                  
-                                        |      287.04 |                  
-                                        |             |                  
-AIC                                     |             |                  
-AICc                                    |             |                  
-BIC                                     |             |                  
-R2 (conditional)                        |             |                  
-R2 (marginal)                           |             |                  
-Sigma                                   |             |                  
-
-Parameter                               | t(1016) |      p | Effects
---------------------------------------------------------------------
-(Intercept)                             |   -0.24 | 0.811  |   fixed
-Movement [Teleport]                     |    1.31 | 0.191  |   fixed
-LevelSize [Small]                       |   10.25 | &lt; .001 |   fixed
-Vista [Vista]                           |   -1.16 | 0.246  |   fixed
-Movement [Teleport] × LevelSize [Small] |   -0.03 | 0.978  |   fixed
-Movement [Teleport] × Vista [Vista]     |   -2.27 | 0.023  |   fixed
-                                        |         |        |  random
-                                        |         |        |  random
-                                        |         |        |        
-AIC                                     |         |        |        
-AICc                                    |         |        |        
-BIC                                     |         |        |        
-R2 (conditional)                        |         |        |        
-R2 (marginal)                           |         |        |        
-Sigma                                   |         |        |        
-
-Parameter                               |       Group | Std. Coef.
-------------------------------------------------------------------
-(Intercept)                             |             |      -0.33
-Movement [Teleport]                     |             |       0.12
-LevelSize [Small]                       |             |       0.75
-Vista [Vista]                           |             |      -0.08
-Movement [Teleport] × LevelSize [Small] |             |  -2.77e-03
-Movement [Teleport] × Vista [Vista]     |             |      -0.23
-                                        | participant |           
-                                        |    Residual |           
-                                        |             |           
-AIC                                     |             |           
-AICc                                    |             |           
-BIC                                     |             |           
-R2 (conditional)                        |             |           
-R2 (marginal)                           |             |           
-Sigma                                   |             |           
-
-Parameter                               | Std. Coef. 95% CI |      Fit
-----------------------------------------------------------------------
-(Intercept)                             |    [-0.53, -0.13] |         
-Movement [Teleport]                     |    [-0.06,  0.29] |         
-LevelSize [Small]                       |    [ 0.60,  0.89] |         
-Vista [Vista]                           |    [-0.23,  0.06] |         
-Movement [Teleport] × LevelSize [Small] |    [-0.20,  0.20] |         
-Movement [Teleport] × Vista [Vista]     |    [-0.43, -0.03] |         
-                                        |                   |         
-                                        |                   |         
-                                        |                   |         
-AIC                                     |                   | 14534.17
-AICc                                    |                   | 14534.31
-BIC                                     |                   | 14573.62
-R2 (conditional)                        |                   |     0.35
-R2 (marginal)                           |                   |     0.15
-Sigma                                   |                   |   287.04</code></pre>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 1%">
+<col style="width: 19%">
+<col style="width: 5%">
+<col style="width: 2%">
+<col style="width: 5%">
+<col style="width: 4%">
+<col style="width: 5%">
+<col style="width: 4%">
+<col style="width: 4%">
+<col style="width: 3%">
+<col style="width: 5%">
+<col style="width: 7%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 6%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: left;">Parameter</th>
+<th style="text-align: right;">Coefficient</th>
+<th style="text-align: right;">CI</th>
+<th style="text-align: right;">CI_low</th>
+<th style="text-align: right;">CI_high</th>
+<th style="text-align: right;">t</th>
+<th style="text-align: right;">df_error</th>
+<th style="text-align: right;">p</th>
+<th style="text-align: left;">Effects</th>
+<th style="text-align: left;">Group</th>
+<th style="text-align: right;">Std_Coefficient</th>
+<th style="text-align: right;">Std_Coefficient_CI_low</th>
+<th style="text-align: right;">Std_Coefficient_CI_high</th>
+<th style="text-align: right;">Fit</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">1</td>
+<td style="text-align: left;">(Intercept)</td>
+<td style="text-align: right;">-8.6670062</td>
+<td style="text-align: right;">0.95</td>
+<td style="text-align: right;">-79.89213</td>
+<td style="text-align: right;">62.55812</td>
+<td style="text-align: right;">-0.2387820</td>
+<td style="text-align: right;">1016</td>
+<td style="text-align: right;">0.8113228</td>
+<td style="text-align: left;">fixed</td>
+<td style="text-align: left;"></td>
+<td style="text-align: right;">-0.3298358</td>
+<td style="text-align: right;">-0.5304436</td>
+<td style="text-align: right;">-0.1292280</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2</td>
+<td style="text-align: left;">Movement [Teleport]</td>
+<td style="text-align: right;">40.9354492</td>
+<td style="text-align: right;">0.95</td>
+<td style="text-align: right;">-20.46903</td>
+<td style="text-align: right;">102.33993</td>
+<td style="text-align: right;">1.3081732</td>
+<td style="text-align: right;">1016</td>
+<td style="text-align: right;">0.1911104</td>
+<td style="text-align: left;">fixed</td>
+<td style="text-align: left;"></td>
+<td style="text-align: right;">0.1152960</td>
+<td style="text-align: right;">-0.0576517</td>
+<td style="text-align: right;">0.2882437</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">3</td>
+<td style="text-align: left;">LevelSize [Small]</td>
+<td style="text-align: right;">264.6735935</td>
+<td style="text-align: right;">0.95</td>
+<td style="text-align: right;">213.98441</td>
+<td style="text-align: right;">315.36277</td>
+<td style="text-align: right;">10.2461595</td>
+<td style="text-align: right;">1016</td>
+<td style="text-align: right;">0.0000000</td>
+<td style="text-align: left;">fixed</td>
+<td style="text-align: left;"></td>
+<td style="text-align: right;">0.7454616</td>
+<td style="text-align: right;">0.6026939</td>
+<td style="text-align: right;">0.8882293</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">4</td>
+<td style="text-align: left;">Vista [Vista]</td>
+<td style="text-align: right;">-29.9922302</td>
+<td style="text-align: right;">0.95</td>
+<td style="text-align: right;">-80.67625</td>
+<td style="text-align: right;">20.69179</td>
+<td style="text-align: right;">-1.1611905</td>
+<td style="text-align: right;">1016</td>
+<td style="text-align: right;">0.2458372</td>
+<td style="text-align: left;">fixed</td>
+<td style="text-align: left;"></td>
+<td style="text-align: right;">-0.0844741</td>
+<td style="text-align: right;">-0.2272272</td>
+<td style="text-align: right;">0.0582791</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">5</td>
+<td style="text-align: left;">Movement [Teleport] × LevelSize [Small]</td>
+<td style="text-align: right;">-0.9831171</td>
+<td style="text-align: right;">0.95</td>
+<td style="text-align: right;">-71.68783</td>
+<td style="text-align: right;">69.72159</td>
+<td style="text-align: right;">-0.0272849</td>
+<td style="text-align: right;">1016</td>
+<td style="text-align: right;">0.9782378</td>
+<td style="text-align: left;">fixed</td>
+<td style="text-align: left;"></td>
+<td style="text-align: right;">-0.0027690</td>
+<td style="text-align: right;">-0.2019110</td>
+<td style="text-align: right;">0.1963731</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">6</td>
+<td style="text-align: left;">Movement [Teleport] × Vista [Vista]</td>
+<td style="text-align: right;">-81.8087825</td>
+<td style="text-align: right;">0.95</td>
+<td style="text-align: right;">-152.51210</td>
+<td style="text-align: right;">-11.10546</td>
+<td style="text-align: right;">-2.2705229</td>
+<td style="text-align: right;">1016</td>
+<td style="text-align: right;">0.0233846</td>
+<td style="text-align: left;">fixed</td>
+<td style="text-align: left;"></td>
+<td style="text-align: right;">-0.2304170</td>
+<td style="text-align: right;">-0.4295552</td>
+<td style="text-align: right;">-0.0312789</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">7</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">160.5075675</td>
+<td style="text-align: right;">0.95</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: left;">random</td>
+<td style="text-align: left;">participant</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">8</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">287.0413964</td>
+<td style="text-align: right;">0.95</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: left;">random</td>
+<td style="text-align: left;">Residual</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">9</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">10</td>
+<td style="text-align: left;">AIC</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">1.453417e+04</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">11</td>
+<td style="text-align: left;">AICc</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">1.453431e+04</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">12</td>
+<td style="text-align: left;">BIC</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">1.457362e+04</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">13</td>
+<td style="text-align: left;">R2 (conditional)</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">3.525493e-01</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">14</td>
+<td style="text-align: left;">R2 (marginal)</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">1.501036e-01</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">17</td>
+<td style="text-align: left;">Sigma</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">2.870414e+02</td>
+</tr>
+</tbody>
+</table>
 </div>
+</div>
+<div class="cell">
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <colgroup>
@@ -546,79 +772,305 @@ Sigma                                   |                   |   287.04</code></p
 <h3 class="anchored" data-anchor-id="relative-distance-error">Relative distance error</h3>
 <p>A relative measure to account for the fact that larger distances might lead to larger absolute errors</p>
 <div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code>Parameter                               | Coefficient |         95% CI
-----------------------------------------------------------------------
-(Intercept)                             |        1.17 | [ 1.04,  1.30]
-Movement [Teleport]                     |        0.02 | [-0.11,  0.16]
-LevelSize [Small]                       |        0.45 | [ 0.35,  0.56]
-Vista [Vista]                           |       -0.15 | [-0.26, -0.04]
-Movement [Teleport] × Vista [Vista]     |       -0.12 | [-0.28,  0.03]
-Movement [Teleport] × LevelSize [Small] |        0.05 | [-0.11,  0.20]
-                                        |        0.24 |               
-                                        |        0.62 |               
-                                        |             |               
-AIC                                     |             |               
-AICc                                    |             |               
-BIC                                     |             |               
-R2 (conditional)                        |             |               
-R2 (marginal)                           |             |               
-Sigma                                   |             |               
-
-Parameter                               | t(1016) |      p | Effects
---------------------------------------------------------------------
-(Intercept)                             |   17.85 | &lt; .001 |   fixed
-Movement [Teleport]                     |    0.37 | 0.712  |   fixed
-LevelSize [Small]                       |    8.13 | &lt; .001 |   fixed
-Vista [Vista]                           |   -2.61 | 0.009  |   fixed
-Movement [Teleport] × Vista [Vista]     |   -1.59 | 0.111  |   fixed
-Movement [Teleport] × LevelSize [Small] |    0.58 | 0.560  |   fixed
-                                        |         |        |  random
-                                        |         |        |  random
-                                        |         |        |        
-AIC                                     |         |        |        
-AICc                                    |         |        |        
-BIC                                     |         |        |        
-R2 (conditional)                        |         |        |        
-R2 (marginal)                           |         |        |        
-Sigma                                   |         |        |        
-
-Parameter                               |       Group | Std. Coef.
-------------------------------------------------------------------
-(Intercept)                             |             |      -0.21
-Movement [Teleport]                     |             |       0.03
-LevelSize [Small]                       |             |       0.64
-Vista [Vista]                           |             |      -0.20
-Movement [Teleport] × Vista [Vista]     |             |      -0.17
-Movement [Teleport] × LevelSize [Small] |             |       0.06
-                                        | participant |           
-                                        |    Residual |           
-                                        |             |           
-AIC                                     |             |           
-AICc                                    |             |           
-BIC                                     |             |           
-R2 (conditional)                        |             |           
-R2 (marginal)                           |             |           
-Sigma                                   |             |           
-
-Parameter                               | Std. Coef. 95% CI |     Fit
----------------------------------------------------------------------
-(Intercept)                             |    [-0.38, -0.03] |        
-Movement [Teleport]                     |    [-0.15,  0.22] |        
-LevelSize [Small]                       |    [ 0.48,  0.79] |        
-Vista [Vista]                           |    [-0.36, -0.05] |        
-Movement [Teleport] × Vista [Vista]     |    [-0.39,  0.04] |        
-Movement [Teleport] × LevelSize [Small] |    [-0.15,  0.28] |        
-                                        |                   |        
-                                        |                   |        
-                                        |                   |        
-AIC                                     |                   | 2023.14
-AICc                                    |                   | 2023.28
-BIC                                     |                   | 2062.59
-R2 (conditional)                        |                   |    0.25
-R2 (marginal)                           |                   |    0.13
-Sigma                                   |                   |    0.62</code></pre>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 1%">
+<col style="width: 19%">
+<col style="width: 5%">
+<col style="width: 2%">
+<col style="width: 5%">
+<col style="width: 5%">
+<col style="width: 5%">
+<col style="width: 4%">
+<col style="width: 4%">
+<col style="width: 3%">
+<col style="width: 5%">
+<col style="width: 7%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 6%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: left;">Parameter</th>
+<th style="text-align: right;">Coefficient</th>
+<th style="text-align: right;">CI</th>
+<th style="text-align: right;">CI_low</th>
+<th style="text-align: right;">CI_high</th>
+<th style="text-align: right;">t</th>
+<th style="text-align: right;">df_error</th>
+<th style="text-align: right;">p</th>
+<th style="text-align: left;">Effects</th>
+<th style="text-align: left;">Group</th>
+<th style="text-align: right;">Std_Coefficient</th>
+<th style="text-align: right;">Std_Coefficient_CI_low</th>
+<th style="text-align: right;">Std_Coefficient_CI_high</th>
+<th style="text-align: right;">Fit</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">1</td>
+<td style="text-align: left;">(Intercept)</td>
+<td style="text-align: right;">1.1668660</td>
+<td style="text-align: right;">0.95</td>
+<td style="text-align: right;">1.0386114</td>
+<td style="text-align: right;">1.2951207</td>
+<td style="text-align: right;">17.8531016</td>
+<td style="text-align: right;">1016</td>
+<td style="text-align: right;">0.0000000</td>
+<td style="text-align: left;">fixed</td>
+<td style="text-align: left;"></td>
+<td style="text-align: right;">-0.2051440</td>
+<td style="text-align: right;">-0.3844575</td>
+<td style="text-align: right;">-0.0258305</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2</td>
+<td style="text-align: left;">Movement [Teleport]</td>
+<td style="text-align: right;">0.0249749</td>
+<td style="text-align: right;">0.95</td>
+<td style="text-align: right;">-0.1078685</td>
+<td style="text-align: right;">0.1578183</td>
+<td style="text-align: right;">0.3689176</td>
+<td style="text-align: right;">1016</td>
+<td style="text-align: right;">0.7122660</td>
+<td style="text-align: left;">fixed</td>
+<td style="text-align: left;"></td>
+<td style="text-align: right;">0.0349175</td>
+<td style="text-align: right;">-0.1508115</td>
+<td style="text-align: right;">0.2206465</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">3</td>
+<td style="text-align: left;">LevelSize [Small]</td>
+<td style="text-align: right;">0.4547403</td>
+<td style="text-align: right;">0.95</td>
+<td style="text-align: right;">0.3450434</td>
+<td style="text-align: right;">0.5644372</td>
+<td style="text-align: right;">8.1345733</td>
+<td style="text-align: right;">1016</td>
+<td style="text-align: right;">0.0000000</td>
+<td style="text-align: left;">fixed</td>
+<td style="text-align: left;"></td>
+<td style="text-align: right;">0.6357748</td>
+<td style="text-align: right;">0.4824069</td>
+<td style="text-align: right;">0.7891426</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">4</td>
+<td style="text-align: left;">Vista [Vista]</td>
+<td style="text-align: right;">-0.1460325</td>
+<td style="text-align: right;">0.95</td>
+<td style="text-align: right;">-0.2557180</td>
+<td style="text-align: right;">-0.0363470</td>
+<td style="text-align: right;">-2.6125586</td>
+<td style="text-align: right;">1016</td>
+<td style="text-align: right;">0.0091194</td>
+<td style="text-align: left;">fixed</td>
+<td style="text-align: left;"></td>
+<td style="text-align: right;">-0.2041688</td>
+<td style="text-align: right;">-0.3575207</td>
+<td style="text-align: right;">-0.0508169</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">5</td>
+<td style="text-align: left;">Movement [Teleport] × Vista [Vista]</td>
+<td style="text-align: right;">-0.1243148</td>
+<td style="text-align: right;">0.95</td>
+<td style="text-align: right;">-0.2773021</td>
+<td style="text-align: right;">0.0286726</td>
+<td style="text-align: right;">-1.5945313</td>
+<td style="text-align: right;">1016</td>
+<td style="text-align: right;">0.1111281</td>
+<td style="text-align: left;">fixed</td>
+<td style="text-align: left;"></td>
+<td style="text-align: right;">-0.1738051</td>
+<td style="text-align: right;">-0.3876975</td>
+<td style="text-align: right;">0.0400872</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">6</td>
+<td style="text-align: left;">Movement [Teleport] × LevelSize [Small]</td>
+<td style="text-align: right;">0.0454827</td>
+<td style="text-align: right;">0.95</td>
+<td style="text-align: right;">-0.1075089</td>
+<td style="text-align: right;">0.1984743</td>
+<td style="text-align: right;">0.5833704</td>
+<td style="text-align: right;">1016</td>
+<td style="text-align: right;">0.5597735</td>
+<td style="text-align: left;">fixed</td>
+<td style="text-align: left;"></td>
+<td style="text-align: right;">0.0635896</td>
+<td style="text-align: right;">-0.1503088</td>
+<td style="text-align: right;">0.2774880</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">7</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">0.2447978</td>
+<td style="text-align: right;">0.95</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: left;">random</td>
+<td style="text-align: left;">participant</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">8</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">0.6212865</td>
+<td style="text-align: right;">0.95</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: left;">random</td>
+<td style="text-align: left;">Residual</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">9</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">10</td>
+<td style="text-align: left;">AIC</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">2023.1393878</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">11</td>
+<td style="text-align: left;">AICc</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">2023.2812597</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">12</td>
+<td style="text-align: left;">BIC</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">2062.5911622</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">13</td>
+<td style="text-align: left;">R2 (conditional)</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">0.2506768</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">14</td>
+<td style="text-align: left;">R2 (marginal)</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">0.1343445</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">17</td>
+<td style="text-align: left;">Sigma</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">0.6212865</td>
+</tr>
+</tbody>
+</table>
 </div>
+</div>
+<div class="cell">
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <colgroup>
