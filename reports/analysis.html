@@ -2,12 +2,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.33">
+<meta name="generator" content="quarto-1.5.54">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Your Name">
-<meta name="dcterms.date" content="2025-10-02">
+<meta name="dcterms.date" content="2025-10-14">
 
 <title>Vista Teleportation Analysis: Spatial Cognition in Virtual Environments – Vista Teleportation</title>
 <style>
@@ -23,9 +23,8 @@ ul.task-list li input[type="checkbox"] {
   vertical-align: middle;
 }
 /* CSS for syntax highlighting */
-html { -webkit-text-size-adjust: 100%; }
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -36,7 +35,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -67,16 +66,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
-<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/quarto.js"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-3f9d6638d7c0c59d11b838f9d0b3baf3.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-dfb324f25d9b1687192fa8be62ac8f9c.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -109,7 +107,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link rel="stylesheet" href="styles.css">
 </head>
 
-<body class="nav-fixed quarto-light">
+<body class="nav-fixed">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -129,6 +127,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li class="nav-item">
     <a class="nav-link active" href="../reports/analysis.html" aria-current="page"> 
 <span class="menu-text">Analysis</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../reports/vrsummit.html"> 
+<span class="menu-text">VR Summit</span></a>
   </li>  
 </ul>
           </div> <!-- /navcollapse -->
@@ -191,7 +193,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">October 2, 2025</p>
+      <p class="date">October 14, 2025</p>
     </div>
   </div>
   
@@ -228,40 +230,43 @@ The following objects are masked from 'package:tidyr':
     expand, pack, unpack</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(report)</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggeffects)</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span>opts_chunk<span class="sc">$</span><span class="fu">set</span>(<span class="at">echo =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>here<span class="sc">::</span><span class="fu">i_am</span>(<span class="st">"reports/analysis.qmd"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggeffects)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>here() starts at C:/Cyberspacelab/Projects/VistaTeleportation/vistateleportation-analysis</code></pre>
+<pre><code>Warning: package 'ggeffects' was built under R version 4.3.3</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"functions"</span>, <span class="st">"visualisation.R"</span>))</span>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span>opts_chunk<span class="sc">$</span><span class="fu">set</span>(<span class="at">echo =</span> <span class="cn">FALSE</span>)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>df_pointing <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"temp"</span>, <span class="st">"processed"</span>, <span class="st">"pointing20250804.csv"</span>))</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>df_distance <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"temp"</span>, <span class="st">"processed"</span>, <span class="st">"distance20250804.csv"</span>))</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>df_timing <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"temp"</span>, <span class="st">"processed"</span>, <span class="st">"timing20250804.csv"</span>))</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>df_trials <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"temp"</span>, <span class="st">"processed"</span>, <span class="st">"all_combined_trials20250822.csv"</span>))</span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>df_data <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"temp"</span>, <span class="st">"processed"</span>, <span class="st">"all_combined20250822.csv"</span>))</span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>df_trials <span class="ot">&lt;-</span> df_trials <span class="sc">%&gt;%</span></span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">LevelName =</span> <span class="fu">str_c</span>(<span class="fu">str_remove</span>(LevelName, <span class="st">"Vista|Nonvista"</span>), <span class="st">"_"</span>, LevelSize),</span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>         <span class="at">is_training =</span> target <span class="sc">==</span> <span class="st">"OriginDoor"</span>,</span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>         <span class="at">run =</span> <span class="fu">ifelse</span>(<span class="fu">grepl</span>(<span class="st">"run"</span>, participant), <span class="st">"Run2"</span>, <span class="st">"Run1"</span>),</span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>         <span class="at">pointing_duration =</span> <span class="fu">as.numeric</span>(FirstPointing_time <span class="sc">-</span> start_time))</span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>df_data <span class="ot">&lt;-</span> df_data <span class="sc">%&gt;%</span></span>
-<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">run =</span> <span class="fu">ifelse</span>(<span class="fu">grepl</span>(<span class="st">"run"</span>, participant), <span class="st">"Run2"</span>, <span class="st">"Run1"</span>))</span>
-<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>df_trials_model <span class="ot">&lt;-</span> df_trials <span class="sc">%&gt;%</span></span>
-<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span>is_training)</span>
-<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>predict_my_responses <span class="ot">&lt;-</span> <span class="cf">function</span>(model) {</span>
-<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>    dat <span class="ot">&lt;-</span> <span class="fu">predict_response</span>(model, <span class="at">terms =</span> <span class="fu">c</span>(<span class="st">"Movement"</span>, <span class="st">"Vista"</span>, <span class="st">"LevelSize"</span>), <span class="at">margin =</span> <span class="st">"empirical"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>        <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>        <span class="fu">select</span>(x, group, facet, predicted, <span class="fu">everything</span>())</span>
-<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(dat)</span>
-<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>here<span class="sc">::</span><span class="fu">i_am</span>(<span class="st">"reports/analysis.qmd"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>here() starts at /Users/lukashejtmanek/Documents/Projects/CyberspaceLab/VistaTeleportation/vistateleportation-analysis</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"functions"</span>, <span class="st">"visualisation.R"</span>))</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>df_pointing <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"temp"</span>, <span class="st">"processed"</span>, <span class="st">"pointing20250804.csv"</span>))</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>df_distance <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"temp"</span>, <span class="st">"processed"</span>, <span class="st">"distance20250804.csv"</span>))</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>df_timing <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"temp"</span>, <span class="st">"processed"</span>, <span class="st">"timing20250804.csv"</span>))</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>df_trials <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"temp"</span>, <span class="st">"processed"</span>, <span class="st">"all_combined_trials20250822.csv"</span>))</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>df_data <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"temp"</span>, <span class="st">"processed"</span>, <span class="st">"all_combined20250822.csv"</span>))</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>df_trials <span class="ot">&lt;-</span> df_trials <span class="sc">%&gt;%</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">LevelName =</span> <span class="fu">str_c</span>(<span class="fu">str_remove</span>(LevelName, <span class="st">"Vista|Nonvista"</span>), <span class="st">"_"</span>, LevelSize),</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>         <span class="at">is_training =</span> target <span class="sc">==</span> <span class="st">"OriginDoor"</span>,</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>         <span class="at">run =</span> <span class="fu">ifelse</span>(<span class="fu">grepl</span>(<span class="st">"run"</span>, participant), <span class="st">"Run2"</span>, <span class="st">"Run1"</span>),</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>         <span class="at">pointing_duration =</span> <span class="fu">as.numeric</span>(FirstPointing_time <span class="sc">-</span> start_time))</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>df_data <span class="ot">&lt;-</span> df_data <span class="sc">%&gt;%</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">run =</span> <span class="fu">ifelse</span>(<span class="fu">grepl</span>(<span class="st">"run"</span>, participant), <span class="st">"Run2"</span>, <span class="st">"Run1"</span>))</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>df_trials_model <span class="ot">&lt;-</span> df_trials <span class="sc">%&gt;%</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span>is_training)</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>predict_my_responses <span class="ot">&lt;-</span> <span class="cf">function</span>(model) {</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>    dat <span class="ot">&lt;-</span> <span class="fu">predict_response</span>(model, <span class="at">terms =</span> <span class="fu">c</span>(<span class="st">"Movement"</span>, <span class="st">"Vista"</span>, <span class="st">"LevelSize"</span>), <span class="at">margin =</span> <span class="st">"empirical"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>        <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>        <span class="fu">select</span>(x, group, facet, predicted, <span class="fu">everything</span>())</span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(dat)</span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <section id="descriptives" class="level2">
 <h2 class="anchored" data-anchor-id="descriptives">Descriptives</h2>
@@ -358,6 +363,13 @@ LevelSzSmll -0.369  0.430
 VistaVista  -0.362  0.422  0.018              
 MvmntTl:LSS  0.266 -0.581 -0.719 -0.014       
 MvmntTlp:VV  0.261 -0.578 -0.014 -0.719  0.005</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Registered S3 methods overwritten by 'parameters':
+  method                           from      
+  display.parameters_distribution  datawizard
+  plot.parameters_distribution     datawizard
+  print_md.parameters_distribution datawizard</code></pre>
 </div>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -503,7 +515,7 @@ MvmntTlp:VV  0.261 -0.578 -0.014 -0.719  0.005</code></pre>
 <tr class="odd">
 <td style="text-align: left;">7</td>
 <td style="text-align: left;">NA</td>
-<td style="text-align: right;">160.5075675</td>
+<td style="text-align: right;">160.5075676</td>
 <td style="text-align: right;">0.95</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
@@ -667,7 +679,7 @@ MvmntTlp:VV  0.261 -0.578 -0.014 -0.719  0.005</code></pre>
 <col style="width: 16%">
 <col style="width: 14%">
 <col style="width: 16%">
-<col style="width: 16%">
+<col style="width: 14%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -686,72 +698,72 @@ MvmntTlp:VV  0.261 -0.578 -0.014 -0.719  0.005</code></pre>
 <td style="text-align: left;">Nonvista</td>
 <td style="text-align: left;">Large</td>
 <td style="text-align: right;">-8.667006</td>
-<td style="text-align: right;">36.29673</td>
-<td style="text-align: right;">-79.89213</td>
-<td style="text-align: right;">62.558122</td>
+<td style="text-align: right;">36.29672</td>
+<td style="text-align: right;">-79.89212</td>
+<td style="text-align: right;">62.55811</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">OpticFlow</td>
 <td style="text-align: left;">Nonvista</td>
 <td style="text-align: left;">Small</td>
 <td style="text-align: right;">256.006587</td>
-<td style="text-align: right;">35.96578</td>
-<td style="text-align: right;">185.43088</td>
-<td style="text-align: right;">326.582293</td>
+<td style="text-align: right;">35.96574</td>
+<td style="text-align: right;">185.43095</td>
+<td style="text-align: right;">326.58223</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">OpticFlow</td>
 <td style="text-align: left;">Vista</td>
 <td style="text-align: left;">Large</td>
 <td style="text-align: right;">-38.659236</td>
-<td style="text-align: right;">36.12753</td>
-<td style="text-align: right;">-109.55235</td>
-<td style="text-align: right;">32.233876</td>
+<td style="text-align: right;">36.12755</td>
+<td style="text-align: right;">-109.55239</td>
+<td style="text-align: right;">32.23391</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">OpticFlow</td>
 <td style="text-align: left;">Vista</td>
 <td style="text-align: left;">Small</td>
 <td style="text-align: right;">226.014357</td>
-<td style="text-align: right;">36.12975</td>
-<td style="text-align: right;">155.11688</td>
-<td style="text-align: right;">296.911830</td>
+<td style="text-align: right;">36.12977</td>
+<td style="text-align: right;">155.11684</td>
+<td style="text-align: right;">296.91187</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Teleport</td>
 <td style="text-align: left;">Nonvista</td>
 <td style="text-align: left;">Large</td>
 <td style="text-align: right;">32.268443</td>
-<td style="text-align: right;">35.58704</td>
-<td style="text-align: right;">-37.56406</td>
-<td style="text-align: right;">102.100944</td>
+<td style="text-align: right;">35.58705</td>
+<td style="text-align: right;">-37.56407</td>
+<td style="text-align: right;">102.10096</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Teleport</td>
 <td style="text-align: left;">Nonvista</td>
 <td style="text-align: left;">Small</td>
 <td style="text-align: right;">295.958919</td>
-<td style="text-align: right;">35.82517</td>
-<td style="text-align: right;">225.65913</td>
-<td style="text-align: right;">366.258705</td>
+<td style="text-align: right;">35.82493</td>
+<td style="text-align: right;">225.65961</td>
+<td style="text-align: right;">366.25823</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Teleport</td>
 <td style="text-align: left;">Vista</td>
 <td style="text-align: left;">Large</td>
 <td style="text-align: right;">-79.532570</td>
-<td style="text-align: right;">35.70371</td>
-<td style="text-align: right;">-149.59402</td>
-<td style="text-align: right;">-9.471118</td>
+<td style="text-align: right;">35.70370</td>
+<td style="text-align: right;">-149.59400</td>
+<td style="text-align: right;">-9.47114</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Teleport</td>
 <td style="text-align: left;">Vista</td>
 <td style="text-align: left;">Small</td>
 <td style="text-align: right;">184.157907</td>
-<td style="text-align: right;">35.70561</td>
-<td style="text-align: right;">114.09274</td>
-<td style="text-align: right;">254.223074</td>
+<td style="text-align: right;">35.70579</td>
+<td style="text-align: right;">114.09237</td>
+<td style="text-align: right;">254.22344</td>
 </tr>
 </tbody>
 </table>
@@ -818,7 +830,7 @@ MvmntTlp:VV  0.261 -0.578 -0.014 -0.719  0.005</code></pre>
 <td style="text-align: right;">0.95</td>
 <td style="text-align: right;">1.0386114</td>
 <td style="text-align: right;">1.2951207</td>
-<td style="text-align: right;">17.8531016</td>
+<td style="text-align: right;">17.8530993</td>
 <td style="text-align: right;">1016</td>
 <td style="text-align: right;">0.0000000</td>
 <td style="text-align: left;">fixed</td>
@@ -835,7 +847,7 @@ MvmntTlp:VV  0.261 -0.578 -0.014 -0.719  0.005</code></pre>
 <td style="text-align: right;">0.95</td>
 <td style="text-align: right;">-0.1078685</td>
 <td style="text-align: right;">0.1578183</td>
-<td style="text-align: right;">0.3689176</td>
+<td style="text-align: right;">0.3689177</td>
 <td style="text-align: right;">1016</td>
 <td style="text-align: right;">0.7122660</td>
 <td style="text-align: left;">fixed</td>
@@ -852,7 +864,7 @@ MvmntTlp:VV  0.261 -0.578 -0.014 -0.719  0.005</code></pre>
 <td style="text-align: right;">0.95</td>
 <td style="text-align: right;">0.3450434</td>
 <td style="text-align: right;">0.5644372</td>
-<td style="text-align: right;">8.1345733</td>
+<td style="text-align: right;">8.1345734</td>
 <td style="text-align: right;">1016</td>
 <td style="text-align: right;">0.0000000</td>
 <td style="text-align: left;">fixed</td>
@@ -869,7 +881,7 @@ MvmntTlp:VV  0.261 -0.578 -0.014 -0.719  0.005</code></pre>
 <td style="text-align: right;">0.95</td>
 <td style="text-align: right;">-0.2557180</td>
 <td style="text-align: right;">-0.0363470</td>
-<td style="text-align: right;">-2.6125586</td>
+<td style="text-align: right;">-2.6125587</td>
 <td style="text-align: right;">1016</td>
 <td style="text-align: right;">0.0091194</td>
 <td style="text-align: left;">fixed</td>
@@ -903,7 +915,7 @@ MvmntTlp:VV  0.261 -0.578 -0.014 -0.719  0.005</code></pre>
 <td style="text-align: right;">0.95</td>
 <td style="text-align: right;">-0.1075089</td>
 <td style="text-align: right;">0.1984743</td>
-<td style="text-align: right;">0.5833704</td>
+<td style="text-align: right;">0.5833703</td>
 <td style="text-align: right;">1016</td>
 <td style="text-align: right;">0.5597735</td>
 <td style="text-align: left;">fixed</td>
@@ -916,7 +928,7 @@ MvmntTlp:VV  0.261 -0.578 -0.014 -0.719  0.005</code></pre>
 <tr class="odd">
 <td style="text-align: left;">7</td>
 <td style="text-align: left;">NA</td>
-<td style="text-align: right;">0.2447978</td>
+<td style="text-align: right;">0.2447979</td>
 <td style="text-align: right;">0.95</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
@@ -1030,7 +1042,7 @@ MvmntTlp:VV  0.261 -0.578 -0.014 -0.719  0.005</code></pre>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">NA</td>
-<td style="text-align: right;">0.2506768</td>
+<td style="text-align: right;">0.2506769</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">14</td>
@@ -1108,7 +1120,7 @@ MvmntTlp:VV  0.261 -0.578 -0.014 -0.719  0.005</code></pre>
 <td style="text-align: left;">Nonvista</td>
 <td style="text-align: left;">Small</td>
 <td style="text-align: right;">1.6216063</td>
-<td style="text-align: right;">0.0645041</td>
+<td style="text-align: right;">0.0645042</td>
 <td style="text-align: right;">1.4950297</td>
 <td style="text-align: right;">1.748183</td>
 </tr>
@@ -1117,8 +1129,8 @@ MvmntTlp:VV  0.261 -0.578 -0.014 -0.719  0.005</code></pre>
 <td style="text-align: left;">Vista</td>
 <td style="text-align: left;">Large</td>
 <td style="text-align: right;">1.0208335</td>
-<td style="text-align: right;">0.0649228</td>
-<td style="text-align: right;">0.8934354</td>
+<td style="text-align: right;">0.0649229</td>
+<td style="text-align: right;">0.8934353</td>
 <td style="text-align: right;">1.148232</td>
 </tr>
 <tr class="even">
@@ -1126,8 +1138,8 @@ MvmntTlp:VV  0.261 -0.578 -0.014 -0.719  0.005</code></pre>
 <td style="text-align: left;">Vista</td>
 <td style="text-align: left;">Small</td>
 <td style="text-align: right;">1.4755738</td>
-<td style="text-align: right;">0.0649281</td>
-<td style="text-align: right;">1.3481652</td>
+<td style="text-align: right;">0.0649282</td>
+<td style="text-align: right;">1.3481651</td>
 <td style="text-align: right;">1.602982</td>
 </tr>
 <tr class="odd">
@@ -1136,7 +1148,7 @@ MvmntTlp:VV  0.261 -0.578 -0.014 -0.719  0.005</code></pre>
 <td style="text-align: left;">Large</td>
 <td style="text-align: right;">1.1918409</td>
 <td style="text-align: right;">0.0635065</td>
-<td style="text-align: right;">1.0672220</td>
+<td style="text-align: right;">1.0672219</td>
 <td style="text-align: right;">1.316460</td>
 </tr>
 <tr class="even">
@@ -1144,8 +1156,8 @@ MvmntTlp:VV  0.261 -0.578 -0.014 -0.719  0.005</code></pre>
 <td style="text-align: left;">Nonvista</td>
 <td style="text-align: left;">Small</td>
 <td style="text-align: right;">1.6920639</td>
-<td style="text-align: right;">0.0641366</td>
-<td style="text-align: right;">1.5662086</td>
+<td style="text-align: right;">0.0641365</td>
+<td style="text-align: right;">1.5662087</td>
 <td style="text-align: right;">1.817919</td>
 </tr>
 <tr class="odd">
@@ -1247,8 +1259,8 @@ MvmntTlp:VV  0.338 -0.539  0.014 -0.722 -0.025</code></pre>
 <td style="text-align: left;">Nonvista</td>
 <td style="text-align: left;">Large</td>
 <td style="text-align: right;">27.48348</td>
-<td style="text-align: right;">2.645772</td>
-<td style="text-align: right;">22.29168</td>
+<td style="text-align: right;">2.645774</td>
+<td style="text-align: right;">22.29167</td>
 <td style="text-align: right;">32.67529</td>
 </tr>
 <tr class="even">
@@ -1256,18 +1268,18 @@ MvmntTlp:VV  0.338 -0.539  0.014 -0.722 -0.025</code></pre>
 <td style="text-align: left;">Nonvista</td>
 <td style="text-align: left;">Small</td>
 <td style="text-align: right;">22.09947</td>
-<td style="text-align: right;">2.375608</td>
+<td style="text-align: right;">2.375607</td>
 <td style="text-align: right;">17.43781</td>
-<td style="text-align: right;">26.76113</td>
+<td style="text-align: right;">26.76112</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">OpticFlow</td>
 <td style="text-align: left;">Vista</td>
 <td style="text-align: left;">Large</td>
 <td style="text-align: right;">25.98558</td>
-<td style="text-align: right;">2.570715</td>
+<td style="text-align: right;">2.570720</td>
 <td style="text-align: right;">20.94106</td>
-<td style="text-align: right;">31.03010</td>
+<td style="text-align: right;">31.03011</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">OpticFlow</td>
@@ -1275,7 +1287,7 @@ MvmntTlp:VV  0.338 -0.539  0.014 -0.722 -0.025</code></pre>
 <td style="text-align: left;">Small</td>
 <td style="text-align: right;">20.89501</td>
 <td style="text-align: right;">2.271192</td>
-<td style="text-align: right;">16.43825</td>
+<td style="text-align: right;">16.43824</td>
 <td style="text-align: right;">25.35177</td>
 </tr>
 <tr class="odd">
@@ -1283,9 +1295,9 @@ MvmntTlp:VV  0.338 -0.539  0.014 -0.722 -0.025</code></pre>
 <td style="text-align: left;">Nonvista</td>
 <td style="text-align: left;">Large</td>
 <td style="text-align: right;">28.18258</td>
-<td style="text-align: right;">2.581071</td>
-<td style="text-align: right;">23.11774</td>
-<td style="text-align: right;">33.24742</td>
+<td style="text-align: right;">2.581079</td>
+<td style="text-align: right;">23.11773</td>
+<td style="text-align: right;">33.24744</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Teleport</td>
@@ -1301,16 +1313,16 @@ MvmntTlp:VV  0.338 -0.539  0.014 -0.722 -0.025</code></pre>
 <td style="text-align: left;">Vista</td>
 <td style="text-align: left;">Large</td>
 <td style="text-align: right;">23.19963</td>
-<td style="text-align: right;">2.347271</td>
+<td style="text-align: right;">2.347273</td>
 <td style="text-align: right;">18.59358</td>
-<td style="text-align: right;">27.80568</td>
+<td style="text-align: right;">27.80569</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Teleport</td>
 <td style="text-align: left;">Vista</td>
 <td style="text-align: left;">Small</td>
 <td style="text-align: right;">22.23308</td>
-<td style="text-align: right;">2.251008</td>
+<td style="text-align: right;">2.251009</td>
 <td style="text-align: right;">17.81592</td>
 <td style="text-align: right;">26.65024</td>
 </tr>
@@ -1395,7 +1407,7 @@ MvmntTlp:VV  0.239 -0.607 -0.043 -0.753  0.035</code></pre>
 <td style="text-align: left;">Nonvista</td>
 <td style="text-align: left;">Large</td>
 <td style="text-align: right;">7.713356</td>
-<td style="text-align: right;">0.4972132</td>
+<td style="text-align: right;">0.4972134</td>
 <td style="text-align: right;">6.737673</td>
 <td style="text-align: right;">8.689038</td>
 </tr>
@@ -1404,7 +1416,7 @@ MvmntTlp:VV  0.239 -0.607 -0.043 -0.753  0.035</code></pre>
 <td style="text-align: left;">Nonvista</td>
 <td style="text-align: left;">Small</td>
 <td style="text-align: right;">6.032644</td>
-<td style="text-align: right;">0.4029909</td>
+<td style="text-align: right;">0.4029910</td>
 <td style="text-align: right;">5.241854</td>
 <td style="text-align: right;">6.823434</td>
 </tr>
@@ -1413,34 +1425,34 @@ MvmntTlp:VV  0.239 -0.607 -0.043 -0.753  0.035</code></pre>
 <td style="text-align: left;">Vista</td>
 <td style="text-align: left;">Large</td>
 <td style="text-align: right;">7.287151</td>
-<td style="text-align: right;">0.4700007</td>
-<td style="text-align: right;">6.364868</td>
-<td style="text-align: right;">8.209434</td>
+<td style="text-align: right;">0.4700003</td>
+<td style="text-align: right;">6.364869</td>
+<td style="text-align: right;">8.209433</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">OpticFlow</td>
 <td style="text-align: left;">Vista</td>
 <td style="text-align: left;">Small</td>
 <td style="text-align: right;">5.699308</td>
-<td style="text-align: right;">0.3889148</td>
+<td style="text-align: right;">0.3889145</td>
 <td style="text-align: right;">4.936140</td>
-<td style="text-align: right;">6.462476</td>
+<td style="text-align: right;">6.462475</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Teleport</td>
 <td style="text-align: left;">Nonvista</td>
 <td style="text-align: left;">Large</td>
 <td style="text-align: right;">7.746738</td>
-<td style="text-align: right;">0.4870054</td>
-<td style="text-align: right;">6.791086</td>
-<td style="text-align: right;">8.702389</td>
+<td style="text-align: right;">0.4870033</td>
+<td style="text-align: right;">6.791091</td>
+<td style="text-align: right;">8.702385</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Teleport</td>
 <td style="text-align: left;">Nonvista</td>
 <td style="text-align: left;">Small</td>
 <td style="text-align: right;">7.053507</td>
-<td style="text-align: right;">0.4515922</td>
+<td style="text-align: right;">0.4515921</td>
 <td style="text-align: right;">6.167347</td>
 <td style="text-align: right;">7.939667</td>
 </tr>
@@ -1449,18 +1461,18 @@ MvmntTlp:VV  0.239 -0.607 -0.043 -0.753  0.035</code></pre>
 <td style="text-align: left;">Vista</td>
 <td style="text-align: left;">Large</td>
 <td style="text-align: right;">7.694257</td>
-<td style="text-align: right;">0.4846423</td>
+<td style="text-align: right;">0.4846421</td>
 <td style="text-align: right;">6.743243</td>
-<td style="text-align: right;">8.645272</td>
+<td style="text-align: right;">8.645271</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Teleport</td>
 <td style="text-align: left;">Vista</td>
 <td style="text-align: left;">Small</td>
 <td style="text-align: right;">7.005723</td>
-<td style="text-align: right;">0.4492433</td>
-<td style="text-align: right;">6.124172</td>
-<td style="text-align: right;">7.887274</td>
+<td style="text-align: right;">0.4492443</td>
+<td style="text-align: right;">6.124170</td>
+<td style="text-align: right;">7.887276</td>
 </tr>
 </tbody>
 </table>
@@ -1529,8 +1541,8 @@ Number of Fisher Scoring iterations: 5</code></pre>
 <td style="text-align: left;">Nonvista</td>
 <td style="text-align: left;">Large</td>
 <td style="text-align: right;">25616.59</td>
-<td style="text-align: right;">23713.923</td>
-<td style="text-align: right;">27671.92</td>
+<td style="text-align: right;">23713.931</td>
+<td style="text-align: right;">27671.91</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Teleport</td>
@@ -1545,16 +1557,16 @@ Number of Fisher Scoring iterations: 5</code></pre>
 <td style="text-align: left;">Vista</td>
 <td style="text-align: left;">Large</td>
 <td style="text-align: right;">21432.88</td>
-<td style="text-align: right;">19554.150</td>
-<td style="text-align: right;">23492.11</td>
+<td style="text-align: right;">19554.118</td>
+<td style="text-align: right;">23492.15</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Teleport</td>
 <td style="text-align: left;">Vista</td>
 <td style="text-align: left;">Small</td>
 <td style="text-align: right;">10549.07</td>
-<td style="text-align: right;">9132.799</td>
-<td style="text-align: right;">12184.97</td>
+<td style="text-align: right;">9132.529</td>
+<td style="text-align: right;">12185.33</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">OpticFlow</td>
@@ -1577,16 +1589,16 @@ Number of Fisher Scoring iterations: 5</code></pre>
 <td style="text-align: left;">Vista</td>
 <td style="text-align: left;">Large</td>
 <td style="text-align: right;">20062.04</td>
-<td style="text-align: right;">18148.621</td>
-<td style="text-align: right;">22177.20</td>
+<td style="text-align: right;">18148.612</td>
+<td style="text-align: right;">22177.21</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">OpticFlow</td>
 <td style="text-align: left;">Vista</td>
 <td style="text-align: left;">Small</td>
 <td style="text-align: right;">10112.47</td>
-<td style="text-align: right;">8709.686</td>
-<td style="text-align: right;">11741.19</td>
+<td style="text-align: right;">8709.688</td>
+<td style="text-align: right;">11741.18</td>
 </tr>
 </tbody>
 </table>
@@ -1657,32 +1669,32 @@ Number of Fisher Scoring iterations: 5</code></pre>
 <td style="text-align: left;">Nonvista</td>
 <td style="text-align: left;">Large</td>
 <td style="text-align: right;">109.55148</td>
-<td style="text-align: right;">99.39772</td>
-<td style="text-align: right;">120.74247</td>
+<td style="text-align: right;">99.39742</td>
+<td style="text-align: right;">120.74283</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Teleport</td>
 <td style="text-align: left;">Nonvista</td>
 <td style="text-align: left;">Small</td>
 <td style="text-align: right;">88.86048</td>
-<td style="text-align: right;">79.18153</td>
-<td style="text-align: right;">99.72256</td>
+<td style="text-align: right;">79.18154</td>
+<td style="text-align: right;">99.72255</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Teleport</td>
 <td style="text-align: left;">Vista</td>
 <td style="text-align: left;">Large</td>
 <td style="text-align: right;">99.71017</td>
-<td style="text-align: right;">89.71282</td>
-<td style="text-align: right;">110.82160</td>
+<td style="text-align: right;">89.71276</td>
+<td style="text-align: right;">110.82168</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Teleport</td>
 <td style="text-align: left;">Vista</td>
 <td style="text-align: left;">Small</td>
 <td style="text-align: right;">80.87790</td>
-<td style="text-align: right;">71.69333</td>
-<td style="text-align: right;">91.23911</td>
+<td style="text-align: right;">71.69332</td>
+<td style="text-align: right;">91.23912</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">OpticFlow</td>
@@ -1698,23 +1710,23 @@ Number of Fisher Scoring iterations: 5</code></pre>
 <td style="text-align: left;">Small</td>
 <td style="text-align: right;">85.69261</td>
 <td style="text-align: right;">75.64642</td>
-<td style="text-align: right;">97.07299</td>
+<td style="text-align: right;">97.07298</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">OpticFlow</td>
 <td style="text-align: left;">Vista</td>
 <td style="text-align: left;">Large</td>
 <td style="text-align: right;">79.79918</td>
-<td style="text-align: right;">69.90430</td>
-<td style="text-align: right;">91.09466</td>
+<td style="text-align: right;">69.90431</td>
+<td style="text-align: right;">91.09465</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">OpticFlow</td>
 <td style="text-align: left;">Vista</td>
 <td style="text-align: left;">Small</td>
 <td style="text-align: right;">68.83802</td>
-<td style="text-align: right;">59.61108</td>
-<td style="text-align: right;">79.49316</td>
+<td style="text-align: right;">59.61130</td>
+<td style="text-align: right;">79.49287</td>
 </tr>
 </tbody>
 </table>
@@ -1736,242 +1748,239 @@ Number of Fisher Scoring iterations: 5</code></pre>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
-  window.document.addEventListener("DOMContentLoaded", function (event) {
-    const icon = "";
-    const anchorJS = new window.AnchorJS();
-    anchorJS.options = {
-      placement: 'right',
-      icon: icon
-    };
-    anchorJS.add('.anchored');
-    const isCodeAnnotation = (el) => {
-      for (const clz of el.classList) {
-        if (clz.startsWith('code-annotation-')) {                     
-          return true;
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
       }
-      return false;
-    }
-    const onCopySuccess = function(e) {
-      // button target
-      const button = e.trigger;
-      // don't keep focus
-      button.blur();
-      // flash "checked"
-      button.classList.add('code-copy-button-checked');
-      var currentTitle = button.getAttribute("title");
-      button.setAttribute("title", "Copied!");
-      let tooltip;
-      if (window.bootstrap) {
-        button.setAttribute("data-bs-toggle", "tooltip");
-        button.setAttribute("data-bs-placement", "left");
-        button.setAttribute("data-bs-title", "Copied!");
-        tooltip = new bootstrap.Tooltip(button, 
-          { trigger: "manual", 
-            customClass: "code-copy-button-tooltip",
-            offset: [0, -8]});
-        tooltip.show();    
-      }
-      setTimeout(function() {
-        if (tooltip) {
-          tooltip.hide();
-          button.removeAttribute("data-bs-title");
-          button.removeAttribute("data-bs-toggle");
-          button.removeAttribute("data-bs-placement");
-        }
-        button.setAttribute("title", currentTitle);
-        button.classList.remove('code-copy-button-checked');
-      }, 1000);
-      // clear code selection
-      e.clearSelection();
-    }
-    const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
-        }
-        return codeEl.innerText;
-    }
-    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
-      text: getTextToCopy
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
     });
-    clipboard.on('success', onCopySuccess);
-    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
-      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
-        text: getTextToCopy,
-        container: window.document.getElementById('quarto-embedded-source-code-modal')
-      });
-      clipboardModal.on('success', onCopySuccess);
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/cyberspace-lab\.github\.io\/vistateleportation-analysis\/");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
     }
-      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
-      var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp("https:\/\/cyberspace-lab\.github\.io\/vistateleportation-analysis\/");
-      var isInternal = (href) => {
-          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
-      }
-      // Inspect non-navigation links and adorn them if external
-     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
-      for (var i=0; i<links.length; i++) {
-        const link = links[i];
-        if (!isInternal(link.href)) {
-          // undo the damage that might have been done by quarto-nav.js in the case of
-          // links that we want to consider external
-          if (link.dataset.originalHref !== undefined) {
-            link.href = link.dataset.originalHref;
-          }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
         }
       }
-    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
-      const config = {
-        allowHTML: true,
-        maxWidth: 500,
-        delay: 100,
-        arrow: false,
-        appendTo: function(el) {
-            return el.parentElement;
-        },
-        interactive: true,
-        interactiveBorder: 10,
-        theme: 'quarto',
-        placement: 'bottom-start',
-      };
-      if (contentFn) {
-        config.content = contentFn;
-      }
-      if (onTriggerFn) {
-        config.onTrigger = onTriggerFn;
-      }
-      if (onUntriggerFn) {
-        config.onUntrigger = onUntriggerFn;
-      }
-      window.tippy(el, config); 
     }
-    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
-    for (var i=0; i<noterefs.length; i++) {
-      const ref = noterefs[i];
-      tippyHover(ref, function() {
-        // use id or data attribute instead here
-        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
-        try { href = new URL(href).hash; } catch {}
-        const id = href.replace(/^#\/?/, "");
-        const note = window.document.getElementById(id);
-        if (note) {
-          return note.innerHTML;
-        } else {
-          return "";
-        }
-      });
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
     }
-    const xrefs = window.document.querySelectorAll('a.quarto-xref');
-    const processXRef = (id, note) => {
-      // Strip column container classes
-      const stripColumnClz = (el) => {
-        el.classList.remove("page-full", "page-columns");
-        if (el.children) {
-          for (const child of el.children) {
-            stripColumnClz(child);
-          }
-        }
-      }
-      stripColumnClz(note)
-      if (id === null || id.startsWith('sec-')) {
-        // Special case sections, only their first couple elements
-        const container = document.createElement("div");
-        if (note.children && note.children.length > 2) {
-          container.appendChild(note.children[0].cloneNode(true));
-          for (let i = 1; i < note.children.length; i++) {
-            const child = note.children[i];
-            if (child.tagName === "P" && child.innerText === "") {
-              continue;
-            } else {
-              container.appendChild(child.cloneNode(true));
-              break;
-            }
-          }
-          if (window.Quarto?.typesetMath) {
-            window.Quarto.typesetMath(container);
-          }
-          return container.innerHTML
-        } else {
-          if (window.Quarto?.typesetMath) {
-            window.Quarto.typesetMath(note);
-          }
-          return note.innerHTML;
-        }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
       } else {
-        // Remove any anchor links if they are present
-        const anchorLink = note.querySelector('a.anchorjs-link');
-        if (anchorLink) {
-          anchorLink.remove();
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
         }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
         if (window.Quarto?.typesetMath) {
           window.Quarto.typesetMath(note);
         }
-        if (note.classList.contains("callout")) {
-          return note.outerHTML;
-        } else {
-          return note.innerHTML;
-        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
       }
     }
-    for (var i=0; i<xrefs.length; i++) {
-      const xref = xrefs[i];
-      tippyHover(xref, undefined, function(instance) {
-        instance.disable();
-        let url = xref.getAttribute('href');
-        let hash = undefined; 
-        if (url.startsWith('#')) {
-          hash = url;
-        } else {
-          try { hash = new URL(url).hash; } catch {}
-        }
-        if (hash) {
-          const id = hash.replace(/^#\/?/, "");
-          const note = window.document.getElementById(id);
-          if (note !== null) {
-            try {
-              const html = processXRef(id, note.cloneNode(true));
-              instance.setContent(html);
-            } finally {
-              instance.enable();
-              instance.show();
-            }
-          } else {
-            // See if we can fetch this
-            fetch(url.split('#')[0])
-            .then(res => res.text())
-            .then(html => {
-              const parser = new DOMParser();
-              const htmlDoc = parser.parseFromString(html, "text/html");
-              const note = htmlDoc.getElementById(id);
-              if (note !== null) {
-                const html = processXRef(id, note);
-                instance.setContent(html);
-              } 
-            }).finally(() => {
-              instance.enable();
-              instance.show();
-            });
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
           }
         } else {
-          // See if we can fetch a full url (with no hash to target)
-          // This is a special case and we should probably do some content thinning / targeting
-          fetch(url)
+          // See if we can fetch this
+          fetch(url.split('#')[0])
           .then(res => res.text())
           .then(html => {
             const parser = new DOMParser();
             const htmlDoc = parser.parseFromString(html, "text/html");
-            const note = htmlDoc.querySelector('main.content');
+            const note = htmlDoc.getElementById(id);
             if (note !== null) {
-              // This should only happen for chapter cross references
-              // (since there is no id in the URL)
-              // remove the first header
-              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
-                note.children[0].remove();
-              }
-              const html = processXRef(null, note);
+              const html = processXRef(id, note);
               instance.setContent(html);
             } 
           }).finally(() => {
@@ -1979,161 +1988,185 @@ Number of Fisher Scoring iterations: 5</code></pre>
             instance.show();
           });
         }
-      }, function(instance) {
-      });
-    }
-        let selectedAnnoteEl;
-        const selectorForAnnotation = ( cell, annotation) => {
-          let cellAttr = 'data-code-cell="' + cell + '"';
-          let lineAttr = 'data-code-annotation="' +  annotation + '"';
-          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
-          return selector;
-        }
-        const selectCodeLines = (annoteEl) => {
-          const doc = window.document;
-          const targetCell = annoteEl.getAttribute("data-target-cell");
-          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
-          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
-          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
-          const lineIds = lines.map((line) => {
-            return targetCell + "-" + line;
-          })
-          let top = null;
-          let height = null;
-          let parent = null;
-          if (lineIds.length > 0) {
-              //compute the position of the single el (top and bottom and make a div)
-              const el = window.document.getElementById(lineIds[0]);
-              top = el.offsetTop;
-              height = el.offsetHeight;
-              parent = el.parentElement.parentElement;
-            if (lineIds.length > 1) {
-              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
-              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
-              height = bottom - top;
-            }
-            if (top !== null && height !== null && parent !== null) {
-              // cook up a div (if necessary) and position it 
-              let div = window.document.getElementById("code-annotation-line-highlight");
-              if (div === null) {
-                div = window.document.createElement("div");
-                div.setAttribute("id", "code-annotation-line-highlight");
-                div.style.position = 'absolute';
-                parent.appendChild(div);
-              }
-              div.style.top = top - 2 + "px";
-              div.style.height = height + 4 + "px";
-              div.style.left = 0;
-              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
-              if (gutterDiv === null) {
-                gutterDiv = window.document.createElement("div");
-                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
-                gutterDiv.style.position = 'absolute';
-                const codeCell = window.document.getElementById(targetCell);
-                const gutter = codeCell.querySelector('.code-annotation-gutter');
-                gutter.appendChild(gutterDiv);
-              }
-              gutterDiv.style.top = top - 2 + "px";
-              gutterDiv.style.height = height + 4 + "px";
-            }
-            selectedAnnoteEl = annoteEl;
-          }
-        };
-        const unselectCodeLines = () => {
-          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
-          elementsIds.forEach((elId) => {
-            const div = window.document.getElementById(elId);
-            if (div) {
-              div.remove();
-            }
-          });
-          selectedAnnoteEl = undefined;
-        };
-          // Handle positioning of the toggle
-      window.addEventListener(
-        "resize",
-        throttle(() => {
-          elRect = undefined;
-          if (selectedAnnoteEl) {
-            selectCodeLines(selectedAnnoteEl);
-          }
-        }, 10)
-      );
-      function throttle(fn, ms) {
-      let throttle = false;
-      let timer;
-        return (...args) => {
-          if(!throttle) { // first call gets through
-              fn.apply(this, args);
-              throttle = true;
-          } else { // all the others get throttled
-              if(timer) clearTimeout(timer); // cancel #2
-              timer = setTimeout(() => {
-                fn.apply(this, args);
-                timer = throttle = false;
-              }, ms);
-          }
-        };
-      }
-        // Attach click handler to the DT
-        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
-        for (const annoteDlNode of annoteDls) {
-          annoteDlNode.addEventListener('click', (event) => {
-            const clickedEl = event.target;
-            if (clickedEl !== selectedAnnoteEl) {
-              unselectCodeLines();
-              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
-              if (activeEl) {
-                activeEl.classList.remove('code-annotation-active');
-              }
-              selectCodeLines(clickedEl);
-              clickedEl.classList.add('code-annotation-active');
-            } else {
-              // Unselect the line
-              unselectCodeLines();
-              clickedEl.classList.remove('code-annotation-active');
-            }
-          });
-        }
-    const findCites = (el) => {
-      const parentEl = el.parentElement;
-      if (parentEl) {
-        const cites = parentEl.dataset.cites;
-        if (cites) {
-          return {
-            el,
-            cites: cites.split(' ')
-          };
-        } else {
-          return findCites(el.parentElement)
-        }
       } else {
-        return undefined;
-      }
-    };
-    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
-    for (var i=0; i<bibliorefs.length; i++) {
-      const ref = bibliorefs[i];
-      const citeInfo = findCites(ref);
-      if (citeInfo) {
-        tippyHover(citeInfo.el, function() {
-          var popup = window.document.createElement('div');
-          citeInfo.cites.forEach(function(cite) {
-            var citeDiv = window.document.createElement('div');
-            citeDiv.classList.add('hanging-indent');
-            citeDiv.classList.add('csl-entry');
-            var biblioDiv = window.document.getElementById('ref-' + cite);
-            if (biblioDiv) {
-              citeDiv.innerHTML = biblioDiv.innerHTML;
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
             }
-            popup.appendChild(citeDiv);
-          });
-          return popup.innerHTML;
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
         });
       }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
     }
-  });
-  </script>
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
 </div> <!-- /content -->
 
 
