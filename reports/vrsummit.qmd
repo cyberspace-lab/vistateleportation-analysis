@@ -1,0 +1,104 @@
+---
+title: "Vista Teleportation Analysis: Spatial Cognition in Virtual Environments"
+author: "Your Name"
+date: "`r Sys.Date()`"
+format: html
+---
+
+```{r setup, echo=FALSE, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(lme4)
+library(report)
+knitr::opts_chunk$set(echo = FALSE)
+
+here::i_am("reports/analysis.qmd")
+source(here::here("functions", "visualisation.R"))
+
+df_pointing <- read.csv(here::here("temp", "processed", "pointing20250804.csv"))
+df_distance <- read.csv(here::here("temp", "processed", "distance20250804.csv"))
+df_timing <- read.csv(here::here("temp", "processed", "timing20250804.csv"))
+
+df_trials <- read.csv(here::here("temp", "processed", "all_combined_trials20250822.csv"))
+df_data <- read.csv(here::here("temp", "processed", "all_combined20250822.csv"))
+
+df_trials <- df_trials %>%
+  mutate(LevelName = str_c(str_remove(LevelName, "Vista|Nonvista"), "_", LevelSize),
+         is_training = target == "OriginDoor",
+         run = ifelse(grepl("run", participant), "Run2", "Run1"),
+         pointing_duration = as.numeric(FirstPointing_time - start_time))
+
+df_data <- df_data %>%
+  mutate(run = ifelse(grepl("run", participant), "Run2", "Run1"))
+  
+df_trials_model <- df_trials %>%
+  filter(!is_training)
+
+predict_my_responses <- function(model) {
+    dat <- predict_response(model, terms = c("Movement", "Vista", "LevelSize"), margin = "empirical") %>%
+        as.data.frame() %>%
+        select(x, group, facet, predicted, everything())
+    return(dat)
+}
+```
+
+## Descriptives
+
+How long it took to complete the experiment in various conditions, especially comparing the same size vista vs non-vista levels and its interaction with movement mode
+
+## Visualisations
+
+```{r pointing-distance-boxplot, fig.width=12, fig.height=8}
+df_trials %>%
+  filter(!is_training) %>%
+  ggplot(aes(x = LevelSize, y = target_pointed_distance_difference, fill = Movement)) +
+  geom_boxplot() +
+  geom_jitter(alpha = 0.3, position = position_jitterdodge(0.8, jitter.width = 0.1)) +
+  facet_wrap(~Vista) +
+  theme_minimal(base_size = 24) +
+  labs(title = "Pointing Distance Error",
+       y = "Pointing Distance Difference",
+       x = "Level Size") + 
+       theme(legend.position = "bottom")
+```
+
+```{r pointing-angle-boxplot, fig.width=12, fig.height=8}
+df_trials %>%
+  filter(!is_training) %>%
+  ggplot(aes(x = LevelSize, y = abs(pointed_angle_difference), fill = Movement)) +
+  geom_boxplot() +
+  geom_jitter(alpha = 0.3, position = position_jitterdodge(0.8, jitter.width = 0.1)) +
+  facet_wrap(~Vista) +
+  theme_minimal(base_size = 24) +
+  labs(title = "Absolute Pointing Angle Error",
+       y = "Absolute Pointing Angle Difference",
+       x = "Level Size") +
+  theme(legend.position   = "bottom")
+```
+
+```{r distance-boxplot, fig.width=12, fig.height=8}
+df_trials %>%
+  filter(!is_training) %>%
+  ggplot(aes(x = LevelSize, y = distance_items, fill = Movement)) +
+  geom_boxplot() +
+  geom_jitter(alpha = 0.3, position = position_jitterdodge(0.8, jitter.width = 0.1)) +
+  facet_wrap(~Vista) +
+  theme_minimal(base_size = 24) +
+  labs(title = "Traveled Distance",
+       y = "Traveled Distance (m)",
+       x = "Level Size") +
+  theme(legend.position = "bottom")
+```
+
+```{r timing-boxplot, fig.width=12, fig.height=8}
+df_trials %>%
+  filter(!is_training) %>%
+  ggplot(aes(x = LevelSize, y = duration_searching, fill = Movement)) +
+  geom_boxplot() +
+  geom_jitter(alpha = 0.3, position = position_jitterdodge( 0.8, jitter.width = 0.1)) +
+  facet_wrap(~Vista) +
+  theme_minimal(base_size = 24) +
+  labs(title = "Navigation Duration",
+       y = "Navigation Duration (s)",
+       x = "Level Size") +
+  theme(legend.position = "bottom")
+```
