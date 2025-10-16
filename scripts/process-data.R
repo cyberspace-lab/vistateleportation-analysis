@@ -46,7 +46,8 @@ df_ssq1 <- df_questionnaire[, c("ID", "Movement1", "X.SQ001.", "X.SQ002.",
 colnames(df_ssq1) <- c("ID", "Movement", paste0("question", 1:16))
 
 df_ssq1 <- df_ssq1 %>%
-  mutate(across(-c(ID, Movement), ~recode(.x, !!!question_keys))) %>%
+  mutate(across(-c(ID, Movement), ~recode(.x, !!!question_keys)),
+         Movement = recode(Movement, !!!movement_keys)) %>%
   process_ssq() %>%
   select(ID, Movement, starts_with(c("ssq_", "vrsq_")))
 
@@ -59,12 +60,12 @@ df_ssq2 <- df_questionnaire[, c("ID", "Movement2", "Copy.SQ001.", "Copy.SQ002.",
                                 "Copy.SQ015.", "Copy.SQ016.")]
 colnames(df_ssq2) <- c("ID", "Movement", paste0("question", 1:16))
 df_ssq2 <- df_ssq2 %>%
-  mutate(across(-c(ID, Movement), ~recode(.x, !!!question_keys))) %>%
+  mutate(across(-c(ID, Movement), ~recode(.x, !!!question_keys)),
+         Movement = recode(Movement, !!!movement_keys)) %>%
   process_ssq() %>%
   select(ID, Movement, starts_with(c("ssq_", "vrsq_")))
 
 ### FIRST VRLEQ ---------------
-
 df_vrleq1 <- df_questionnaire[, c("ID", "Movement1", "X.VRQ001.",
                                   "X.VRQ002.", "X.VRQ003.", "X.VRQ004.",
                                   "X.VRQ005.", "X.VRQ006.", "X.VRQ007.",
@@ -72,9 +73,9 @@ df_vrleq1 <- df_questionnaire[, c("ID", "Movement1", "X.VRQ001.",
 colnames(df_vrleq1) <- c("ID", "Movement1", paste0("question", 1:10))
 df_vrleq1 <- mutate(df_vrleq1,
                     across(-c(ID, Movement1), ~recode(.x, !!!question_keys2)),
-                    Movement1 = recode(Movement1, !!!movement_keys)) %>%
+                    Movement = recode(Movement1, !!!movement_keys)) %>%
   process_vrleq() %>%
-  select(ID, Movement = Movement1, starts_with("vrleq_"))
+  select(ID, Movement, starts_with("vrleq_"))
 
 ### SECOND VRLEQ ------
 df_vrleq2 <- df_questionnaire[, c(
@@ -82,11 +83,11 @@ df_vrleq2 <- df_questionnaire[, c(
     "Copy.VRQ004.", "Copy.VRQ005.", "Copy.VRQ006.", "Copy.VRQ007.",
     "Copy.VRQ008.", "Copy.VRQ009.", "Copy.VRQ010.")]
 colnames(df_vrleq2) <- c("ID", "Movement2", paste0("question", 1:10))
-df_vrleq2 <- mutate(df_vrleq2, 
+df_vrleq2 <- mutate(df_vrleq2,
                     across(-c(ID, Movement2), ~recode(.x, !!!question_keys2)),
-                    Movement2 = recode(Movement2, !!!movement_keys)) %>%
+                    Movement = recode(Movement2, !!!movement_keys)) %>%
   process_vrleq() %>%
-  select(ID, Movement = Movement2, starts_with("vrleq_"))
+  select(ID, Movement, starts_with("vrleq_"))
 
 ### Merging all together
 convert_to_long <- function(df) {
