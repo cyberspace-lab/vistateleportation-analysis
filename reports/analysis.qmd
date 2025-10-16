@@ -9,6 +9,7 @@ format: html
 library(tidyverse)
 library(lme4)
 library(report)
+library(broom)
 library(ggeffects)
 knitr::opts_chunk$set(echo = FALSE)
 
@@ -33,6 +34,10 @@ df_data <- df_data %>%
   
 df_trials_model <- df_trials %>%
   filter(!is_training)
+ 
+df_questionnaires <- df_data %>%
+  select(participant, starts_with("ssq_"), starts_with("vrsq_"), starts_with("vrleq_"), Movement) %>%
+  distinct() 
 
 predict_my_responses <- function(model) {
     dat <- predict_response(model, terms = c("Movement", "Vista", "LevelSize"), margin = "empirical") %>%
@@ -246,3 +251,54 @@ while the movement method did affect the navigated duration when considered on i
 ## Gender
 
 ## Simulator sickness
+```{r ssq descriptives}
+df_questionnaires %>%
+  select(starts_with("ssq_"), Movement) %>%
+  pivot_longer(cols = -Movement, names_to = "ssq_metric", values_to = "value") %>%
+  group_by(ssq_metric, Movement) %>%
+  summarize(mean = mean(value, na.rm = TRUE),
+            sd = sd(value, na.rm = TRUE),
+            min = min(value, na.rm = TRUE),
+            max = max(value, na.rm = TRUE)) %>%
+  pivot_wider(names_from = Movement, values_from = c(mean, sd)) %>%
+  knitr::kable()
+
+df_questionnaires %>% 
+  select(c(starts_with("ssq_"), starts_with("vrsq_")), participant, Movement) %>%
+  pivot_longer(cols = -c(participant, Movement), names_to = "ssq_metric", values_to = "value") %>%
+  pivot_wider(names_from = Movement, values_from = value, id_cols = c(participant, ssq_metric)) %>%
+  group_by(ssq_metric) %>%
+  nest() %>%
+  mutate(
+    test = map(data, ~ t.test(.x$OpticFlow, .x$Teleport, paired = TRUE) %>% tidy())
+  ) %>%
+  select(ssq_metric, test) %>%
+  unnest(test)
+```
+
+### VRLEQ
+
+```{r vrleq descriptives}
+df_questionnaires %>% 
+  select(starts_with("vrleq_"), Movement, participant) %>%
+  pivot_longer(cols = -c(Movement, participant), names_to = "vrleq_metric", values_to = "value") %>%
+  group_by(vrleq_metric, Movement) %>%
+  summarize(mean = mean(value, na.rm = TRUE),
+            sd = sd(value, na.rm = TRUE),
+            min = min(value, na.rm = TRUE),
+            max = max(value, na.rm = TRUE)) %>%
+  pivot_wider(names_from = Movement, values_from = c(mean, sd, min, max)) %>%
+  knitr::kable()
+
+df_questionnaires %>% 
+  select(starts_with("vrleq_"), participant, Movement) %>%
+  pivot_longer(cols = -c(participant, Movement), names_to = "vrleq_metric", values_to = "value") %>%
+  pivot_wider(names_from = Movement, values_from = value, id_cols = c(participant, vrleq_metric)) %>%
+  group_by(vrleq_metric) %>%
+  nest() %>%
+  mutate(
+    test = map(data, ~ t.test(.x$OpticFlow, .x$Teleport, paired = TRUE) %>% tidy())
+  ) %>%
+  select(vrleq_metric, test) %>%
+  unnest(test)
+```

@@ -45,6 +45,19 @@ predict_my_responses <- function(model) {
 
 How long it took to complete the experiment in various conditions, especially comparing the same size vista vs non-vista levels and its interaction with movement mode
 
+```{r descriptives, echo=TRUE}
+df_data %>%
+  select(participant, Age, Gender) %>%
+  distinct() %>%
+  group_by(Gender) %>%
+  summarise(mean_age = mean(Age),
+            sd_age = sd(Age),
+            min = min(Age),
+            max = max(Age),
+            n = n(),
+            .groups = "drop") 
+```
+
 ## Visualisations
 
 ```{r pointing-distance-boxplot, fig.width=12, fig.height=8}
