@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Your Name">
-<meta name="dcterms.date" content="2025-10-14">
+<meta name="dcterms.date" content="2025-10-16">
 
 <title>Vista Teleportation Analysis: Spatial Cognition in Virtual Environments – Vista Teleportation</title>
 <style>
@@ -166,7 +166,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#questionnaire-data" id="toc-questionnaire-data" class="nav-link" data-scroll-target="#questionnaire-data">Questionnaire data</a>
   <ul class="collapse">
   <li><a href="#gender" id="toc-gender" class="nav-link" data-scroll-target="#gender">Gender</a></li>
-  <li><a href="#simulator-sickness" id="toc-simulator-sickness" class="nav-link" data-scroll-target="#simulator-sickness">Simulator sickness</a></li>
+  <li><a href="#simulator-sickness" id="toc-simulator-sickness" class="nav-link" data-scroll-target="#simulator-sickness">Simulator sickness</a>
+  <ul class="collapse">
+  <li><a href="#vrleq" id="toc-vrleq" class="nav-link" data-scroll-target="#vrleq">VRLEQ</a></li>
+  </ul></li>
   </ul></li>
   </ul>
 </nav>
@@ -193,7 +196,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">October 14, 2025</p>
+      <p class="date">October 16, 2025</p>
     </div>
   </div>
   
@@ -230,43 +233,51 @@ The following objects are masked from 'package:tidyr':
     expand, pack, unpack</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(report)</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggeffects)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(broom)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'broom' was built under R version 4.3.3</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggeffects)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning: package 'ggeffects' was built under R version 4.3.3</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span>opts_chunk<span class="sc">$</span><span class="fu">set</span>(<span class="at">echo =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>here<span class="sc">::</span><span class="fu">i_am</span>(<span class="st">"reports/analysis.qmd"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span>opts_chunk<span class="sc">$</span><span class="fu">set</span>(<span class="at">echo =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>here<span class="sc">::</span><span class="fu">i_am</span>(<span class="st">"reports/analysis.qmd"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>here() starts at /Users/lukashejtmanek/Documents/Projects/CyberspaceLab/VistaTeleportation/vistateleportation-analysis</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"functions"</span>, <span class="st">"visualisation.R"</span>))</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>df_pointing <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"temp"</span>, <span class="st">"processed"</span>, <span class="st">"pointing20250804.csv"</span>))</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>df_distance <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"temp"</span>, <span class="st">"processed"</span>, <span class="st">"distance20250804.csv"</span>))</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>df_timing <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"temp"</span>, <span class="st">"processed"</span>, <span class="st">"timing20250804.csv"</span>))</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>df_trials <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"temp"</span>, <span class="st">"processed"</span>, <span class="st">"all_combined_trials20250822.csv"</span>))</span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>df_data <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"temp"</span>, <span class="st">"processed"</span>, <span class="st">"all_combined20250822.csv"</span>))</span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>df_trials <span class="ot">&lt;-</span> df_trials <span class="sc">%&gt;%</span></span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">LevelName =</span> <span class="fu">str_c</span>(<span class="fu">str_remove</span>(LevelName, <span class="st">"Vista|Nonvista"</span>), <span class="st">"_"</span>, LevelSize),</span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>         <span class="at">is_training =</span> target <span class="sc">==</span> <span class="st">"OriginDoor"</span>,</span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>         <span class="at">run =</span> <span class="fu">ifelse</span>(<span class="fu">grepl</span>(<span class="st">"run"</span>, participant), <span class="st">"Run2"</span>, <span class="st">"Run1"</span>),</span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>         <span class="at">pointing_duration =</span> <span class="fu">as.numeric</span>(FirstPointing_time <span class="sc">-</span> start_time))</span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>df_data <span class="ot">&lt;-</span> df_data <span class="sc">%&gt;%</span></span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">run =</span> <span class="fu">ifelse</span>(<span class="fu">grepl</span>(<span class="st">"run"</span>, participant), <span class="st">"Run2"</span>, <span class="st">"Run1"</span>))</span>
-<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>df_trials_model <span class="ot">&lt;-</span> df_trials <span class="sc">%&gt;%</span></span>
-<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span>is_training)</span>
-<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>predict_my_responses <span class="ot">&lt;-</span> <span class="cf">function</span>(model) {</span>
-<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>    dat <span class="ot">&lt;-</span> <span class="fu">predict_response</span>(model, <span class="at">terms =</span> <span class="fu">c</span>(<span class="st">"Movement"</span>, <span class="st">"Vista"</span>, <span class="st">"LevelSize"</span>), <span class="at">margin =</span> <span class="st">"empirical"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>        <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>        <span class="fu">select</span>(x, group, facet, predicted, <span class="fu">everything</span>())</span>
-<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(dat)</span>
-<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"functions"</span>, <span class="st">"visualisation.R"</span>))</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>df_pointing <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"temp"</span>, <span class="st">"processed"</span>, <span class="st">"pointing20250804.csv"</span>))</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>df_distance <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"temp"</span>, <span class="st">"processed"</span>, <span class="st">"distance20250804.csv"</span>))</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>df_timing <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"temp"</span>, <span class="st">"processed"</span>, <span class="st">"timing20250804.csv"</span>))</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>df_trials <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"temp"</span>, <span class="st">"processed"</span>, <span class="st">"all_combined_trials20250822.csv"</span>))</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>df_data <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"temp"</span>, <span class="st">"processed"</span>, <span class="st">"all_combined20250822.csv"</span>))</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>df_trials <span class="ot">&lt;-</span> df_trials <span class="sc">%&gt;%</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">LevelName =</span> <span class="fu">str_c</span>(<span class="fu">str_remove</span>(LevelName, <span class="st">"Vista|Nonvista"</span>), <span class="st">"_"</span>, LevelSize),</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>         <span class="at">is_training =</span> target <span class="sc">==</span> <span class="st">"OriginDoor"</span>,</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>         <span class="at">run =</span> <span class="fu">ifelse</span>(<span class="fu">grepl</span>(<span class="st">"run"</span>, participant), <span class="st">"Run2"</span>, <span class="st">"Run1"</span>),</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>         <span class="at">pointing_duration =</span> <span class="fu">as.numeric</span>(FirstPointing_time <span class="sc">-</span> start_time))</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>df_data <span class="ot">&lt;-</span> df_data <span class="sc">%&gt;%</span></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">run =</span> <span class="fu">ifelse</span>(<span class="fu">grepl</span>(<span class="st">"run"</span>, participant), <span class="st">"Run2"</span>, <span class="st">"Run1"</span>))</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>df_trials_model <span class="ot">&lt;-</span> df_trials <span class="sc">%&gt;%</span></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span>is_training)</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>df_questionnaires <span class="ot">&lt;-</span> df_data <span class="sc">%&gt;%</span></span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(participant, <span class="fu">starts_with</span>(<span class="st">"ssq_"</span>), <span class="fu">starts_with</span>(<span class="st">"vrsq_"</span>), <span class="fu">starts_with</span>(<span class="st">"vrleq_"</span>), Movement) <span class="sc">%&gt;%</span></span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>() </span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>predict_my_responses <span class="ot">&lt;-</span> <span class="cf">function</span>(model) {</span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>    dat <span class="ot">&lt;-</span> <span class="fu">predict_response</span>(model, <span class="at">terms =</span> <span class="fu">c</span>(<span class="st">"Movement"</span>, <span class="st">"Vista"</span>, <span class="st">"LevelSize"</span>), <span class="at">margin =</span> <span class="st">"empirical"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>        <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a>        <span class="fu">select</span>(x, group, facet, predicted, <span class="fu">everything</span>())</span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(dat)</span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <section id="descriptives" class="level2">
 <h2 class="anchored" data-anchor-id="descriptives">Descriptives</h2>
@@ -1741,8 +1752,291 @@ Number of Fisher Scoring iterations: 5</code></pre>
 </section>
 <section id="simulator-sickness" class="level2">
 <h2 class="anchored" data-anchor-id="simulator-sickness">Simulator sickness</h2>
+<div class="cell">
+<div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by 'ssq_metric'. You can override using the
+`.groups` argument.</code></pre>
+</div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 26%">
+<col style="width: 8%">
+<col style="width: 9%">
+<col style="width: 15%">
+<col style="width: 14%">
+<col style="width: 13%">
+<col style="width: 12%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">ssq_metric</th>
+<th style="text-align: right;">min</th>
+<th style="text-align: right;">max</th>
+<th style="text-align: right;">mean_OpticFlow</th>
+<th style="text-align: right;">mean_Teleport</th>
+<th style="text-align: right;">sd_OpticFlow</th>
+<th style="text-align: right;">sd_Teleport</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">ssq_avg</td>
+<td style="text-align: right;">1.0000</td>
+<td style="text-align: right;">2.6875</td>
+<td style="text-align: right;">1.490234</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">0.3620441</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ssq_avg</td>
+<td style="text-align: right;">1.0625</td>
+<td style="text-align: right;">2.1250</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">1.357422</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">0.2166427</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">ssq_desorientation</td>
+<td style="text-align: right;">7.0000</td>
+<td style="text-align: right;">21.0000</td>
+<td style="text-align: right;">10.812500</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">3.2072247</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ssq_desorientation</td>
+<td style="text-align: right;">7.0000</td>
+<td style="text-align: right;">19.0000</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">9.281250</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">2.2466373</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">ssq_desorientation_total</td>
+<td style="text-align: right;">97.4400</td>
+<td style="text-align: right;">292.3200</td>
+<td style="text-align: right;">150.510000</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">44.6445679</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ssq_desorientation_total</td>
+<td style="text-align: right;">97.4400</td>
+<td style="text-align: right;">264.4800</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">129.195000</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">31.2731908</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">ssq_nausea</td>
+<td style="text-align: right;">7.0000</td>
+<td style="text-align: right;">19.0000</td>
+<td style="text-align: right;">9.906250</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">2.5697919</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ssq_nausea</td>
+<td style="text-align: right;">7.0000</td>
+<td style="text-align: right;">13.0000</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">9.000000</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">1.4368424</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">ssq_nausea_total</td>
+<td style="text-align: right;">66.7800</td>
+<td style="text-align: right;">181.2600</td>
+<td style="text-align: right;">94.505625</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">24.5158152</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ssq_nausea_total</td>
+<td style="text-align: right;">66.7800</td>
+<td style="text-align: right;">124.0200</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">85.860000</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">13.7074767</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">ssq_oculomotor</td>
+<td style="text-align: right;">7.0000</td>
+<td style="text-align: right;">18.0000</td>
+<td style="text-align: right;">11.187500</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">3.0631788</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ssq_oculomotor</td>
+<td style="text-align: right;">7.0000</td>
+<td style="text-align: right;">16.0000</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">10.562500</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">2.3953921</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">ssq_oculomotor_total</td>
+<td style="text-align: right;">53.0600</td>
+<td style="text-align: right;">136.4400</td>
+<td style="text-align: right;">84.801250</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">23.2188955</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ssq_oculomotor_total</td>
+<td style="text-align: right;">53.0600</td>
+<td style="text-align: right;">121.2800</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">80.063750</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">18.1570720</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">ssq_sum</td>
+<td style="text-align: right;">16.0000</td>
+<td style="text-align: right;">43.0000</td>
+<td style="text-align: right;">23.843750</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">5.7927061</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ssq_sum</td>
+<td style="text-align: right;">17.0000</td>
+<td style="text-align: right;">34.0000</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">21.718750</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">3.4662835</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">ssq_total</td>
+<td style="text-align: right;">78.5400</td>
+<td style="text-align: right;">216.9200</td>
+<td style="text-align: right;">119.329375</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">29.8952481</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ssq_total</td>
+<td style="text-align: right;">82.2800</td>
+<td style="text-align: right;">164.5600</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">107.875625</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">17.9517329</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 12 × 9
+# Groups:   ssq_metric [12]
+   ssq_metric     estimate statistic p.value parameter conf.low conf.high method
+   &lt;chr&gt;             &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt; &lt;chr&gt; 
+ 1 ssq_sum           2.12       2.41 0.0219         31   0.329      3.92  Paire…
+ 2 ssq_avg           0.133      2.41 0.0219         31   0.0205     0.245 Paire…
+ 3 ssq_nausea        0.906      2.10 0.0439         31   0.0262     1.79  Paire…
+ 4 ssq_nausea_to…    8.65       2.10 0.0439         31   0.250     17.0   Paire…
+ 5 ssq_oculomotor    0.625      1.55 0.132          31  -0.198      1.45  Paire…
+ 6 ssq_oculomoto…    4.74       1.55 0.132          31  -1.50      11.0   Paire…
+ 7 ssq_desorient…    1.53       2.83 0.00805        31   0.429      2.63  Paire…
+ 8 ssq_desorient…   21.3        2.83 0.00805        31   5.97      36.7   Paire…
+ 9 ssq_total        11.5        2.47 0.0191         31   2.01      20.9   Paire…
+10 vrsq_oculomot…    0.310      1.59 0.122          31  -0.0875     0.707 Paire…
+11 vrsq_disorien…    0.875      2.20 0.0354         31   0.0640     1.69  Paire…
+12 vrsq_total        0.592      2.15 0.0397         31   0.0298     1.16  Paire…
+# ℹ 1 more variable: alternative &lt;chr&gt;</code></pre>
+</div>
+</div>
+<section id="vrleq" class="level3">
+<h3 class="anchored" data-anchor-id="vrleq">VRLEQ</h3>
+<div class="cell">
+<div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by 'vrleq_metric'. You can override using the
+`.groups` argument.</code></pre>
+</div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 10%">
+<col style="width: 12%">
+<col style="width: 11%">
+<col style="width: 10%">
+<col style="width: 9%">
+<col style="width: 11%">
+<col style="width: 10%">
+<col style="width: 11%">
+<col style="width: 10%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">vrleq_metric</th>
+<th style="text-align: right;">mean_OpticFlow</th>
+<th style="text-align: right;">mean_Teleport</th>
+<th style="text-align: right;">sd_OpticFlow</th>
+<th style="text-align: right;">sd_Teleport</th>
+<th style="text-align: right;">min_OpticFlow</th>
+<th style="text-align: right;">min_Teleport</th>
+<th style="text-align: right;">max_OpticFlow</th>
+<th style="text-align: right;">max_Teleport</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">vrleq_avg</td>
+<td style="text-align: right;">2.5625</td>
+<td style="text-align: right;">2.66875</td>
+<td style="text-align: right;">0.4930157</td>
+<td style="text-align: right;">0.6129977</td>
+<td style="text-align: right;">1.8</td>
+<td style="text-align: right;">1.5</td>
+<td style="text-align: right;">3.9</td>
+<td style="text-align: right;">4.1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">vrleq_sum</td>
+<td style="text-align: right;">25.6250</td>
+<td style="text-align: right;">26.68750</td>
+<td style="text-align: right;">4.9301574</td>
+<td style="text-align: right;">6.1299766</td>
+<td style="text-align: right;">18.0</td>
+<td style="text-align: right;">15.0</td>
+<td style="text-align: right;">39.0</td>
+<td style="text-align: right;">41.0</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 9
+# Groups:   vrleq_metric [2]
+  vrleq_metric estimate statistic p.value parameter conf.low conf.high method   
+  &lt;chr&gt;           &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt; &lt;chr&gt;    
+1 vrleq_sum      -1.06     -0.899   0.376        31   -3.47      1.35  Paired t…
+2 vrleq_avg      -0.106    -0.899   0.376        31   -0.347     0.135 Paired t…
+# ℹ 1 more variable: alternative &lt;chr&gt;</code></pre>
+</div>
+</div>
 
 
+</section>
 </section>
 </section>
 
