@@ -11,6 +11,7 @@ library(lme4)
 library(report)
 library(broom)
 library(ggeffects)
+library(performance)
 knitr::opts_chunk$set(echo = FALSE)
 
 here::i_am("reports/analysis.qmd")
@@ -25,49 +26,70 @@ df_data <- read.csv(here::here("temp", "processed", "all_combined20250822.csv"))
 
 df_trials <- df_trials %>%
   mutate(LevelName = str_c(str_remove(LevelName, "Vista|Nonvista"), "_", LevelSize),
+         Vista = factor(Vista, levels = c("Nonvista", "Vista")),
+         LevelSize = factor(LevelSize, levels = c("Small", "Large")),
          is_training = target == "OriginDoor",
          run = ifelse(grepl("run", participant), "Run2", "Run1"),
-         pointing_duration = as.numeric(FirstPointing_time - start_time))
+         pointing_duration = as.numeric(FirstPointing_time - start_time),
+         OpticFlow = factor(Movement, levels = c("Teleport", "OpticFlow"), labels = c("Without OF", "With OF")))
 
 df_data <- df_data %>%
-  mutate(run = ifelse(grepl("run", participant), "Run2", "Run1"))
+  mutate(run = ifelse(grepl("run", participant), "Run2", "Run1"),
+         Vista = factor(Vista, levels = c("Nonvista", "Vista")),
+         LevelSize = factor(LevelSize, levels = c("Small", "Large")),
+         OpticFlow = factor(Movement, levels = c("Teleport", "OpticFlow"), labels = c("Without OF", "With OF")))
   
 df_trials_model <- df_trials %>%
   filter(!is_training)
  
 df_questionnaires <- df_data %>%
-  select(participant, starts_with("ssq_"), starts_with("vrsq_"), starts_with("vrleq_"), Movement) %>%
+  select(participant, starts_with("ssq_"), starts_with("vrsq_"), starts_with("vrleq_"), Movement, Gender) %>%
+  mutate(OpticFlow = factor(Movement, levels = c("Teleport", "OpticFlow"), labels = c("Without OF", "With OF"))) %>%
   distinct() 
 
 predict_my_responses <- function(model) {
-    dat <- predict_response(model, terms = c("Movement", "Vista", "LevelSize"), margin = "empirical") %>%
+    dat <- predict_response(model, terms = c("OpticFlow", "Vista", "LevelSize"), margin = "empirical") %>%
         as.data.frame() %>%
         select(x, group, facet, predicted, everything())
     return(dat)
+}
+
+check_lmer_model <- function(model) {
+    print(check_overdispersion(model))
+    print(check_convergence(model))
+    print(check_heteroscedasticity(model))
+    print(check_homogeneity(model))
+    print(check_normality(model))
 }
 ```
 
 ## Descriptives
 
-How long it took to complete the experiment in various conditions, especially comparing the same size vista vs non-vista levels and its interaction with movement mode
+How long it took to complete the experiment in various conditions, especially comparing the same size vista vs non-vista levels and its interaction with the presence of optic flow.
+
+```{r descriptives, echo=TRUE}
+df_data %>%
+  select(participant, Age, Gender) %>%
+  distinct() %>%
+  group_by(Gender) %>%
+  summarise(mean_age = mean(Age),
+            sd_age = sd(Age),
+            min = min(Age),
+            max = max(Age),
+            n = n(),
+            .groups = "drop") 
+```
 
 ## Visualisations
 
 ```{r pointing-distance-boxplot}
-df_trials %>%
-  filter(!is_training) %>%
-  ggplot(aes(x = LevelSize, y = target_pointed_distance_difference, fill = Movement)) +
-  geom_boxplot() +
-  facet_wrap(~Vista) +
-  theme_minimal(base_size = 16) +
-  labs(title = "Pointing Distance Error by Movement Mode, Level Size, and Vista Condition",
-       y = "Pointing Distance Difference",
-       x = "Level Size")
+
 ```
 
-## Validation of the pointing data
+## Sanity checks
 
-Validation based on the origin door
+### Checking door accuracy
+Checking how accurate people were at pointing to the origin door during training trials
 
 ```{r validation-origin-door}
 df_trials %>%
@@ -83,7 +105,7 @@ df_trials %>%
   theme(legend.position = "none")
 ```
 
-Testing if the different variation of the verbal isntruction made any difference
+Testing if the different variation of the verbal instruction made any difference
 
 ```{r validation of the RUN on the origin door}
 df_trials %>%
@@ -100,23 +122,52 @@ df_trials %>%
 
 ## Pointing distance error 
 
+
 Overall analysis - do they overrshoot, undershoot?
 
 ```{r pointing-distance-histogram}
-ggplot(df_trials_model, aes(x = target_pointed_distance_difference)) +
-  geom_histogram() +
+df_trials_model %>%
+  ggplot(aes(x = LevelSize, y = target_pointed_distance_difference, fill = OpticFlow, color = OpticFlow)) +
+  geom_boxplot(alpha = 0.5) +
+  geom_jitter(position = position_jitterdodge(jitter.width = 0.2), alpha = 0.3) +
+  facet_wrap(~Vista) +
   theme_minimal(base_size = 16) +
-  labs(title = "Pointing distance error",
-       y = "Count",
-       x = "Pointing Distance Difference")
+  labs(title = "Pointing Distance Error by Optic Flow, Level Size, and Vista Condition",
+       y = "Pointing Distance Difference",
+       x = "Level Size")
 ```
 
+The model without pointing point as a predictor does not have normal residuals, so we include the target distance as a predictor to account for the fact that larger distances might lead to larger errors.
+
 ```{r lmer-pointed-distance}
-lmer_pointed_distance <- lmer(target_pointed_distance_difference ~ Movement + LevelSize + Vista + Movement:LevelSize + Movement:Vista + (1|participant),
-  data = df_trials_model)
+ggplot(aes(x = target_pointed_distance_difference), data = df_trials_model) +
+  geom_histogram() +
+  theme_minimal() +
+  labs(title = "Pointing Distance Error",
+       y = "Count",
+       x = "Pointing Distance Difference")
+levels(df_trials_model$Vista)
+
+lmer_pointed_distance <- df_trials_model %>%
+  mutate(z_target_pointed_distance_difference = abs(scale(target_pointed_distance_difference))) %>%
+  #mutate(OpticFlow = as.character(OpticFlow)) %>%
+  filter(z_target_pointed_distance_difference < 3) %>%
+  lmer(target_pointed_distance_difference ~ OpticFlow + LevelSize + Vista + OpticFlow:LevelSize + OpticFlow:Vista + scale(pointingpoint_target_distance) + (1|participant),
+  data = .)
+
+lmer_pointed_distance_noof <- df_trials_model %>%
+  mutate(z_target_pointed_distance_difference = abs(scale(target_pointed_distance_difference))) %>%
+  #mutate(OpticFlow = as.character(OpticFlow)) %>%
+  filter(z_target_pointed_distance_difference < 3) %>%
+  lmer(target_pointed_distance_difference ~  + LevelSize + Vista + scale(pointingpoint_target_distance) + (1|participant), data = .)
+ 
+anova(lmer_pointed_distance, lmer_pointed_distance_noof)
 
 # Check for singularity
 summary(lmer_pointed_distance)
+check_lmer_model(lmer_pointed_distance)
+plot(check_heteroscedasticity(lmer_pointed_distance))
+plot(check_homogeneity(lmer_pointed_distance))
 
 report_table(lmer_pointed_distance) %>%
     knitr::kable()
@@ -127,10 +178,6 @@ predict_my_responses(lmer_pointed_distance) %>%
   knitr::kable()
 ```
 
-Importantly, the vista is not a significant predictor on its own, but it inteacts with both movement and vista spaces. People overall overshoot the target in small levels by about 3 virtual meters. 
-
-While on its own, the movement mode does not significantly affect the pointing distance error, it interacts with both the vista condition and the level size. The marginal effects show the Teleportation leading to higher distaces
-
 ```{r vista-effect-plot}
 ggpredict(lmer_pointed_distance, terms = "Vista") %>%
   plot() +
@@ -140,46 +187,62 @@ ggpredict(lmer_pointed_distance, terms = "Vista") %>%
        x = "Vista")
 ```
 
-### Relative distance error
-A relative measure to account for the fact that larger distances might lead to larger absolute errors
-
-```{r lmer-relative-distance}
-lmer_pointed_relative_distance <- df_trials_model %>%
-  mutate(target_pointed_distance_difference_relative = pointingpoint_pointed_distance / pointingpoint_target_distance) %>%
-  lmer(target_pointed_distance_difference_relative ~ Movement + LevelSize + Vista + Movement:Vista + Movement:LevelSize + (1|participant), data = .)
-
-report_table(lmer_pointed_relative_distance) %>%
-    knitr::kable()
-```
-
-```{r lmer-relative-distance-predictions}
-predict_my_responses(lmer_pointed_relative_distance) %>%
-  knitr::kable()
-```
-
-We can observe that the relative distance error is also affected by the same factors as the absolute distance error, and in the same directions, but only the level size becomes a significant predictor. 
-
 ## Pointing angle error
 
 ```{r angle-error-histogram}
 df_trials_model %>%
-  ggplot(aes(x = log(abs(pointed_angle_difference)))) +
-  geom_histogram() +
+    ggplot() +
+  geom_histogram(aes(x = log(abs(pointed_angle_difference)))) +
   theme_minimal() +
-  labs(title = "Absolute Angle Error",
+  labs(title = "Absolute Angle Error Log-Transformed",
        y = "Count",
        x = "Angle Error")
 ```
 
-```{r glmer-angle-error}
+This is all fucked up :D Coding this without contrasts leads to bunch of issues and instability of the model due to math things I do not understand. It is necessary to set the treatment contrasts manually to get stable results.
+
+```{r glmer-angle-error constrasts}
+contrasts(df_trials_model$OpticFlow) <- c(0, 1)
+contrasts(df_trials_model$LevelSize) <- c(0, 1)
+contrasts(df_trials_model$Vista) <- c(0, 1)
+```
+
+```{r glmer-pointed-angle}
 lmer_pointed_angle <- df_trials_model %>%
   mutate(abs_pointed_angle_difference = abs(pointed_angle_difference)) %>%
-  glmer(abs_pointed_angle_difference ~ Movement + LevelSize + Vista + Movement:LevelSize + Movement:Vista + (1|participant),
-        data = ., family = gaussian(link = "log"))
+  #mutate(OpticFlow = as.character(OpticFlow)) %>%
+  filter(abs_pointed_angle_difference > 0) %>%
+  # glmer(abs_pointed_angle_difference ~ Movement + LevelSize + Vista + Movement:LevelSize + Movement:Vista + (1|participant), data = ., family = gaussian(link = "log"))
+  glmer(abs_pointed_angle_difference ~ OpticFlow + LevelSize + Vista + OpticFlow:LevelSize + OpticFlow:Vista + (1|participant), data = ., family = Gamma(link = "log"))
 
+check_lmer_model(lmer_pointed_angle)
+simulate_residuals(lmer_pointed_angle) %>%
+  plot()
+check_residuals(simulate_residuals(lmer_pointed_angle))
+plot(check_homogeneity(lmer_pointed_angle))
+report_table(lmer_pointed_angle) %>%
+    knitr::kable()
+
+lmer_pointed_angle_noof <- df_trials_model %>%
+  mutate(abs_pointed_angle_difference = abs(pointed_angle_difference)) %>%
+  #mutate(OpticFlow = as.character(OpticFlow)) %>%
+  filter(abs_pointed_angle_difference > 0) %>%
+  # glmer(abs_pointed_angle_difference ~ Movement + LevelSize + Vista + Movement:LevelSize + Movement:Vista + (1|participant), data = ., family = gaussian(link = "log"))
+  glmer(abs_pointed_angle_difference ~ LevelSize + Vista + OpticFlow:LevelSize + (1|participant), data = ., family = Gamma(link = "log"))
+
+anova(lmer_pointed_angle, lmer_pointed_angle_noof)
 summary(lmer_pointed_angle)
+```
+
+we can see that the model including optic flow is not significantly better than the model without it and adding that infromation does not help explain the variance in angle error.
+
+```{r lmer-pointed-angle-predictions}
 predict_my_responses(lmer_pointed_angle) %>%
   knitr::kable()
+
+predict_response(lmer_pointed_angle, terms = c("Vista"), margin = "empirical")
+predict_response(lmer_pointed_angle, terms = c("LevelSize"), margin = "empirical")
+predict_response(lmer_pointed_angle, terms = c("OpticFlow"), margin = "empirical")
 ```
 
 We can see that the angle error was affected by the size of the environment, with larger environments leading to larger errors. However, there was no significant effect of movement mode or vista condition on angle error.
@@ -199,7 +262,7 @@ ggplot(df_trials_model, aes(x = log(pointing_duration), fill=Movement)) +
 lmer_point_duration <- glmer(pointing_duration ~ Movement + LevelSize + Vista + Movement:LevelSize + Movement:Vista + (1|participant),
   data = df_trials_model, family = gaussian(link = "log"))
 summary(lmer_point_duration)
-
+check_model(lmer_point_duration)
 predict_my_responses(lmer_point_duration) %>%
   knitr::kable()
 ```
@@ -214,8 +277,11 @@ ggplot(df_data) +
        x = "Navigated Duration",
        y = "Count")
 
-glm_distance <- glm((distance_items + distance_return) ~ Movement + Vista + LevelSize + Movement:Vista + Movement:LevelSize,
-  data = df_data, family = gaussian(link = "log"))
+x <- glmer((distance_items + distance_return) ~ Movement + LevelSize + Vista + Movement:Vista + Movement:LevelSize + (1|participant), 
+    data = df_data, family = Gamma(link = "log"))
+
+glm_distance <- glm((distance_items + distance_return) ~ OpticFlow + Vista + LevelSize + OpticFlow:Vista + OpticFlow:LevelSize,
+  data = df_data, family = Gamma(link = "log"))
 summary(glm_distance)
 
 predict_my_responses(glm_distance) %>%
@@ -227,7 +293,7 @@ Movement did not significantly affect the distance travelled, but vista spaces l
 ## Navigated duration
 
 ```{r search-duration-histogram}
-ggplot(df_data, aes(x = log(duration_searching), fill = Movement)) +
+ggplot(df_data, aes(x = log(duration_searching), fill = OpticFlow)) +
   geom_histogram(bins = 30) +
   theme_minimal() +
   labs(title = "Distribution of Search Duration (log-transformed)",
@@ -236,8 +302,8 @@ ggplot(df_data, aes(x = log(duration_searching), fill = Movement)) +
 ```
 
 ```{r glm-duration-analysis}
-glm_duration <- glm((duration_return + duration_searching) ~ Movement + Vista + LevelSize + Movement:Vista + Movement:LevelSize,
-    data = df_data, family = gaussian(link = "log"))
+glm_duration <- glm((duration_return + duration_searching) ~ OpticFlow + Vista + LevelSize + OpticFlow:Vista + OpticFlow:LevelSize,
+    data = df_data, family = Gamma(link = "log"))
 summary(glm_duration)
 
 predict_my_responses(glm_duration) %>%
@@ -249,6 +315,12 @@ while the movement method did affect the navigated duration when considered on i
 # Questionnaire data
 
 ## Gender
+```{r}
+ggplot(df_trials_model, aes(Gender, pointing_duration)) +
+  geom_boxplot() +
+  theme_minimal() +
+  labs(title = "Pointing Duration by Gender")
+```
 
 ## Simulator sickness
 ```{r ssq descriptives}
@@ -257,9 +329,8 @@ df_questionnaires %>%
   pivot_longer(cols = -Movement, names_to = "ssq_metric", values_to = "value") %>%
   group_by(ssq_metric, Movement) %>%
   summarize(mean = mean(value, na.rm = TRUE),
-            sd = sd(value, na.rm = TRUE),
-            min = min(value, na.rm = TRUE),
-            max = max(value, na.rm = TRUE)) %>%
+            sd = sd(value, na.rm = TRUE)) %>%
+    ungroup() %>%
   pivot_wider(names_from = Movement, values_from = c(mean, sd)) %>%
   knitr::kable()
 

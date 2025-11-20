@@ -10,3 +10,5 @@ temp/
 *.csv
 
 /.quarto/
+
+_site/
