@@ -9,6 +9,8 @@ drive_download(file = as_id("1pgQyD39k5KPln4wkyJXhH5215Krmq5Mb"),
                path = file.path("temp", "run1_survey_vistateleport.csv"))
 drive_download(file = as_id("1pHEZzkKUFpZYzUsPc7N4YinztXeFdmIM"),
                path = file.path("temp", "run2_survey_vistateleport.json"))
+drive_download(file = as_id("1RDxa_thQu_3cT1leYUMmBk30fb5oonZR"),
+               path = file.path("temp", "run3_survey_vistateleport.json"))
 
 # Load the position information
 positions_sheet <- "18mrx8kSpGEbWkHkKVoYaUkAHyi1bZZVgaL7mDlRHkbc"
