@@ -53,12 +53,14 @@ opticflow_vrleq <- surveys_run2$surveys$VRLEQOF$data %>%
   mutate(Movement = "OpticFlow") %>%
   pivot_longer(cols = -c(ID, Movement), names_to = "score", values_to = "value")
 
+df_surveys_run2 <- bind_rows(teleport_ssq, opticflow_ssq, teleport_vrleq, opticflow_vrleq) %>%
+  pivot_wider(id_cols = c(ID, Movement),
+              names_from = score, values_from = value)
+
 ## Demography
-df_demog <- surveys_run2$surveys$VTDG$data %>%
+df_demog_run2 <- surveys_run2$surveys$VTDG$data %>%
   fix_olivers_mistake() %>%
   select(ID = participant, Age = question2, Gender = question1) %>%
   # recode question 1 so that Item 2 = Male and Item 3 = Female
   mutate(Gender = recode(Gender, "Item 1" = "Muž", "Item 2" = "Žena", "Item 3" = "Jiné"),
-         Age = as.numeric(Age)) %>%
-  bind_rows(select(df_questionnaire, ID, Age, Gender)) %>%
-  distinct()
+         Age = as.numeric(Age))

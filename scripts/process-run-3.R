@@ -1,66 +1,46 @@
+library(dplyr)
+library(tidyr)
+
 surveys_run3 <- jsonlite::fromJSON("temp/run3_survey_vistateleport.json")
-str((surveys_run3))
-View(surveys_run3$surveyInstances$surveyDetails)
 surveys_run3 <- organize_psychotron_data(surveys_run3)
 surveys_run3 <- split_participant_email(surveys_run3)
 
-fix_olivers_mistake <- function(df_tab) {
-  fixed <- df_tab %>%
-    filter(!grepl("test", participant, ignore.case = TRUE)) %>%
-    arrange(completedAt) %>%
-    mutate(participant = case_when(
-      row_number() <= 3 & participant == "run1_1" ~ paste0("run1_", row_number()),
-      TRUE ~ participant
-    ))
-  return(fixed)
+run3_ssq <- function(ssq_data, movement_type) {
+  res <- ssq_data %>%
+    mutate(across(starts_with("SSQ"),
+                  ~as.numeric(str_remove(., "item")))) %>%
+    rename_with(~paste0("question", seq_along(.)), starts_with("SSQ")) %>%
+    process_ssq() %>%
+    select(ID = participant, starts_with(c("ssq_"))) %>%
+    mutate(Movement = movement_type) %>%
+    pivot_longer(cols = -c(ID, Movement), names_to = "score", values_to = "value")
+  return(res)
 }
 
-## the question order is 1 18 2 4 5 ... and then regularly to 16
-teleport_ssq <- surveys_run2$surveys$SSQT$data %>%
-  fix_olivers_mistake() %>%
-  rename(question3 = question2, question2 = question18) %>%
-  mutate(across(starts_with("question"),
-                ~as.numeric(str_remove(., "item")))) %>%
-  process_ssq() %>%
-  select(ID = participant, starts_with(c("ssq_", "vrsq_"))) %>%
-  mutate(Movement = "Teleport") %>%
-  pivot_longer(cols = -c(ID, Movement), names_to = "score", values_to = "value")
+teleport_ssq <- run3_ssq(surveys_run3$surveys$SSQ_TELEPORT$data, "Teleport")
+opticflow_ssq <- run3_ssq(surveys_run3$surveys$SSQ_OPTIC$data, "OpticFlow")
 
-opticflow_ssq <- surveys_run2$surveys$SSQ_OF$data %>%
-  fix_olivers_mistake() %>%
-  rename(question3 = question2, question2 = question18) %>%
-  mutate(across(starts_with("question"),
-                ~as.numeric(str_remove(., "item")))) %>%
-  process_ssq() %>%
-  select(ID = participant, starts_with(c("ssq_", "vrsq_"))) %>%
-  mutate(Movement = "OpticFlow") %>%
-  pivot_longer(cols = -c(ID, Movement), names_to = "score", values_to = "value")
+run3_vrleq <- function(vrleq_data, movement_type) {
+  res <- vrleq_data %>%
+    rename_with(~paste0("question", seq_along(.)), starts_with("VRLEQ")) %>%
+    select(ID = participant, starts_with("question")) %>%
+    process_vrleq() %>%
+    select(ID, starts_with("vrleq_")) %>%
+    mutate(Movement = movement_type) %>%
+    pivot_longer(cols = -c(ID, Movement), names_to = "score", values_to = "value")
+  return(res)
+}
 
-## VRLQ - použít otázky 17-26
-teleport_vrleq <- surveys_run2$surveys$VRLEQT$data %>%
-  fix_olivers_mistake() %>%
-  select(ID = participant, num_range("question", 17:26)) %>%
-  rename_with(~paste0("question", seq_along(.)), starts_with("question")) %>%
-  process_vrleq() %>%
-  select(ID, starts_with("vrleq_")) %>%
-  mutate(Movement = "Teleport") %>%
-  pivot_longer(cols = -c(ID, Movement), names_to = "score", values_to = "value")
+teleport_vrleq <- run3_vrleq(surveys_run3$surveys$VRLEQ_TELEPORT$data, "Teleport")
+opticflow_vrleq <- run3_vrleq(surveys_run3$surveys$VRLEQ_OPTIC$data, "OpticFlow")
 
-opticflow_vrleq <- surveys_run2$surveys$VRLEQOF$data %>%
-  fix_olivers_mistake() %>%
-  select(ID = participant, num_range("question", 17:26)) %>%
-  rename_with(~paste0("question", seq_along(.)), starts_with("question")) %>%
-  process_vrleq() %>%
-  select(ID, starts_with("vrleq_")) %>%
-  mutate(Movement = "OpticFlow") %>%
-  pivot_longer(cols = -c(ID, Movement), names_to = "score", values_to = "value")
+df_surveys_run3 <- bind_rows(teleport_ssq, opticflow_ssq, teleport_vrleq, opticflow_vrleq) %>%
+  pivot_wider(id_cols = c(ID, Movement),
+              names_from = score, values_from = value)
 
-## Demography
-df_demog <- surveys_run2$surveys$VTDG$data %>%
-  fix_olivers_mistake() %>%
+## Demography -------------------------------------------------
+df_demog_run3 <- surveys_run3$surveys$Vista_demography$data %>%
   select(ID = participant, Age = question2, Gender = question1) %>%
   # recode question 1 so that Item 2 = Male and Item 3 = Female
   mutate(Gender = recode(Gender, "Item 1" = "Muž", "Item 2" = "Žena", "Item 3" = "Jiné"),
-         Age = as.numeric(Age)) %>%
-  bind_rows(select(df_questionnaire, ID, Age, Gender)) %>%
-  distinct()
+         Age = as.numeric(Age))

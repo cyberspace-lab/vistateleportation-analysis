@@ -1,5 +1,4 @@
 library(stringr)
-library(navr)
 library(cyberframer)
 library(ggplot2)
 library(dplyr)
@@ -36,10 +35,12 @@ source("scripts/process-run-2.R")
 source("scripts/process-run-3.R")
 
 ## Merge all surveys ---------------------------------------------
-df_surveys_run2 <- bind_rows(teleport_ssq, opticflow_ssq, teleport_vrleq, opticflow_vrleq) %>%
-  pivot_wider(id_cols = c(ID, Movement),
-              names_from = score, values_from = value)
-df_surveys <- bind_rows(df_surveys_run1, df_surveys_run2) %>%
+df_demog <- bind_rows(select(df_questionnaire, ID, Age, Gender),
+                      df_demog_run2,
+                      df_demog_run3) %>%
+  distinct()
+
+df_surveys <- bind_rows(df_surveys_run1, df_surveys_run2, df_surveys_run3) %>%
   left_join(df_demog, by = "ID")
 
 ## Merging all data ------------------------------------------------
