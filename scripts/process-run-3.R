@@ -11,7 +11,7 @@ run3_ssq <- function(ssq_data, movement_type) {
                   ~as.numeric(str_remove(., "item")))) %>%
     rename_with(~paste0("question", seq_along(.)), starts_with("SSQ")) %>%
     process_ssq() %>%
-    select(ID = participant, starts_with(c("ssq_"))) %>%
+    select(ID = participant, starts_with(c("ssq_", "vrsq_"))) %>%
     mutate(Movement = movement_type) %>%
     pivot_longer(cols = -c(ID, Movement), names_to = "score", values_to = "value")
   return(res)
@@ -33,8 +33,8 @@ run3_vrleq <- function(vrleq_data, movement_type) {
 
 teleport_vrleq <- run3_vrleq(surveys_run3$surveys$VRLEQ_TELEPORT$data, "Teleport")
 opticflow_vrleq <- run3_vrleq(surveys_run3$surveys$VRLEQ_OPTIC$data, "OpticFlow")
-
-df_surveys_run3 <- bind_rows(teleport_ssq, opticflow_ssq, teleport_vrleq, opticflow_vrleq) %>%
+df_surveys_run3 <- bind_rows(teleport_ssq, opticflow_ssq,
+                             teleport_vrleq, opticflow_vrleq) %>%
   pivot_wider(id_cols = c(ID, Movement),
               names_from = score, values_from = value)
 
