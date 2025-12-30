@@ -24,18 +24,21 @@ df_timing <- read.csv(here::here("temp", "processed", "timing20251223.csv"))
 
 df_trials <- read.csv(here::here("temp", "processed", "all_combined_trials20251223.csv"))
 df_data <- read.csv(here::here("temp", "processed", "all_combined20251223.csv"))
+str(df_trials)
 
 df_trials <- df_trials %>%
   mutate(LevelName = str_c(str_remove(LevelName, "Vista|Nonvista"), "_", LevelSize),
          Vista = factor(Vista, levels = c("Nonvista", "Vista")),
          LevelSize = factor(LevelSize, levels = c("Small", "Large")),
          is_training = target == "OriginDoor",
-         run = ifelse(grepl("run", participant), "Run2", "Run1"),
+         run = gsub("VT", "run2_", participant),
+         run = gsub("_.*", "", run),
          pointing_duration = as.numeric(FirstPointing_time - start_time),
          OpticFlow = factor(Movement, levels = c("Teleport", "OpticFlow"), labels = c("Without OF", "With OF")))
 
 df_data <- df_data %>%
-  mutate(run = ifelse(grepl("run", participant), "Run2", "Run1"),
+  mutate(run = gsub("VT", "run2_", participant),
+         run = gsub("_.*", "", run),
          Vista = factor(Vista, levels = c("Nonvista", "Vista")),
          LevelSize = factor(LevelSize, levels = c("Small", "Large")),
          OpticFlow = factor(Movement, levels = c("Teleport", "OpticFlow"), labels = c("Without OF", "With OF")))
