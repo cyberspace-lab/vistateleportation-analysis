@@ -2,7 +2,6 @@ project:
   type: website
   render:
     - reports/analysis.qmd
-    - reports/vrsummit.qmd
 
 website:
   title: "Vista Teleportation"
@@ -10,8 +9,6 @@ website:
     left:
       - href: reports/analysis.qmd
         text: Analysis
-      - href: reports/vrsummit.qmd
-        text: VR Summit
 
 format:
   html:

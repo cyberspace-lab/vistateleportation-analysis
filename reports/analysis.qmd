@@ -11,18 +11,19 @@ library(lme4)
 library(report)
 library(broom)
 library(ggeffects)
+library(marginaleffects)
 library(performance)
 knitr::opts_chunk$set(echo = FALSE)
 
 here::i_am("reports/analysis.qmd")
 source(here::here("functions", "visualisation.R"))
 
-df_pointing <- read.csv(here::here("temp", "processed", "pointing20250804.csv"))
-df_distance <- read.csv(here::here("temp", "processed", "distance20250804.csv"))
-df_timing <- read.csv(here::here("temp", "processed", "timing20250804.csv"))
+df_pointing <- read.csv(here::here("temp", "processed", "pointing20251223.csv"))
+df_distance <- read.csv(here::here("temp", "processed", "distance20251223.csv"))
+df_timing <- read.csv(here::here("temp", "processed", "timing20251223.csv"))
 
-df_trials <- read.csv(here::here("temp", "processed", "all_combined_trials20250822.csv"))
-df_data <- read.csv(here::here("temp", "processed", "all_combined20250822.csv"))
+df_trials <- read.csv(here::here("temp", "processed", "all_combined_trials20251223.csv"))
+df_data <- read.csv(here::here("temp", "processed", "all_combined20251223.csv"))
 
 df_trials <- df_trials %>%
   mutate(LevelName = str_c(str_remove(LevelName, "Vista|Nonvista"), "_", LevelSize),
@@ -122,7 +123,6 @@ df_trials %>%
 
 ## Pointing distance error 
 
-
 Overall analysis - do they overrshoot, undershoot?
 
 ```{r pointing-distance-histogram}
@@ -210,9 +210,7 @@ contrasts(df_trials_model$Vista) <- c(0, 1)
 ```{r glmer-pointed-angle}
 lmer_pointed_angle <- df_trials_model %>%
   mutate(abs_pointed_angle_difference = abs(pointed_angle_difference)) %>%
-  #mutate(OpticFlow = as.character(OpticFlow)) %>%
   filter(abs_pointed_angle_difference > 0) %>%
-  # glmer(abs_pointed_angle_difference ~ Movement + LevelSize + Vista + Movement:LevelSize + Movement:Vista + (1|participant), data = ., family = gaussian(link = "log"))
   glmer(abs_pointed_angle_difference ~ OpticFlow + LevelSize + Vista + OpticFlow:LevelSize + OpticFlow:Vista + (1|participant), data = ., family = Gamma(link = "log"))
 
 check_lmer_model(lmer_pointed_angle)
@@ -225,9 +223,7 @@ report_table(lmer_pointed_angle) %>%
 
 lmer_pointed_angle_noof <- df_trials_model %>%
   mutate(abs_pointed_angle_difference = abs(pointed_angle_difference)) %>%
-  #mutate(OpticFlow = as.character(OpticFlow)) %>%
   filter(abs_pointed_angle_difference > 0) %>%
-  # glmer(abs_pointed_angle_difference ~ Movement + LevelSize + Vista + Movement:LevelSize + Movement:Vista + (1|participant), data = ., family = gaussian(link = "log"))
   glmer(abs_pointed_angle_difference ~ LevelSize + Vista + OpticFlow:LevelSize + (1|participant), data = ., family = Gamma(link = "log"))
 
 anova(lmer_pointed_angle, lmer_pointed_angle_noof)
@@ -263,8 +259,9 @@ lmer_point_duration <- glmer(pointing_duration ~ Movement + LevelSize + Vista + 
   data = df_trials_model, family = gaussian(link = "log"))
 summary(lmer_point_duration)
 check_model(lmer_point_duration)
-predict_my_responses(lmer_point_duration) %>%
-  knitr::kable()
+
+#predict_my_responses(lmer_point_duration) %>%
+#  knitr::kable()
 ```
 
 ## Navigated distance
@@ -323,6 +320,7 @@ ggplot(df_trials_model, aes(Gender, pointing_duration)) +
 ```
 
 ## Simulator sickness
+
 ```{r ssq descriptives}
 df_questionnaires %>%
   select(starts_with("ssq_"), Movement) %>%
