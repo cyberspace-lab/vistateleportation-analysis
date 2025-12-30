@@ -35,7 +35,7 @@ source("scripts/process-run-2.R")
 source("scripts/process-run-3.R")
 
 ## Merge all surveys ---------------------------------------------
-df_demog <- bind_rows(select(df_questionnaire, ID, Age, Gender),
+df_demog <- bind_rows(df_demog_run1,
                       df_demog_run2,
                       df_demog_run3) %>%
   distinct()

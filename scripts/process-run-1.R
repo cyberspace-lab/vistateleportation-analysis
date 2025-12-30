@@ -1,5 +1,6 @@
 ### Read questionnaire
 df_questionnaire <- read.csv("temp/run1_survey_vistateleport.csv", sep = ";")
+
 question_keys <- c("Vůbec" = 1, "Mírně" = 2, "Středně" = 3, "Velmi" = 4)
 question_keys2 <- c("Rozhodně souhlasím" = 1, "Spíše souhlasím" = 2,
                     "Ani souhlasím, ani nesouhlasím" = 3,
@@ -76,5 +77,10 @@ df_surveys_run1 <-
   bind_rows(df_ssq1_long, df_ssq2_long, df_vrleq1_long, df_vrleq2_long) %>%
   pivot_wider(id_cols = c(ID, Movement),
               names_from = score, values_from = value)
+
+df_demog_run1 <- df_questionnaire %>%
+  select(ID, Age, Gender) %>%
+  mutate(Gender = recode(Gender, "Muž" = "Male", "Žena" = "Female", "Jiné" = "Other"),
+         Age = as.numeric(Age))  
 
 write.csv(df_surveys_run1, "temp/processed/questionnaire_summaries_run1.csv")

@@ -62,5 +62,5 @@ df_demog_run2 <- surveys_run2$surveys$VTDG$data %>%
   fix_olivers_mistake() %>%
   select(ID = participant, Age = question2, Gender = question1) %>%
   # recode question 1 so that Item 2 = Male and Item 3 = Female
-  mutate(Gender = recode(Gender, "Item 1" = "Muž", "Item 2" = "Žena", "Item 3" = "Jiné"),
+  mutate(Gender = recode(Gender, "Item 1" = "Male", "Item 2" = "Female", "Item 3" = "Other"),
          Age = as.numeric(Age))
