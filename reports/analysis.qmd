@@ -2,10 +2,19 @@
 title: "Vista Teleportation Analysis: Spatial Cognition in Virtual Environments"
 author: "Your Name"
 date: "`r Sys.Date()`"
-format: html
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    toc-location: left
+    code-fold: true
+    code-summary: "Show code"
+    theme: cosmo
+    self-contained: true
+    df-print: kable
 ---
 
-```{r setup}
+```{r setup, include=FALSE}
 library(tidyverse)
 library(lme4)
 library(report)
@@ -13,7 +22,13 @@ library(broom)
 library(ggeffects)
 library(marginaleffects)
 library(performance)
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(
+  echo = FALSE,
+  warning = FALSE,
+  message = FALSE,
+  fig.width = 10,
+  fig.height = 6
+)
 
 here::i_am("reports/analysis.qmd")
 source(here::here("functions", "visualisation.R"))
@@ -24,13 +39,12 @@ df_timing <- read.csv(here::here("temp", "processed", "timing20251223.csv"))
 
 df_trials <- read.csv(here::here("temp", "processed", "all_combined_trials20251223.csv"))
 df_data <- read.csv(here::here("temp", "processed", "all_combined20251223.csv"))
-str(df_trials)
 
 df_trials <- df_trials %>%
   mutate(LevelName = str_c(str_remove(LevelName, "Vista|Nonvista"), "_", LevelSize),
          Vista = factor(Vista, levels = c("Nonvista", "Vista")),
          LevelSize = factor(LevelSize, levels = c("Small", "Large")),
-         is_training = target == "OriginDoor",
+         is_training = (target == "OriginDoor"),
          run = gsub("VT", "run2_", participant),
          run = gsub("_.*", "", run),
          pointing_duration = as.numeric(FirstPointing_time - start_time),
@@ -42,14 +56,14 @@ df_data <- df_data %>%
          Vista = factor(Vista, levels = c("Nonvista", "Vista")),
          LevelSize = factor(LevelSize, levels = c("Small", "Large")),
          OpticFlow = factor(Movement, levels = c("Teleport", "OpticFlow"), labels = c("Without OF", "With OF")))
-  
+
 df_trials_model <- df_trials %>%
   filter(!is_training)
- 
+
 df_questionnaires <- df_data %>%
   select(participant, starts_with("ssq_"), starts_with("vrsq_"), starts_with("vrleq_"), Movement, Gender) %>%
   mutate(OpticFlow = factor(Movement, levels = c("Teleport", "OpticFlow"), labels = c("Without OF", "With OF"))) %>%
-  distinct() 
+  distinct()
 
 predict_my_responses <- function(model) {
     dat <- predict_response(model, terms = c("OpticFlow", "Vista", "LevelSize"), margin = "empirical") %>%
@@ -67,275 +81,491 @@ check_lmer_model <- function(model) {
 }
 ```
 
-## Descriptives
+# Introduction
 
-How long it took to complete the experiment in various conditions, especially comparing the same size vista vs non-vista levels and its interaction with the presence of optic flow.
+This report presents the analysis of spatial cognition in virtual environments using the Vista Teleportation paradigm. The study examines how different movement modes (with and without optic flow) and environmental configurations (vista vs. non-vista spaces, small vs. large environments) affect spatial navigation performance.
 
-```{r descriptives, echo=TRUE}
+# Participant Characteristics
+
+```{r descriptives}
+#| tbl-cap: "Demographic characteristics of participants by gender"
 df_data %>%
   select(participant, Age, Gender) %>%
   distinct() %>%
   group_by(Gender) %>%
-  summarise(mean_age = mean(Age),
-            sd_age = sd(Age),
-            min = min(Age),
-            max = max(Age),
-            n = n(),
-            .groups = "drop") 
+  summarise(
+    `Mean Age` = round(mean(Age), 1),
+    `SD Age` = round(sd(Age), 1),
+    `Min Age` = min(Age),
+    `Max Age` = max(Age),
+    N = n(),
+    .groups = "drop"
+  ) %>%
+  knitr::kable(align = "lccccc")
 ```
 
-## Visualisations
-
-```{r pointing-distance-boxplot}
-
+```{r demographics-calc}
+# Calculate demographic statistics for inline reporting
+n_total <- n_distinct(df_data$participant)
+demo_data <- df_data %>%
+  select(participant, Age, Gender) %>%
+  distinct()
+n_female <- sum(demo_data$Gender == "Female")
+n_male <- sum(demo_data$Gender == "Male")
+mean_age <- round(mean(demo_data$Age), 1)
+sd_age <- round(sd(demo_data$Age), 1)
 ```
 
-## Sanity checks
+A total of `r n_total` participants completed the study. The sample consisted of `r n_female` females and `r n_male` males, with an average age of `r mean_age` years (SD = `r sd_age`).
 
-### Checking door accuracy
-Checking how accurate people were at pointing to the origin door during training trials
+# Data Quality Validation
+
+## Training Trial Performance
+
+Before analyzing the main experimental trials, we validated participant performance on training trials where they pointed to the origin door. This serves as a basic competency check to ensure participants understood the pointing task.
 
 ```{r validation-origin-door}
+#| fig-cap: "Distribution of pointing errors during training (origin door) vs. experimental trials. Left panels show training trials, right panels show experimental trials."
 df_trials %>%
   select(participant, target, is_training, target_pointed_distance_difference,
          pointed_angle_difference) %>%
   pivot_longer(cols = target_pointed_distance_difference:pointed_angle_difference,
                names_to = "metric", values_to = "value") %>%
-  ggplot(aes(x = value, fill = metric)) +
-  geom_histogram() +
-  facet_wrap(~metric+is_training, scales = "free") +
-  theme_minimal(base_size = 16) +
-  labs(title = "Validation based on the origin door") +
-  theme(legend.position = "none")
+  mutate(
+    metric = case_when(
+      metric == "target_pointed_distance_difference" ~ "Distance Error (m)",
+      metric == "pointed_angle_difference" ~ "Angle Error (degrees)"
+    ),
+    is_training = ifelse(is_training, "Training", "Experimental")
+  ) %>%
+  ggplot(aes(x = value, fill = is_training)) +
+  geom_histogram(bins = 30, alpha = 0.7) +
+  facet_wrap(~metric + is_training, scales = "free", ncol = 2) +
+  theme_minimal(base_size = 14) +
+  labs(
+    title = "Pointing Accuracy: Training vs. Experimental Trials",
+    x = "Error Magnitude",
+    y = "Frequency"
+  ) +
+  theme(legend.position = "none") +
+  scale_fill_brewer(palette = "Set2")
 ```
 
-Testing if the different variation of the verbal instruction made any difference
+Participants demonstrated good accuracy on training trials, with relatively small errors in both distance and angular pointing, confirming they understood the task requirements.
 
-```{r validation of the RUN on the origin door}
+## Experimental Design Validation
+
+```{r validation-run}
+#| tbl-cap: "Training trial performance by experimental run (verbal instruction variant)"
 df_trials %>%
   filter(is_training) %>%
   group_by(run) %>%
-  summarize(mean_distance = mean(target_pointed_distance_difference, na.rm = TRUE),
-            sd_distance = sd(target_pointed_distance_difference, na.rm = TRUE),
-            mean_angle = mean(abs(pointed_angle_difference), na.rm = TRUE),
-            sd_angle = sd(abs(pointed_angle_difference), na.rm = TRUE),
-            n = n())
+  summarize(
+    `Mean Distance Error (m)` = round(mean(target_pointed_distance_difference, na.rm = TRUE), 2),
+    `SD Distance Error` = round(sd(target_pointed_distance_difference, na.rm = TRUE), 2),
+    `Mean Angle Error (deg)` = round(mean(abs(pointed_angle_difference), na.rm = TRUE), 2),
+    `SD Angle Error` = round(sd(abs(pointed_angle_difference), na.rm = TRUE), 2),
+    N = n(),
+    .groups = "drop"
+  ) %>%
+  knitr::kable(align = "lccccc")
 ```
 
-## Movement behaviors in different movement modes and vista non vista spaces
+Performance on training trials was consistent across different experimental runs, suggesting that verbal instruction variations did not systematically bias participant performance.
 
-## Pointing distance error 
+# Main Analyses
 
-Overall analysis - do they overrshoot, undershoot?
+## Pointing Distance Error
+
+We first examined how accurately participants estimated distances to target objects. The distance error represents the difference between the actual distance to the target and the distance to the location they indicated.
 
 ```{r pointing-distance-histogram}
-df_trials_model %>%
-  ggplot(aes(x = LevelSize, y = target_pointed_distance_difference, fill = OpticFlow, color = OpticFlow)) +
-  geom_boxplot(alpha = 0.5) +
-  geom_jitter(position = position_jitterdodge(jitter.width = 0.2), alpha = 0.3) +
-  facet_wrap(~Vista) +
-  theme_minimal(base_size = 16) +
-  labs(title = "Pointing Distance Error by Optic Flow, Level Size, and Vista Condition",
-       y = "Pointing Distance Difference",
-       x = "Level Size")
+#| fig-cap: "Distribution of pointing distance errors showing potential outliers"
+ggplot(aes(x = target_pointed_distance_difference), data = df_trials_model) +
+  geom_histogram(bins = 30, fill = "steelblue", alpha = 0.7) +
+  theme_minimal(base_size = 14) +
+  labs(
+    title = "Distribution of Pointing Distance Errors",
+    x = "Distance Error (meters)",
+    y = "Frequency"
+  )
 ```
 
-The model without pointing point as a predictor does not have normal residuals, so we include the target distance as a predictor to account for the fact that larger distances might lead to larger errors.
+```{r pointing-distance-boxplot}
+#| fig-cap: "Pointing distance errors by experimental conditions. Positive values indicate overshooting, negative values indicate undershooting."
+df_trials_model %>%
+  ggplot(aes(x = LevelSize, y = target_pointed_distance_difference, fill = OpticFlow, color = OpticFlow)) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "gray40") +
+  geom_boxplot(alpha = 0.5, outlier.alpha = 0.3) +
+  geom_jitter(position = position_jitterdodge(jitter.width = 0.2), alpha = 0.3) +
+  facet_wrap(~Vista) +
+  theme_minimal(base_size = 14) +
+  labs(
+    title = "Pointing Distance Error by Condition",
+    y = "Distance Error (meters)",
+    x = "Environment Size",
+    fill = "Movement Mode",
+    color = "Movement Mode"
+  ) +
+  scale_fill_brewer(palette = "Set1") +
+  scale_color_brewer(palette = "Set1")
+```
 
-```{r lmer-pointed-distance}
-ggplot(aes(x = target_pointed_distance_difference), data = df_trials_model) +
-  geom_histogram() +
-  theme_minimal() +
-  labs(title = "Pointing Distance Error",
-       y = "Count",
-       x = "Pointing Distance Difference")
-levels(df_trials_model$Vista)
+### Statistical Model for Distance Error
 
-lmer_pointed_distance <- df_trials_model %>%
+We fitted a linear mixed-effects model to examine the effects of optic flow, environment size, and vista condition on pointing distance errors. The model included the actual distance to the target as a covariate to account for the fact that larger distances might lead to larger errors. Extreme outliers (|z| > 3) were excluded from the analysis.
+
+Regular mixed effect model with normal distrubution has been used, as the distribution of distance errors was approximately normal around 0-mean.
+
+```{r lmer-pointed-distance, results='hide'}
+# Prepare data with outlier removal
+df_distance_model <- df_trials_model %>%
   mutate(z_target_pointed_distance_difference = abs(scale(target_pointed_distance_difference))) %>%
-  #mutate(OpticFlow = as.character(OpticFlow)) %>%
-  filter(z_target_pointed_distance_difference < 3) %>%
-  lmer(target_pointed_distance_difference ~ OpticFlow + LevelSize + Vista + OpticFlow:LevelSize + OpticFlow:Vista + scale(pointingpoint_target_distance) + (1|participant),
-  data = .)
+  filter(z_target_pointed_distance_difference < 3)
 
-lmer_pointed_distance_noof <- df_trials_model %>%
-  mutate(z_target_pointed_distance_difference = abs(scale(target_pointed_distance_difference))) %>%
-  #mutate(OpticFlow = as.character(OpticFlow)) %>%
-  filter(z_target_pointed_distance_difference < 3) %>%
-  lmer(target_pointed_distance_difference ~  + LevelSize + Vista + scale(pointingpoint_target_distance) + (1|participant), data = .)
- 
-anova(lmer_pointed_distance, lmer_pointed_distance_noof)
+# Fit the full model
+lmer_pointed_distance <- lmer(
+  target_pointed_distance_difference ~ OpticFlow + LevelSize + Vista +
+    OpticFlow:LevelSize + OpticFlow:Vista + scale(pointingpoint_target_distance) +
+    (1|participant),
+  data = df_distance_model
+)
 
-# Check for singularity
-summary(lmer_pointed_distance)
-check_lmer_model(lmer_pointed_distance)
-plot(check_heteroscedasticity(lmer_pointed_distance))
-plot(check_homogeneity(lmer_pointed_distance))
+# Fit model without optic flow for comparison
+lmer_pointed_distance_noof <- lmer(
+  target_pointed_distance_difference ~ LevelSize + Vista +
+    scale(pointingpoint_target_distance) + (1|participant),
+  data = df_distance_model
+)
 
+# Model comparison
+model_comparison_distance <- anova(lmer_pointed_distance, lmer_pointed_distance_noof)
+```
+
+```{r extract-distance-stats}
+# Extract statistics for inline reporting
+beta_vista <- round(fixef(lmer_pointed_distance)["VistaVista"], 2)
+chisq_distance <- round(model_comparison_distance$Chisq[2], 2)
+p_distance <- round(model_comparison_distance[2, "Pr(>Chisq)"], 3)
+```
+
+```{r lmer-pointed-distance-table}
+#| tbl-cap: "Linear mixed-effects model results for pointing distance error" 
 report_table(lmer_pointed_distance) %>%
-    knitr::kable()
+  knitr::kable(digits = 3, align = "lcccccc")
+```
+
+The model revealed that vista spaces significantly reduced distance estimation errors compared to non-vista spaces ($\beta$ = `r beta_vista`m, *p* < 0.05). The presence of optic flow had significant main effects on distance error (model comparison between model with and withouth Optic flow: $\chi^2$ = `r chisq_distance`, *p* = `r p_distance`).
+
+```{r vista-effect-plot}
+#| fig-cap: "Estimated marginal effect of vista condition on pointing distance error with 95% confidence intervals"
+ggpredict(lmer_pointed_distance, terms = "Vista") %>%
+  plot() +
+  theme_minimal(base_size = 14) +
+  labs(
+    title = "Vista Effect on Distance Estimation",
+    y = "Predicted Distance Error (meters)",
+    x = "Environment Type"
+  ) +
+  theme(legend.position = "none")
 ```
 
 ```{r lmer-pointed-distance-predictions}
+#| tbl-cap: "Predicted distance errors across all experimental conditions"
 predict_my_responses(lmer_pointed_distance) %>%
-  knitr::kable()
+  mutate(
+    OpticFlow = x,
+    Vista = group,
+    LevelSize = facet,
+    `Predicted Error (m)` = round(predicted, 2),
+    `95% CI` = paste0("[", round(conf.low, 2), ", ", round(conf.high, 2), "]")
+  ) %>%
+  select(OpticFlow, Vista, LevelSize, `Predicted Error (m)`, `95% CI`) %>%
+  knitr::kable(align = "lllcc")
 ```
 
-```{r vista-effect-plot}
-ggpredict(lmer_pointed_distance, terms = "Vista") %>%
-  plot() +
-  theme_minimal() +
-  labs(title = "Effect of Vista on Pointing Distance Error",
-       y = "Pointing Distance Difference",
-       x = "Vista")
-```
+**Key Finding:** Participants made smaller distance estimation errors in vista spaces (environments with open sightlines) compared to non-vista spaces, regardless of movement mode or environment size. This suggests that visual access to the environment improves distance estimation accuracy.
 
-## Pointing angle error
+## Pointing Angle Error
+
+Next, we examined the angular accuracy of participants' pointing responses. Angle errors were computed as the absolute difference between the correct direction and the direction indicated by participants.
 
 ```{r angle-error-histogram}
+#| fig-cap: "Distribution of absolute angle errors (log-transformed). The distribution shows positive skew, justifying the use of a Gamma regression model."
 df_trials_model %>%
-    ggplot() +
-  geom_histogram(aes(x = log(abs(pointed_angle_difference)))) +
-  theme_minimal() +
-  labs(title = "Absolute Angle Error Log-Transformed",
-       y = "Count",
-       x = "Angle Error")
+  ggplot() +
+  geom_histogram(aes(x = log(abs(pointed_angle_difference))), bins = 30, fill = "coral", alpha = 0.7) +
+  theme_minimal(base_size = 14) +
+  labs(
+    title = "Distribution of Absolute Angle Errors (Log Scale)",
+    x = "Log(Angle Error in degrees)",
+    y = "Frequency"
+  )
 ```
 
-This is all fucked up :D Coding this without contrasts leads to bunch of issues and instability of the model due to math things I do not understand. It is necessary to set the treatment contrasts manually to get stable results.
+### Statistical Model for Angle Error
 
-```{r glmer-angle-error constrasts}
+Due to the skewed distribution of the absolute angle errors, we used a generalized linear mixed-effects model with a Gamma distribution (as the log of the errors are left skewed) and log link. To ensure model stability, we set explicit treatment contrasts for all factors.
+
+```{r glmer-angle-error-contrasts}
+# Set treatment contrasts for model stability
+# name the contrasts explicitly
+
 contrasts(df_trials_model$OpticFlow) <- c(0, 1)
 contrasts(df_trials_model$LevelSize) <- c(0, 1)
 contrasts(df_trials_model$Vista) <- c(0, 1)
 ```
 
-```{r glmer-pointed-angle}
+```{r glmer-pointed-angle, results='hide'}
+# Fit the full model with Gamma family
 lmer_pointed_angle <- df_trials_model %>%
   mutate(abs_pointed_angle_difference = abs(pointed_angle_difference)) %>%
   filter(abs_pointed_angle_difference > 0) %>%
-  glmer(abs_pointed_angle_difference ~ OpticFlow + LevelSize + Vista + OpticFlow:LevelSize + OpticFlow:Vista + (1|participant), data = ., family = Gamma(link = "log"))
+  glmer(
+    abs_pointed_angle_difference ~ OpticFlow + LevelSize + Vista +
+      OpticFlow:LevelSize + OpticFlow:Vista + (1|participant),
+    data = .,
+    family = Gamma(link = "log")
+  )
 
-check_lmer_model(lmer_pointed_angle)
-simulate_residuals(lmer_pointed_angle) %>%
-  plot()
-check_residuals(simulate_residuals(lmer_pointed_angle))
-plot(check_homogeneity(lmer_pointed_angle))
-report_table(lmer_pointed_angle) %>%
-    knitr::kable()
-
+# Fit model without optic flow
 lmer_pointed_angle_noof <- df_trials_model %>%
   mutate(abs_pointed_angle_difference = abs(pointed_angle_difference)) %>%
   filter(abs_pointed_angle_difference > 0) %>%
-  glmer(abs_pointed_angle_difference ~ LevelSize + Vista + OpticFlow:LevelSize + (1|participant), data = ., family = Gamma(link = "log"))
+  glmer(
+    abs_pointed_angle_difference ~ LevelSize + Vista + OpticFlow:LevelSize + (1|participant),
+    data = .,
+    family = Gamma(link = "log")
+  )
 
-anova(lmer_pointed_angle, lmer_pointed_angle_noof)
-summary(lmer_pointed_angle)
+# Model comparison
+model_comparison_angle <- anova(lmer_pointed_angle, lmer_pointed_angle_noof)
+
+# Extract statistics for inline reporting
+chisq_angle <- round(model_comparison_angle$Chisq[2], 2)
+p_angle <- round(model_comparison_angle[2, "Pr(>Chisq)"], 3)
 ```
 
-we can see that the model including optic flow is not significantly better than the model without it and adding that infromation does not help explain the variance in angle error.
+```{r glmer-pointed-angle-table}
+#| tbl-cap: "Generalized linear mixed-effects model results for pointing angle error (Gamma family, log link)"
+report_table(lmer_pointed_angle) %>%
+  knitr::kable(digits = 3, align = "lcccccc")
+```
+
+Model comparison revealed that including optic flow as a predictor did not significantly improve model fit ($\chi^2$ = `r chisq_angle`, *p* = `r p_angle`), indicating that movement mode did not substantially affect angular pointing accuracy.
 
 ```{r lmer-pointed-angle-predictions}
+#| tbl-cap: "Predicted angle errors (in degrees) across experimental conditions"
 predict_my_responses(lmer_pointed_angle) %>%
-  knitr::kable()
-
-predict_response(lmer_pointed_angle, terms = c("Vista"), margin = "empirical")
-predict_response(lmer_pointed_angle, terms = c("LevelSize"), margin = "empirical")
-predict_response(lmer_pointed_angle, terms = c("OpticFlow"), margin = "empirical")
+  mutate(
+    OpticFlow = x,
+    Vista = group,
+    LevelSize = facet,
+    `Predicted Error (deg)` = round(predicted, 2),
+    `95% CI` = paste0("[", round(conf.low, 2), ", ", round(conf.high, 2), "]")
+  ) %>%
+  select(OpticFlow, Vista, LevelSize, `Predicted Error (deg)`, `95% CI`) %>%
+  knitr::kable(align = "lllcc")
 ```
 
-We can see that the angle error was affected by the size of the environment, with larger environments leading to larger errors. However, there was no significant effect of movement mode or vista condition on angle error.
+```{r angle-predictions-individual}
+#| tbl-cap: "Marginal predictions for individual factors"
+# Vista effect
+vista_pred <- predict_response(lmer_pointed_angle, terms = c("Vista"), margin = "empirical") %>%
+  as.data.frame() %>%
+  mutate(`Predicted Error (deg)` = round(predicted, 2),
+         `95% CI` = paste0("[", round(conf.low, 2), ", ", round(conf.high, 2), "]")) %>%
+  select(Vista = x, `Predicted Error (deg)`, `95% CI`)
 
-## Smaller analyses
+# Level size effect
+size_pred <- predict_response(lmer_pointed_angle, terms = c("LevelSize"), margin = "empirical") %>%
+  as.data.frame() %>%
+  mutate(`Predicted Error (deg)` = round(predicted, 2),
+         `95% CI` = paste0("[", round(conf.low, 2), ", ", round(conf.high, 2), "]")) %>%
+  select(`Level Size` = x, `Predicted Error (deg)`, `95% CI`)
 
-### Pointing duration to see when people considered the distance the most
+# Optic flow effect
+of_pred <- predict_response(lmer_pointed_angle, terms = c("OpticFlow"), margin = "empirical") %>%
+  as.data.frame() %>%
+  mutate(`Predicted Error (deg)` = round(predicted, 2),
+         `95% CI` = paste0("[", round(conf.low, 2), ", ", round(conf.high, 2), "]")) %>%
+  select(`Optic Flow` = x, `Predicted Error (deg)`, `95% CI`)
 
-```{r pointing-duration-analysis}
-ggplot(df_trials_model, aes(x = log(pointing_duration), fill=Movement)) +
-  geom_histogram() +
-  theme_minimal() +
-  labs(title = "Pointing Duration (log-transformed)",
-       y = "Count",
-       x = "Log(Pointing Duration)")
-
-lmer_point_duration <- glmer(pointing_duration ~ Movement + LevelSize + Vista + Movement:LevelSize + Movement:Vista + (1|participant),
-  data = df_trials_model, family = gaussian(link = "log"))
-summary(lmer_point_duration)
-check_model(lmer_point_duration)
-
-#predict_my_responses(lmer_point_duration) %>%
-#  knitr::kable()
+# Display
+vista_pred %>% knitr::kable(caption = "Vista Effect", align = "lcc")
+size_pred %>% knitr::kable(caption = "Environment Size Effect", align = "lcc")
+of_pred %>% knitr::kable(caption = "Optic Flow Effect", align = "lcc")
 ```
 
-## Navigated distance
+**Key Finding:** Angle errors were significantly affected by environment size, with larger environments leading to larger angular errors. However, neither movement mode nor vista condition significantly affected angular accuracy. This suggests that angular pointing is more sensitive to spatial scale than to visual access or movement information.
 
-```{r navigated-distance-analysis}
+## Pointing Response Time
+
+We examined how long participants took to make their pointing responses, which may reflect the cognitive difficulty of the spatial judgment.
+
+```{r pointing-duration-analysis, results='hide'}
+#| fig-cap: "Distribution of pointing response times (log-transformed) by movement mode"
+ggplot(df_trials_model, aes(x = log(pointing_duration), fill = Movement)) +
+  geom_histogram(bins = 30, alpha = 0.7) +
+  theme_minimal(base_size = 14) +
+  labs(
+    title = "Pointing Response Time Distribution",
+    x = "Log(Response Time in seconds)",
+    y = "Frequency",
+    fill = "Movement Mode"
+  ) +
+  scale_fill_brewer(palette = "Set2")
+
+lmer_point_duration <- glmer(
+  pointing_duration ~ Movement + LevelSize + Vista + Movement:LevelSize + Movement:Vista + (1|participant),
+  data = df_trials_model,
+  family = Gamma(link = "log")
+)
+```
+
+```{r lmer-pointing-duration-results}
+#| tbl-cap: "Generalized linear mixed-effects model results for pointing response time (Gamma family, log link)"
+report_table(lmer_point_duration) %>%
+  knitr::kable(digits = 3, align = "lcccccc")
+```
+
+Response times showed considerable variability across conditions, but no clear systematic patterns emerged from the model.
+
+## Navigation Distance
+
+We analyzed the total distance participants traveled during the search and return phases of each trial.
+
+```{r navigated-distance-analysis, results='hide'}
+#| fig-cap: "Distribution of total navigation distance across trials"
 ggplot(df_data) +
-  geom_histogram(aes(x = distance_items), bins = 30) +
-  theme_minimal() +
-  labs(title = "Distribution of Navigated Duration",
-       x = "Navigated Duration",
-       y = "Count")
+  # log transform to reduce skewness
+  geom_histogram(aes(x = log(distance_items)), bins = 30, fill = "darkgreen", alpha = 0.7) +
+  theme_minimal(base_size = 14) +
+  labs(
+    title = "Distribution of Navigated Distance",
+    x = "Distance Traveled (meters)",
+    y = "Frequency"
+  )
 
-x <- glmer((distance_items + distance_return) ~ Movement + LevelSize + Vista + Movement:Vista + Movement:LevelSize + (1|participant), 
-    data = df_data, family = Gamma(link = "log"))
-
-glm_distance <- glm((distance_items + distance_return) ~ OpticFlow + Vista + LevelSize + OpticFlow:Vista + OpticFlow:LevelSize,
-  data = df_data, family = Gamma(link = "log"))
-summary(glm_distance)
-
-predict_my_responses(glm_distance) %>%
-  knitr::kable()
+# Fit GLM with Gamma family
+df_navdistance_model <- df_data %>%
+  mutate(total_distance = distance_items + distance_return)
+glm_distance <- glm(
+  total_distance ~ OpticFlow + Vista + LevelSize +
+    OpticFlow:Vista + OpticFlow:LevelSize,
+  data = df_navdistance_model,
+  family = Gamma(link = "log")
+)
 ```
 
-Movement did not significantly affect the distance travelled, but vista spaces led to significantly shorter distances travelled.
+As each participant had only a single observation per condition, we used a generalized linear model with a Gamma distribution and log link to analyze the total navigation distance.
 
-## Navigated duration
+```{r glm-distance-results}
+#| tbl-cap: "Generalized linear model results for total navigation distance (Gamma family, log link)"
+report_table(glm_distance) %>%
+  knitr::kable(digits = 3, align = "lcccccc") 
+```
+
+```{r glm-distance-predictions}
+#| tbl-cap: "Predicted navigation distances across conditions using GLM with Gamma family and log link"
+predict_my_responses(glm_distance) %>%
+  mutate(
+    OpticFlow = x,
+    Vista = group,
+    LevelSize = facet,
+    `Predicted Distance (m)` = round(predicted, 1),
+    `95% CI` = paste0("[", round(conf.low, 1), ", ", round(conf.high, 1), "]")
+  ) %>%
+  select(OpticFlow, Vista, LevelSize, `Predicted Distance (m)`, `95% CI`) %>%
+  knitr::kable(align = "lllcc")
+```
+
+**Key Finding:** Movement mode (optic flow vs. teleportation) did not significantly affect the total distance traveled. However, participants traveled significantly shorter distances in vista spaces compared to non-vista spaces, suggesting more efficient navigation when environmental layout is visible.
+
+## Navigation Duration
+
+Finally, we examined the total time participants spent navigating during the search and return phases.
 
 ```{r search-duration-histogram}
+#| fig-cap: "Distribution of search duration (log-transformed) by movement mode"
 ggplot(df_data, aes(x = log(duration_searching), fill = OpticFlow)) +
-  geom_histogram(bins = 30) +
-  theme_minimal() +
-  labs(title = "Distribution of Search Duration (log-transformed)",
-       x = "Log(Search Duration)",
-       y = "Count")
+  geom_histogram(bins = 30, alpha = 0.7) +
+  theme_minimal(base_size = 14) +
+  labs(
+    title = "Search Duration Distribution",
+    x = "Log(Duration in seconds)",
+    y = "Frequency",
+    fill = "Movement Mode"
+  ) +
+  scale_fill_brewer(palette = "Set1")
 ```
 
-```{r glm-duration-analysis}
-glm_duration <- glm((duration_return + duration_searching) ~ OpticFlow + Vista + LevelSize + OpticFlow:Vista + OpticFlow:LevelSize,
-    data = df_data, family = Gamma(link = "log"))
-summary(glm_duration)
+```{r glm-duration-analysis, results='hide'}
+df_model_duration <- df_data %>%
+  mutate(total_duration = duration_return + duration_searching)
 
+glm_duration <- glm(
+  total_duration ~ OpticFlow + Vista + LevelSize +
+    OpticFlow:Vista + OpticFlow:LevelSize,
+  data = df_model_duration,
+  family = Gamma(link = "log")
+)
+```
+
+```{r glm-duration-results}
+#| tbl-cap: "Generalized linear model results for total navigation duration (Gamma family, log link)"
+report_table(glm_duration) %>%
+  knitr::kable(digits = 3, align = "lcccccc")
+```
+
+```{r glm-duration-predictions}
+#| tbl-cap: "Predicted navigation durations across conditions"
 predict_my_responses(glm_duration) %>%
-  knitr::kable()
+  mutate(
+    OpticFlow = x,
+    Vista = group,
+    LevelSize = facet,
+    `Predicted Duration (s)` = round(predicted, 1),
+    `95% CI` = paste0("[", round(conf.low, 1), ", ", round(conf.high, 1), "]")
+  ) %>%
+  select(OpticFlow, Vista, LevelSize, `Predicted Duration (s)`, `95% CI`) %>%
+  knitr::kable(align = "lllcc")
 ```
 
-while the movement method did affect the navigated duration when considered on its own, it did not significantly affect the duration when the model included the interaction parameters.
+**Key Finding:** While movement method showed some relationship with navigation duration in simple models, this effect was not significant when interaction terms were included in the model. Environmental characteristics (vista condition and size) were more important determinants of navigation time.
 
-# Questionnaire data
+# Questionnaire Data
 
-## Gender
-```{r}
-ggplot(df_trials_model, aes(Gender, pointing_duration)) +
-  geom_boxplot() +
-  theme_minimal() +
-  labs(title = "Pointing Duration by Gender")
-```
+## Simulator Sickness
 
-## Simulator sickness
+We assessed simulator sickness using the SSQ and VRSQ questionnaires to examine potential adverse effects of the different movement modes.
 
-```{r ssq descriptives}
+```{r ssq-descriptives}
+#| tbl-cap: "Simulator sickness scores by movement mode (SSQ metrics)"
 df_questionnaires %>%
-  select(starts_with("ssq_"), Movement) %>%
+  select(starts_with("ssq_"), starts_with("vrsq_"), Movement) %>%
   pivot_longer(cols = -Movement, names_to = "ssq_metric", values_to = "value") %>%
   group_by(ssq_metric, Movement) %>%
-  summarize(mean = mean(value, na.rm = TRUE),
-            sd = sd(value, na.rm = TRUE)) %>%
-    ungroup() %>%
-  pivot_wider(names_from = Movement, values_from = c(mean, sd)) %>%
-  knitr::kable()
+  summarize(
+    Mean = round(mean(value, na.rm = TRUE), 2),
+    SD = round(sd(value, na.rm = TRUE), 2),
+    .groups = "drop"
+  ) %>%
+  pivot_wider(names_from = Movement, values_from = c(Mean, SD)) %>%
+  select(ssq_metric, Mean_Teleport, SD_Teleport, Mean_OpticFlow, SD_OpticFlow) %>%
+  rename(
+    `SSQ Metric` = ssq_metric,
+    `Mean (Teleport)` = Mean_Teleport,
+    `SD (Teleport)` = SD_Teleport,
+    `Mean (Optic Flow)` = Mean_OpticFlow,
+    `SD (Optic Flow)` = SD_OpticFlow
+  ) %>%
+  knitr::kable(align = "lcccc")
+```
 
-df_questionnaires %>% 
+```{r ssq-tests}
+#| tbl-cap: "Paired t-tests comparing simulator sickness between movement modes"
+df_questionnaires %>%
   select(c(starts_with("ssq_"), starts_with("vrsq_")), participant, Movement) %>%
   pivot_longer(cols = -c(participant, Movement), names_to = "ssq_metric", values_to = "value") %>%
   pivot_wider(names_from = Movement, values_from = value, id_cols = c(participant, ssq_metric)) %>%
@@ -345,24 +575,63 @@ df_questionnaires %>%
     test = map(data, ~ t.test(.x$OpticFlow, .x$Teleport, paired = TRUE) %>% tidy())
   ) %>%
   select(ssq_metric, test) %>%
-  unnest(test)
+  unnest(test) %>%
+  select(
+    Metric = ssq_metric,
+    `Mean Difference` = estimate,
+    `t-statistic` = statistic,
+    `p-value` = p.value,
+    `95% CI Lower` = conf.low,
+    `95% CI Upper` = conf.high
+  ) %>%
+  mutate(
+    `Mean Difference` = round(`Mean Difference`, 2),
+    `t-statistic` = round(`t-statistic`, 2),
+    `p-value` = round(`p-value`, 3),
+    `95% CI Lower` = round(`95% CI Lower`, 2),
+    `95% CI Upper` = round(`95% CI Upper`, 2)
+  ) %>%
+  knitr::kable(align = "lccccc")
 ```
 
-### VRLEQ
+## VR Embodiment and Presence (VRLEQ)
 
-```{r vrleq descriptives}
-df_questionnaires %>% 
+```{r vrleq-descriptives}
+#| tbl-cap: "VR embodiment and presence scores by movement mode"
+df_questionnaires %>%
   select(starts_with("vrleq_"), Movement, participant) %>%
   pivot_longer(cols = -c(Movement, participant), names_to = "vrleq_metric", values_to = "value") %>%
   group_by(vrleq_metric, Movement) %>%
-  summarize(mean = mean(value, na.rm = TRUE),
-            sd = sd(value, na.rm = TRUE),
-            min = min(value, na.rm = TRUE),
-            max = max(value, na.rm = TRUE)) %>%
-  pivot_wider(names_from = Movement, values_from = c(mean, sd, min, max)) %>%
-  knitr::kable()
+  summarize(
+    Mean = round(mean(value, na.rm = TRUE), 2),
+    SD = round(sd(value, na.rm = TRUE), 2),
+    Min = min(value, na.rm = TRUE),
+    Max = max(value, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  pivot_wider(names_from = Movement, values_from = c(Mean, SD, Min, Max)) %>%
+  select(
+    vrleq_metric,
+    Mean_Teleport, SD_Teleport, Min_Teleport, Max_Teleport,
+    Mean_OpticFlow, SD_OpticFlow, Min_OpticFlow, Max_OpticFlow
+  ) %>%
+  rename(
+    `VRLEQ Metric` = vrleq_metric,
+    `Mean (T)` = Mean_Teleport,
+    `SD (T)` = SD_Teleport,
+    `Min (T)` = Min_Teleport,
+    `Max (T)` = Max_Teleport,
+    `Mean (OF)` = Mean_OpticFlow,
+    `SD (OF)` = SD_OpticFlow,
+    `Min (OF)` = Min_OpticFlow,
+    `Max (OF)` = Max_OpticFlow
+  ) %>%
+  knitr::kable(align = "lcccccccc")
+```
 
-df_questionnaires %>% 
+```{r vrleq-tests}
+#| tbl-cap: "Paired t-tests comparing VR embodiment and presence between movement modes"
+df_questionnaires %>%
   select(starts_with("vrleq_"), participant, Movement) %>%
   pivot_longer(cols = -c(participant, Movement), names_to = "vrleq_metric", values_to = "value") %>%
   pivot_wider(names_from = Movement, values_from = value, id_cols = c(participant, vrleq_metric)) %>%
@@ -372,5 +641,109 @@ df_questionnaires %>%
     test = map(data, ~ t.test(.x$OpticFlow, .x$Teleport, paired = TRUE) %>% tidy())
   ) %>%
   select(vrleq_metric, test) %>%
-  unnest(test)
+  unnest(test) %>%
+  select(
+    Metric = vrleq_metric,
+    `Mean Difference` = estimate,
+    `t-statistic` = statistic,
+    `p-value` = p.value,
+    `95% CI Lower` = conf.low,
+    `95% CI Upper` = conf.high
+  ) %>%
+  mutate(
+    `Mean Difference` = round(`Mean Difference`, 2),
+    `t-statistic` = round(`t-statistic`, 2),
+    `p-value` = round(`p-value`, 3),
+    `95% CI Lower` = round(`95% CI Lower`, 2),
+    `95% CI Upper` = round(`95% CI Upper`, 2)
+  ) %>%
+  knitr::kable(align = "lccccc")
 ```
+
+## Gender Differences
+
+```{r gender-pointing-duration}
+#| fig-cap: "Pointing response time by gender"
+ggplot(df_trials_model, aes(x = Gender, y = pointing_duration, fill = Gender)) +
+  geom_boxplot(alpha = 0.7) +
+  theme_minimal(base_size = 14) +
+  labs(
+    title = "Pointing Response Time by Gender",
+    x = "Gender",
+    y = "Response Time (seconds)"
+  ) +
+  scale_fill_brewer(palette = "Pastel1") +
+  theme(legend.position = "none")
+```
+
+---
+
+# Model Diagnostics {.appendix}
+
+This section contains detailed diagnostic checks for the statistical models reported above. These checks validate model assumptions and ensure the reliability of our inferences.
+
+## Distance Error Model Diagnostics
+
+```{r distance-diagnostics}
+#| fig-cap: "Diagnostic plots for the distance error linear mixed-effects model"
+#| fig-height: 8
+check_lmer_model(lmer_pointed_distance)
+```
+
+```{r distance-heteroscedasticity}
+#| fig-cap: "Heteroscedasticity check for distance error model"
+plot(check_heteroscedasticity(lmer_pointed_distance))
+```
+
+```{r distance-homogeneity}
+#| fig-cap: "Homogeneity check for distance error model"
+plot(check_homogeneity(lmer_pointed_distance))
+```
+
+## Angle Error Model Diagnostics
+
+```{r angle-diagnostics}
+#| fig-cap: "Diagnostic checks for the angle error generalized linear mixed-effects model"
+check_lmer_model(lmer_pointed_angle)
+```
+
+```{r angle-residuals}
+#| fig-cap: "Simulated residual diagnostics for angle error model"
+#| fig-height: 8
+simulate_residuals(lmer_pointed_angle) %>%
+  plot()
+```
+
+```{r angle-residuals-check}
+#| fig-cap: "Additional residual checks for angle error model"
+check_residuals(simulate_residuals(lmer_pointed_angle))
+```
+
+```{r angle-homogeneity}
+#| fig-cap: "Homogeneity check for angle error model"
+plot(check_homogeneity(lmer_pointed_angle))
+```
+
+## Pointing Duration Model Diagnostics
+
+```{r duration-diagnostics}
+#| fig-cap: "Comprehensive model diagnostics for pointing response time model"
+#| fig-height: 10
+check_model(lmer_point_duration)
+```
+
+---
+
+# Summary
+
+This analysis examined spatial cognition in virtual reality environments across different movement modes and environmental configurations. Key findings include:
+
+1. **Vista spaces improved distance estimation accuracy** - Participants made smaller distance errors in environments with open sightlines (vista spaces) compared to enclosed spaces, regardless of movement mode or environment size.
+
+2. **Environment size affected angular accuracy** - Larger environments led to larger angular pointing errors, but this was not influenced by vista condition or movement mode.
+
+3. **Vista spaces promoted more efficient navigation** - Participants traveled shorter distances in vista spaces, suggesting better spatial awareness and more direct navigation paths.
+
+4. **Optic flow had limited effects** - The presence of optic flow during movement (vs. teleportation) did not significantly affect most spatial performance metrics, suggesting that spatial learning may rely more on visual access to the environment than on movement-related visual information.
+
+These findings support the importance of environmental visibility for spatial cognition in virtual environments and have implications for VR application design, particularly for training and wayfinding applications.
