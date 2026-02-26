@@ -72,7 +72,10 @@ analyze_distances <- function(session, skip_training = TRUE) {
   times <- filter(session$events, event %in% c("PhaseStarted")) %>% pull(time)
   timestamps <- sapply(times, \(x) which(session$navr$data$timestamp > x)[1])
   distances <- session$navr$data$distance_total[timestamps]
-  out <- bind_cols(out, data.frame(distance_items = distances[1], distance_return = distances[2]))
+  teleports <- search_onsets(session$navr, 100, 0.1)
+  out <- bind_cols(out, data.frame(distance_items = distances[1],
+                                   distance_return = distances[2],
+                                   n_teleports = length(teleports$time)))
   return(out)
 }
 
@@ -99,7 +102,6 @@ analyze_participant <- function(participant_data, skip_training = TRUE) {
   }
   return(list(pointing = pointings, timing = timings, distance = distances))
 }
-
 
 analyze_participants <- function(participants) {
   results <- list(pointing = data.frame(),

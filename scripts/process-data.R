@@ -19,9 +19,9 @@ if (file.exists("temp/participants.RData")) {
 
 results <- analyze_participants(participants)
 dir.create("temp/processed", recursive = TRUE, showWarnings = FALSE)
-write.csv(results$pointing, "temp/processed/pointing20251223.csv")
-write.csv(results$distance, "temp/processed/distance20251223.csv")
-write.csv(results$timing, "temp/processed/timing20251223.csv")
+write.csv(results$pointing, "temp/processed/pointing20260226.csv")
+write.csv(results$distance, "temp/processed/distance20260226.csv")
+write.csv(results$timing, "temp/processed/timing20260226.csv")
 
 # Questionnaires --------------------------------------------------
 
@@ -69,7 +69,7 @@ df_all <- df_all %>%
 df_all %>%
   left_join(df_surveys,
             by = c("participant" = "ID", "Movement" = "Movement")) %>%
-  write.csv("temp/processed/all_combined20251223.csv")
+  write.csv("temp/processed/all_combined20260226.csv")
 
 df_all_trials <- results$pointing %>%
   left_join(results$distance, by = c("participant" = "participant",
@@ -78,7 +78,8 @@ df_all_trials <- results$pointing %>%
   left_join(results$timing, by = c("participant" = "participant",
                                    "LevelName" = "LevelName",
                                    "LevelSize" = "LevelSize"))
+
 df_all_trials %>%
   left_join(df_surveys,
             by = c("participant" = "ID", "Movement.x" = "Movement")) %>%
-  write.csv("temp/processed/all_combined_trials20251223.csv")
+  write.csv("temp/processed/all_combined_trials20260226.csv")

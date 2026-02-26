@@ -34,12 +34,12 @@ knitr::opts_chunk$set(
 here::i_am("reports/analysis.qmd")
 source(here::here("functions", "visualisation.R"))
 
-df_pointing <- read.csv(here::here("temp", "processed", "pointing20251223.csv"))
-df_distance <- read.csv(here::here("temp", "processed", "distance20251223.csv"))
-df_timing <- read.csv(here::here("temp", "processed", "timing20251223.csv"))
+df_pointing <- read.csv(here::here("temp", "processed", "pointing20260226.csv"))
+df_distance <- read.csv(here::here("temp", "processed", "distance20260226.csv"))
+df_timing <- read.csv(here::here("temp", "processed", "timing20260226.csv"))
 
-df_trials <- read.csv(here::here("temp", "processed", "all_combined_trials20251223.csv"))
-df_data <- read.csv(here::here("temp", "processed", "all_combined20251223.csv"))
+df_trials <- read.csv(here::here("temp", "processed", "all_combined_trials20260226.csv"))
+df_data <- read.csv(here::here("temp", "processed", "all_combined20260226.csv"))
 
 df_trials <- df_trials %>%
   mutate(LevelName = str_c(str_remove(LevelName, "Vista|Nonvista"), "_", LevelSize),
@@ -315,6 +315,7 @@ lmer_pointed_distance_noof <- lmer(
 
 # Model comparison
 model_comparison_distance <- anova(lmer_pointed_distance, lmer_pointed_distance_noof)
+check_model(lmer_pointed_distance)
 ```
 
 ```{r extract-distance-stats}
@@ -406,29 +407,19 @@ lmer_pointed_angle <- df_trials_model_angle %>%
     family = Gamma(link = "log")
   )
 
-# Fit model without optic flow
-lmer_pointed_angle_noof <- df_trials_model_angle %>%
-  glmer(
-    abs_pointed_angle_difference ~ LevelSize + Vista + OpticFlow:LevelSize + (1|participant),
-    data = .,
-    family = Gamma(link = "log")
-  )
-
-# Model comparison
-model_comparison_angle <- anova(lmer_pointed_angle, lmer_pointed_angle_noof)
-chisq_angle <- round(model_comparison_angle$Chisq[2], 2)
-p_angle <- round(model_comparison_angle[2, "Pr(>Chisq)"], 3)
+check_model(lmer_pointed_angle)
 ```
 
 ```{r glmer-pointed-angle-table}
 #| tbl-cap: "Generalized linear mixed-effects model results for pointing angle error (Gamma family, log link)"
 display(summary(report_table(lmer_pointed_angle)),
-        title = "Generalized linear mixed-effects model results for pointing angle error (Gamma family, log link)")
+        title = "Generalized linear mixed-effects model results for pointing 
+                 angle error (Gamma family, log link)")
 ```
 
-Model comparison revealed that including optic flow as a predictor did not significantly improve model fit ($\chi^2$ = `r chisq_angle`, *p* = `r p_angle`), indicating that movement mode did not substantially affect angular pointing accuracy.
 
 ### Estimated Marginal Means
+
 ```{r lmer-pointed-angle-predictions}
 #| tbl-cap: "Predicted angle errors (in degrees) across experimental conditions"
 predict_my_responses(lmer_pointed_angle) %>%
@@ -502,6 +493,7 @@ lmer_point_duration <- glmer(
   #data = filter(df_trials_model, run != "Run3"),  # exclude participant with extreme outliers
   family = Gamma(link = "log")
 )
+check_model(lmer_point_duration)
 ```
 
 ```{r lmer-pointing-duration-results}
@@ -521,7 +513,7 @@ predict_my_responses(lmer_point_duration) %>%
   report_my_predictions() %>%
   knitr::kable(align = "lllcc")
 
-predict_response(lmer_point_duration, terms="Vista", margin = "empirical")
+predict_response(lmer_point_duration, terms = "Vista", margin = "empirical")
 ``` 
 
 ## Navigation Distance
@@ -559,6 +551,7 @@ glm_distance <- glm(
   data = df_navdistance_model,
   family = Gamma(link = "log")
 )
+check_model(glm_distance)
 ```
 
 ```{r glm-distance-results}
@@ -578,6 +571,68 @@ predict_my_responses(glm_distance) %>%
 
 ### Key Findings
 The presence of optic flow did not significantly affect the total distance traveled. However, participants traveled significantly shorter distances in vista spaces compared to non-vista spaces, suggesting more efficient navigation when environmental layout is visible.
+
+## Number of Teleports
+We also examined the number of teleports participants used during navigation, which may reflect their strategy and confidence in navigating the environment.
+
+```{r teleports-descriptive}
+#| fig-cap: "Distribution of total navigation distance across trials"
+ggplot(df_data) +
+  geom_histogram(aes(x = n_teleports), binwidth=1, fill = "darkgreen", alpha = 0.7) + 
+  theme_minimal(base_size = 14) +
+  labs(
+    title = "Distribution of Number of Teleports",
+    x = "Number of Teleports",
+    y = "Frequency"
+  ) +
+  geom_vline(xintercept = mean(df_data$n_teleports, na.rm = TRUE) + 3 * sd(df_data$n_teleports, na.rm = TRUE), linetype = "dashed", color = "red")
+```
+
+Removing extreme outliers (|z|) > 3. As the number of teleports represents count data, we are using poisson distribution
+
+## Statistical model
+```{r teleports-model, results='hide'}
+df_model_teleports <- df_data %>%
+  mutate(z_n_teleports = abs(scale(n_teleports)[,1])) %>%
+  filter(z_n_teleports < 3)
+
+glm_teleports <- glm(
+  n_teleports ~ OpticFlow + Vista + LevelSize +
+    OpticFlow:Vista + OpticFlow:LevelSize,
+  data = df_model_teleports,
+  family = poisson() 
+)
+check_overdispersion(glm_teleports)
+```
+
+:::block{.callout-warning}
+Due to overdispersion in the Poisson model, we could refitted the model using a negative binomial distribution to account for the extra variability in the count data.
+
+I am thinking of not doing this for clarity, but we very well might. It is as easilly interpretable in the predicted values
+:::
+
+```{r teleports-overdispersion-model, eval=TRUE}
+glm_teleports <- MASS::glm.nb(
+  n_teleports ~ OpticFlow + Vista + LevelSize +
+    OpticFlow:Vista + OpticFlow:LevelSize,
+  data = df_model_teleports
+)
+check_model(glm_teleports)
+summary(glm_teleports)
+```
+
+```{r glm-teleports-results}
+#| tbl-cap: "Generalized linear model results for number of teleports (Poisson family)"
+display(summary(report_table(glm_teleports),
+        title = "Generalized linear model results for number of teleports (Poisson family)"))
+```
+
+```{r glm-teleports-predictions}
+#| tbl-cap: "Predicted number of teleports across conditions using GLM with Poisson family"
+predict_my_responses(glm_teleports) %>%
+  report_my_predictions() %>%
+  knitr::kable(align = "lllcc")
+```
 
 ## Navigation Duration
 
@@ -615,6 +670,7 @@ glm_duration <- glm(
   data = df_model_duration,
   family = Gamma(link = "log")
 )
+check_model(glm_duration)
 ```
 
 ```{r glm-duration-results}
