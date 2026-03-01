@@ -20,9 +20,10 @@ library(tidyverse)
 library(lme4)
 library(report)
 library(broom)
+library(gt)
 library(ggeffects)
-library(marginaleffects)
 library(performance)
+
 knitr::opts_chunk$set(
   echo = FALSE,
   warning = FALSE,
@@ -33,6 +34,7 @@ knitr::opts_chunk$set(
 
 here::i_am("reports/analysis.qmd")
 source(here::here("functions", "visualisation.R"))
+source(here::here("reports", "functions", "reporting.R"))
 
 PROCESSED_DATE <- "20260226"
 
@@ -68,39 +70,10 @@ df_questionnaires <- df_data %>%
   mutate(OpticFlow = factor(Movement, levels = c("Teleport", "OpticFlow"), labels = c("Without OF", "With OF"))) %>%
   distinct()
 
-predict_my_responses <- function(model) {
-  dat <- predict_response(model, terms = c("OpticFlow", "Vista", "LevelSize"), margin = "empirical") %>%
-      as.data.frame() %>%
-      select(x, group, facet, predicted, everything())
-  return(dat)
-}
-
-report_my_predictions <- function(predictions) {
-  out <- predictions %>%
-    mutate(
-      OpticFlow = x,
-      Vista = group,
-      LevelSize = facet,
-      `Predicted Value` = round(predicted, 2),
-      `95% CI` = paste0("[", round(conf.low, 2), ", ", round(conf.high, 2), "]")
-    ) %>%
-    select(OpticFlow, Vista, LevelSize, `Predicted Value`, `95% CI`)
-  return(out)
-}
-
-check_lmer_model <- function(model) {
-  print(check_overdispersion(model))
-  print(check_convergence(model))
-  print(check_heteroscedasticity(model))
-  print(check_homogeneity(model))
-  print(check_normality(model))
-}
-```
-
- To ensure model stability, we set explicit treatment contrasts for all factors to be 0 1 and not mean -centred.
-```{r glmer-angle-error-contrasts}
-# Set treatment contrasts for model stability
-# name the contrasts explicitly
+#' To ensure model stability, we set explicit treatment contrasts for all factors to be 0 1 and not mean -centred.
+#' 
+#' Set treatment contrasts for model stability
+#' name the contrasts explicitly
 contrasts(df_trials_model$OpticFlow) <- c(0, 1)
 contrasts(df_trials_model$LevelSize) <- c(0, 1)
 contrasts(df_trials_model$Vista) <- c(0, 1)
@@ -138,7 +111,8 @@ df_data %>%
     N = n(),
     .groups = "drop"
   ) %>%
-  knitr::kable(align = "lccccc")
+  gt() %>%
+  tab_header(title = "Participant Demographics")
 ```
 
 ```{r demographics-calc}
@@ -163,7 +137,6 @@ Before analyzing the main experimental trials, we validated participant performa
 
 ```{r validation-origin-door}
 #| fig-cap: "Distribution of pointing errors during training (origin door) vs. experimental trials. Left panels show training trials, right panels show experimental trials."
- 
 df_trials %>%
   select(participant, target, is_training, target_pointed_distance_difference,
          pointed_angle_difference) %>%
@@ -206,7 +179,8 @@ df_trials %>%
     N = n(),
     .groups = "drop"
   ) %>%
-  knitr::kable(align = "lccccc")
+  gt() %>%
+    tab_header(title = "Training Trial Performance by Experimental Run")
 
 aov(target_pointed_distance_difference ~ run, data = df_trials %>% filter(!is_training)) %>%
   summary()
@@ -256,6 +230,7 @@ Performance on training trials was consistent across different experimental runs
 
 We first examined how accurately participants estimated distances to target objects. The distance error represents the difference between the actual distance to the target and the distance to the location they indicated.
 
+
 ```{r pointing-distance-histogram}
 #| fig-cap: "Distribution of pointing distance errors showing potential outliers"
 ggplot(aes(x = target_pointed_distance_difference), data = df_trials_model) +
@@ -268,9 +243,30 @@ ggplot(aes(x = target_pointed_distance_difference), data = df_trials_model) +
   )
 ```
 
-```{r pointing-distance-boxplot}
+### Statistical Model
+
+We fitted a linear mixed-effects model to examine the effects of optic flow, environment size, and vista condition on pointing distance errors. The model included the actual distance to the target as a covariate to account for the fact that larger distances might lead to larger errors.
+
+Extreme outliers (|z| > 3) were excluded from the analysis.
+
+Regular mixed effect model with normal distrubution has been used, as the distribution of distance errors was approximately normal around 0-mean. 
+
+```{r lmer-pointed-distance, results='hide'}
+df_distance_model <- df_trials_model %>%
+  mutate(z_target_pointed_distance_difference = abs(scale(target_pointed_distance_difference)[,1])) %>%
+  filter(z_target_pointed_distance_difference < 3)
+
+lmer_pointed_distance <- lmer(
+  target_pointed_distance_difference ~ OpticFlow + LevelSize + Vista +
+    OpticFlow:LevelSize + OpticFlow:Vista + scale(pointingpoint_target_distance) +
+    (1|participant),
+  data = df_distance_model
+)
+```
+
+```{r pointed-distance-boxplot}
 #| fig-cap: "Pointing distance errors by experimental conditions. Positive values indicate overshooting, negative values indicate undershooting."
-df_trials_model %>%
+df_distance_model %>%
   ggplot(aes(x = LevelSize, y = target_pointed_distance_difference, fill = OpticFlow, color = OpticFlow)) +
   geom_hline(yintercept = 0, linetype = "dashed", color = "gray40") +
   geom_boxplot(alpha = 0.5, outlier.alpha = 0.3) +
@@ -288,76 +284,40 @@ df_trials_model %>%
   scale_color_brewer(palette = "Set1")
 ```
 
-### Statistical Model
 
-We fitted a linear mixed-effects model to examine the effects of optic flow, environment size, and vista condition on pointing distance errors. The model included the actual distance to the target as a covariate to account for the fact that larger distances might lead to larger errors. Extreme outliers (|z| > 3) were excluded from the analysis.
-
-Regular mixed effect model with normal distrubution has been used, as the distribution of distance errors was approximately normal around 0-mean. 
-
-```{r lmer-pointed-distance, results='hide'}
-# Prepare data with outlier removal
-df_distance_model <- df_trials_model %>%
-  mutate(z_target_pointed_distance_difference = abs(scale(target_pointed_distance_difference))) %>%
-  filter(z_target_pointed_distance_difference < 3)
-
-# Fit the full model
-lmer_pointed_distance <- lmer(
-  target_pointed_distance_difference ~ OpticFlow + LevelSize + Vista +
-    OpticFlow:LevelSize + OpticFlow:Vista + scale(pointingpoint_target_distance) +
-    (1|participant),
-  data = df_distance_model
-)
-
-# Fit model without optic flow for comparison
-lmer_pointed_distance_noof <- lmer(
-  target_pointed_distance_difference ~ LevelSize + Vista +
-    scale(pointingpoint_target_distance) + (1|participant),
-  data = df_distance_model
-)
-
-# Model comparison
-model_comparison_distance <- anova(lmer_pointed_distance, lmer_pointed_distance_noof)
+```{r pointed-distance-model-check}
+#| fig-cap: "Model diagnostics for the linear mixed-effects model of pointing distance error."
+#| fig-height: 12
+#| fig-width: 8
 check_model(lmer_pointed_distance)
-```
-
-```{r extract-distance-stats}
-# Extract statistics for inline reporting
-beta_vista <- round(fixef(lmer_pointed_distance)["VistaVista"], 2)
-chisq_distance <- round(model_comparison_distance$Chisq[2], 2)
-p_distance <- round(model_comparison_distance[2, "Pr(>Chisq)"], 3)
 ```
 
 ```{r lmer-pointed-distance-table}
 #| tbl-cap: "Linear mixed-effects model results for pointing distance error" 
-display(summary(report_table(lmer_pointed_distance)),
-        title = "Linear mixed-effects model results for pointing distance error")
+summary(report_table(lmer_pointed_distance)) %>%
+  gt() %>%
+    tab_header(title = "Linear mixed-effects model results for pointing distance error") %>%
+    fmt_number(columns = where(is.numeric), decimals = 3) %>%
+    fmt_missing(columns = everything(), missing_text = "")
 ```
-
-The model revealed that vista spaces significantly reduced distance estimation errors compared to non-vista spaces ($\beta$ = `r beta_vista`m, *p* < 0.05). The presence of optic flow had significant main effects on distance error (model comparison between model with and withouth Optic flow: $\chi^2$ = `r chisq_distance`, *p* = `r p_distance`).
 
 ### Estimated Marginal Means
-
-```{r vista-effect-plot}
-#| fig-cap: "Estimated marginal effect of vista condition on pointing distance error with 95% confidence intervals"
-ggpredict(lmer_pointed_distance, terms = "Vista") %>%
-  plot() +
-  theme_minimal(base_size = 14) +
-  labs(
-    title = "Vista Effect on Distance Estimation",
-    y = "Predicted Distance Error (meters)",
-    x = "Environment Type"
-  ) +
-  theme(legend.position = "none")
-```
 
 ```{r lmer-pointed-distance-predictions}
 #| tbl-cap: "Predicted distance errors across all experimental conditions"
 predict_my_responses(lmer_pointed_distance) %>%
   report_my_predictions() %>%
-  knitr::kable(align = "lllcc")
+  gt() %>%
+    tab_header(title = "Predicted Distance Errors Across Experimental Conditions")
+
+report_group_predictions(lmer_pointed_distance) %>% 
+  group_by(Predictor) %>%
+  gt() %>%
+    tab_header(title = "Predicted Effects of Experimental Conditions on Pointing Distance Error")
 ```
 
 ### Key Findings
+
 Participants made smaller distance estimation errors in vista spaces (environments with open sightlines) compared to non-vista spaces, regardless of movement mode or environment size. This suggests that visual access to the environment improves distance estimation accuracy.
 
 ## Pointing Angle Error
@@ -408,17 +368,21 @@ lmer_pointed_angle <- df_trials_model_angle %>%
     data = .,
     family = Gamma(link = "log")
   )
+```
 
+```{r glmer-pointed-angle-check}
+#| fig-cap: "Model diagnostics for the generalized linear mixed-effects model of pointing angle error (Gamma family, log link)."
+#| fig-height: 12
+#| fig-width: 8  
 check_model(lmer_pointed_angle)
 ```
 
 ```{r glmer-pointed-angle-table}
-#| tbl-cap: "Generalized linear mixed-effects model results for pointing angle error (Gamma family, log link)"
+#| tbl-cap: Generalized linear mixed-effects model results for pointing angle error (Gamma family, log link)
 display(summary(report_table(lmer_pointed_angle)),
         title = "Generalized linear mixed-effects model results for pointing 
                  angle error (Gamma family, log link)")
 ```
-
 
 ### Estimated Marginal Means
 
@@ -426,36 +390,16 @@ display(summary(report_table(lmer_pointed_angle)),
 #| tbl-cap: "Predicted angle errors (in degrees) across experimental conditions"
 predict_my_responses(lmer_pointed_angle) %>%
   report_my_predictions() %>%
-  knitr::kable(align = "lllcc")
+  gt() %>%
+    tab_header(title = "Predicted Angle Errors Across Experimental Conditions")
 ```
 
 ```{r angle-predictions-individual}
 #| tbl-cap: "Marginal predictions for individual factors"
-# Vista effect
-vista_pred <- predict_response(lmer_pointed_angle, terms = c("Vista"), margin = "empirical") %>%
-  as.data.frame() %>%
-  mutate(`Predicted Error (deg)` = round(predicted, 2),
-         `95% CI` = paste0("[", round(conf.low, 2), ", ", round(conf.high, 2), "]")) %>%
-  select(Vista = x, `Predicted Error (deg)`, `95% CI`)
-
-# Level size effect
-size_pred <- predict_response(lmer_pointed_angle, terms = c("LevelSize"), margin = "empirical") %>%
-  as.data.frame() %>%
-  mutate(`Predicted Error (deg)` = round(predicted, 2),
-         `95% CI` = paste0("[", round(conf.low, 2), ", ", round(conf.high, 2), "]")) %>%
-  select(`Level Size` = x, `Predicted Error (deg)`, `95% CI`)
-
-# Optic flow effect
-of_pred <- predict_response(lmer_pointed_angle, terms = c("OpticFlow"), margin = "empirical") %>%
-  as.data.frame() %>%
-  mutate(`Predicted Error (deg)` = round(predicted, 2),
-         `95% CI` = paste0("[", round(conf.low, 2), ", ", round(conf.high, 2), "]")) %>%
-  select(`Optic Flow` = x, `Predicted Error (deg)`, `95% CI`)
-
-# Display
-vista_pred %>% knitr::kable(caption = "Vista Effect", align = "lcc")
-size_pred %>% knitr::kable(caption = "Environment Size Effect", align = "lcc")
-of_pred %>% knitr::kable(caption = "Optic Flow Effect", align = "lcc")
+report_group_predictions(lmer_pointed_angle) %>% 
+  group_by(Predictor) %>%
+  gt() %>%
+    tab_header(title = "Predicted Effects of Experimental Conditions on Pointing Angle Error")
 ```
 
 ### Key Findings
@@ -557,7 +501,7 @@ check_model(glm_distance)
 ```
 
 ```{r glm-distance-results}
-#| tbl-cap: "Generalized linear model results for total navigation distance (Gamma family, log link)"
+#| tbl-cap: Generalized linear model results for total navigation distance (Gamma family, log link)
 display(summary(report_table(glm_distance),
         title = "Generalized linear model results for total navigation distance (Gamma family, log link)"))
 ```
@@ -565,7 +509,7 @@ display(summary(report_table(glm_distance),
 ### Estimated Marginal Means
 
 ```{r glm-distance-predictions}
-#| tbl-cap: "Predicted navigation distances across conditions using GLM with Gamma family and log link"
+#| tbl-cap: Predicted navigation distances across conditions using GLM with Gamma family and log link
 predict_my_responses(glm_distance) %>%
   report_my_predictions() %>%
   knitr::kable(align = "lllcc")
@@ -587,7 +531,8 @@ ggplot(df_data) +
     x = "Number of Teleports",
     y = "Frequency"
   ) +
-  geom_vline(xintercept = mean(df_data$n_teleports, na.rm = TRUE) + 3 * sd(df_data$n_teleports, na.rm = TRUE), linetype = "dashed", color = "red")
+  geom_vline(xintercept = mean(df_data$n_teleports, na.rm = TRUE) + 3 * sd(df_data$n_teleports, na.rm = TRUE),
+             linetype = "dashed", color = "red")
 ```
 
 Removing extreme outliers (|z|) > 3. As the number of teleports represents count data, we are using poisson distribution
@@ -630,7 +575,7 @@ display(summary(report_table(glm_teleports),
 ```
 
 ```{r glm-teleports-predictions}
-#| tbl-cap: "Predicted number of teleports across conditions using GLM with Poisson family"
+#| tbl-cap: Predicted number of teleports across conditions using GLM with Poisson family
 predict_my_responses(glm_teleports) %>%
   report_my_predictions() %>%
   knitr::kable(align = "lllcc")
@@ -641,7 +586,7 @@ predict_my_responses(glm_teleports) %>%
 Finally, we examined the total time participants spent navigating during the search and return phases.
 
 ```{r search-duration-histogram}
-#| fig-cap: "Distribution of search duration (log-transformed) by movement mode"
+#| fig-cap: Distribution of search duration (log-transformed) by movement mode
 ggplot(df_data, aes(x = log(duration_searching), fill = OpticFlow)) +
   geom_histogram(bins = 30, alpha = 0.7) +
   theme_minimal(base_size = 14) +
@@ -676,7 +621,7 @@ check_model(glm_duration)
 ```
 
 ```{r glm-duration-results}
-#| tbl-cap: "Generalized linear model results for total navigation duration (Gamma family, log link)"
+#| tbl-cap: Generalized linear model results for total navigation duration (Gamma family, log link)
 display(summary(report_table(glm_duration),
         title = "Generalized linear model results for total navigation duration (Gamma family, log link)"))
 ```
@@ -684,7 +629,7 @@ display(summary(report_table(glm_duration),
 ### Estimated Marginal Means
 
 ```{r glm-duration-predictions}
-#| tbl-cap: "Predicted navigation durations across conditions"
+#| tbl-cap: Predicted navigation durations across conditions
 predict_my_responses(glm_duration) %>%
   report_my_predictions() %>%
   knitr::kable(align = "lllcc")
@@ -699,7 +644,7 @@ Only the level size was a significant predictor of navigation time, unlike in th
 We assessed simulator sickness using the SSQ and VRSQ questionnaires to examine potential adverse effects of the different movement modes.
 
 ```{r ssq-descriptives}
-#| tbl-cap: "Simulator sickness scores by movement mode (SSQ metrics)"
+#| tbl-cap: Simulator sickness scores by movement mode (SSQ metrics)
 df_questionnaires %>%
   select(starts_with("ssq_"), starts_with("vrsq_"), Movement) %>%
   pivot_longer(cols = -Movement, names_to = "ssq_metric", values_to = "value") %>%
@@ -864,7 +809,7 @@ There seem to be no significant difference between the genders, with the excepti
 ### Simulator Sickness by Gender
 
 ```{r ssq-gender}
-#| tbl-cap: "Simulator sickness scores by gender"
+#| tbl-cap: "Simulator sickness scores by gender (SSQ metrics)"
 df_questionnaires %>%
   select(starts_with("vrsq_"), Gender, OpticFlow) %>%
   pivot_longer(cols = -c(Gender, OpticFlow), names_to = "ssq_metric", values_to = "value") %>%
