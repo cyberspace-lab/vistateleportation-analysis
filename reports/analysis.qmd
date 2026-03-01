@@ -328,8 +328,7 @@ Next, we examined the angular accuracy of participants' pointing responses. Angl
 
 ```{r angle-error-histogram}
 #| fig-cap: "Distribution of absolute angle errors (log-transformed). The distribution shows positive skew, justifying the use of a Gamma regression model."
-df_trials_model %>%
-  ggplot() +
+ggplot(df_trials_model) +
   geom_histogram(aes(x = log(abs(pointed_angle_difference))), bins = 30, fill = "coral", alpha = 0.7) +
   theme_minimal(base_size = 14) +
   labs(
@@ -344,7 +343,7 @@ ggplot(df_trials_model, aes(pointed_angle_difference, fill = abs(scale(pointed_a
   geom_histogram(bins = 30, alpha = 0.7) +
   theme_minimal(base_size = 14) +
   labs(
-    title = "Distribution of Absolute Angle Errors",
+    title = "Distribution of Raw Angle Errors",
     x = "Angle Error (degrees)",
     y = "Frequency"
   )
@@ -401,16 +400,16 @@ df_trials_model_angle %>%
 check_model(lmer_pointed_angle)
 ```
 
-```{r glmer-pointed-angle-model-fit-table}
-#| tbl-cap: "Model-level parameters and fit indices for pointing angle error model"
-report_model_summary_parameters(pointed_angle_model_table) %>%
-  tab_header(title = "Model Parameters for Pointing Angle Error")
-```
-
 ```{r glmer-pointed-angle-predictor-table}
 #| tbl-cap: "Fixed-effect predictor estimates for pointing angle error model"
 report_model_parameters(pointed_angle_model_table) %>%
   tab_header(title = "Fixed-Effect Predictor Estimates for Pointing Angle Error Model")
+```
+
+```{r glmer-pointed-angle-model-fit-table}
+#| tbl-cap: "Model-level parameters and fit indices for pointing angle error model"
+report_model_summary_parameters(pointed_angle_model_table) %>%
+  tab_header(title = "Model Parameters for Pointing Angle Error")
 ```
 
 ### Estimated Marginal Means
@@ -468,17 +467,46 @@ lmer_point_duration <- glmer(
   #data = filter(df_trials_model, run != "Run3"),  # exclude participant with extreme outliers
   family = Gamma(link = "log")
 )
+pointing_duration_model_table <- summary(report_table(lmer_point_duration))
+```
+
+```{r pointing-duration-boxplot}
+#| fig-cap: "Pointing response times by experimental conditions after outlier exclusion used in the model."
+df_trials_model_point_duration %>%
+  ggplot(aes(x = LevelSize, y = log(pointing_duration), fill = OpticFlow, color = OpticFlow)) +
+  geom_boxplot(alpha = 0.5, outlier.alpha = 0.3) +
+  geom_jitter(position = position_jitterdodge(jitter.width = 0.2), alpha = 0.3) +
+  facet_wrap(~Vista) +
+  theme_minimal(base_size = 14) +
+  labs(
+    title = "Pointing Response Time (Log) by Condition",
+    y = "Log(Response Time in seconds)",
+    x = "Environment Size",
+    fill = "Movement Mode",
+    color = "Movement Mode"
+  ) +
+  scale_fill_brewer(palette = "Set1") +
+  scale_color_brewer(palette = "Set1")
+```
+
+```{r lmer-pointing-duration-check}
+#| fig-cap: "Model diagnostics for the generalized linear mixed-effects model of pointing response time (Gamma family, log link)."
+#| fig-height: 12
+#| fig-width: 8
 check_model(lmer_point_duration)
 ```
 
-```{r lmer-pointing-duration-results}
-#| tbl-cap: "Generalized linear mixed-effects model results for pointing response time (Gamma family, log link)"
-display(summary(report_table(lmer_point_duration)),
-        title = "Generalized linear mixed-effects model results for pointing response time (Gamma family, log link)")
+```{r lmer-pointing-duration-predictor-table}
+#| tbl-cap: "Fixed-effect predictor estimates for pointing response time model"
+report_model_parameters(pointing_duration_model_table) %>%
+  tab_header(title = "Fixed-Effect Predictor Estimates for Pointing Response Time Model")
 ```
 
-### Key Findings
-Response times showed considerable variability across conditions, but no clear systematic patterns emerged from the model. The pointing was significantly slowere following large levels and following No optic flow movement. 
+```{r lmer-pointing-duration-model-fit-table}
+#| tbl-cap: "Model-level parameters and fit indices for pointing response time model"
+report_model_summary_parameters(pointing_duration_model_table) %>%
+  tab_header(title = "Model Parameters for Pointing Response Time")
+```
 
 ### Estimated Marginal Means
 
@@ -486,10 +514,20 @@ Response times showed considerable variability across conditions, but no clear s
 #| tbl-cap: "Predicted pointing response times (in seconds) across experimental conditions"
 predict_my_responses(lmer_point_duration) %>%
   report_my_predictions() %>%
-  knitr::kable(align = "lllcc")
+  gt() %>%
+    tab_header(title = "Predicted Pointing Response Times Across Experimental Conditions")
+```
 
-predict_response(lmer_point_duration, terms = "Vista", margin = "empirical")
-``` 
+```{r point-duration-predictions-individual}
+#| tbl-cap: "Marginal predictions for individual factors"
+report_group_predictions(lmer_point_duration) %>%
+  group_by(Predictor) %>%
+  gt() %>%
+    tab_header(title = "Predicted Effects of Experimental Conditions on Pointing Response Time")
+```
+
+### Key Findings
+Response times showed considerable variability across conditions, but no clear systematic patterns emerged from the model. The pointing was significantly slowere following large levels and following No optic flow movement. 
 
 ## Navigation Distance
 
@@ -497,12 +535,14 @@ We analyzed the total distance participants traveled during the search and retur
 
 ```{r navigated-distance-analysis, results='hide'}
 #| fig-cap: "Distribution of total navigation distance across trials"
-ggplot(df_data) +
-  geom_histogram(aes(x = log(distance_items)), bins = 30, fill = "darkgreen", alpha = 0.7) +
+df_data %>%
+  mutate(total_distance = distance_items + distance_return) %>%
+  ggplot() +
+  geom_histogram(aes(x = log(total_distance)), bins = 30, fill = "darkgreen", alpha = 0.7) +
   theme_minimal(base_size = 14) +
   labs(
     title = "Distribution of Navigated Distance",
-    x = "Distance Traveled (meters)",
+    x = "Log(Distance Traveled in meters)",
     y = "Frequency"
   )
 ```
