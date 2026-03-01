@@ -52,3 +52,28 @@ report_predictor_prediction <- function(lmer_model, term) {
     select(x, `Predicted Value`, `95% CI`)
   return(pred)
 }
+
+report_model_summary_parameters <- function(model_table) {
+  out <- bind_rows(
+    model_table %>%
+      filter(Effects == "random") %>%
+      transmute(Parameter = paste0("Random effect SD (", Group, ")"),
+                Value = Coefficient),
+      model_table %>%
+        filter(!is.na(Fit)) %>%
+        transmute(Parameter, Value = Fit)
+      ) %>% 
+  gt() %>%
+    fmt_number(columns = Value, decimals = 3)
+  return(out)
+}
+
+report_model_parameters <- function(model_table) {
+  out <- model_table %>%
+    filter(Effects == "fixed") %>%
+    mutate(`95% CI` = paste0("[", round(CI_low, 3), ", ", round(CI_high, 3), "]")) %>%
+    select(Parameter, Estimate = Coefficient, `95% CI`, Statistic = t, p) %>%
+    gt() %>%
+      fmt_number(columns = c(Estimate, Statistic, p), decimals = 3)
+  return(out)
+}

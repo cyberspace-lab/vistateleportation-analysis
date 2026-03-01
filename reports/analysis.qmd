@@ -262,6 +262,8 @@ lmer_pointed_distance <- lmer(
     (1|participant),
   data = df_distance_model
 )
+
+distance_model_table <- summary(report_table(lmer_pointed_distance))
 ```
 
 ```{r pointed-distance-boxplot}
@@ -294,11 +296,11 @@ check_model(lmer_pointed_distance)
 
 ```{r lmer-pointed-distance-table}
 #| tbl-cap: "Linear mixed-effects model results for pointing distance error" 
-summary(report_table(lmer_pointed_distance)) %>%
-  gt() %>%
-    tab_header(title = "Linear mixed-effects model results for pointing distance error") %>%
-    fmt_number(columns = where(is.numeric), decimals = 3) %>%
-    fmt_missing(columns = everything(), missing_text = "")
+report_model_parameters(distance_model_table) %>%
+  tab_header(title = "Fixed-Effect Predictor Estimates for Pointing Distance Error Model")
+report_model_summary_parameters(distance_model_table) %>%
+  tab_header(title = "Model Parameters for Pointing Distance Error")
+
 ```
 
 ### Estimated Marginal Means
@@ -352,7 +354,9 @@ ggplot(df_trials_model, aes(pointed_angle_difference, fill = abs(scale(pointed_a
 
 Due to the skewed distribution of the absolute angle errors, we used a generalized linear mixed-effects model with a Gamma distribution (as the log of the errors are left skewed) and a log link.
 
-As the original angle errors were approximately symmetrically distributed around zero, we removed outliers based on the raw data. Extreme outliers (|z| > 3 away from the mean using the angle estimated) were excluded from the analysis.
+As the original angle errors were approximately symmetrically distributed around zero, we removed outliers based on the raw data. 
+
+Extreme outliers (|z| > 3 away from the mean using the angle estimated) were excluded from the analysis.
 
 ```{r glmer-pointed-angle, results='hide'}
 # Fit the full model with Gamma family
@@ -368,6 +372,26 @@ lmer_pointed_angle <- df_trials_model_angle %>%
     data = .,
     family = Gamma(link = "log")
   )
+pointed_angle_model_table <- summary(report_table(lmer_pointed_angle))
+```
+
+```{r pointed-angle-boxplot}
+#| fig-cap: "Absolute pointing angle errors by experimental conditions after outlier exclusion used in the model."
+df_trials_model_angle %>%
+  ggplot(aes(x = LevelSize, y = log(abs_pointed_angle_difference), fill = OpticFlow, color = OpticFlow)) +
+  geom_boxplot(alpha = 0.5, outlier.alpha = 0.3) +
+  geom_jitter(position = position_jitterdodge(jitter.width = 0.2), alpha = 0.3) +
+  facet_wrap(~Vista) +
+  theme_minimal(base_size = 14) +
+  labs(
+    title = "Absolute Pointing Angle Error (Log) by Condition",
+    y = "Log(Absolute Angle Error in degrees)",
+    x = "Environment Size",
+    fill = "Movement Mode",
+    color = "Movement Mode"
+  ) +
+  scale_fill_brewer(palette = "Set1") +
+  scale_color_brewer(palette = "Set1")
 ```
 
 ```{r glmer-pointed-angle-check}
@@ -377,11 +401,16 @@ lmer_pointed_angle <- df_trials_model_angle %>%
 check_model(lmer_pointed_angle)
 ```
 
-```{r glmer-pointed-angle-table}
-#| tbl-cap: Generalized linear mixed-effects model results for pointing angle error (Gamma family, log link)
-display(summary(report_table(lmer_pointed_angle)),
-        title = "Generalized linear mixed-effects model results for pointing 
-                 angle error (Gamma family, log link)")
+```{r glmer-pointed-angle-model-fit-table}
+#| tbl-cap: "Model-level parameters and fit indices for pointing angle error model"
+report_model_summary_parameters(pointed_angle_model_table) %>%
+  tab_header(title = "Model Parameters for Pointing Angle Error")
+```
+
+```{r glmer-pointed-angle-predictor-table}
+#| tbl-cap: "Fixed-effect predictor estimates for pointing angle error model"
+report_model_parameters(pointed_angle_model_table) %>%
+  tab_header(title = "Fixed-Effect Predictor Estimates for Pointing Angle Error Model")
 ```
 
 ### Estimated Marginal Means
