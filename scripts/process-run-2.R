@@ -17,6 +17,7 @@ fix_olivers_mistake <- function(df_tab) {
 teleport_ssq <- surveys_run2$surveys$SSQT$data %>%
   fix_olivers_mistake() %>%
   rename(question3 = question2, question2 = question18) %>%
+  # This removes "item" from the answer as the items are 1234
   mutate(across(starts_with("question"),
                 ~as.numeric(str_remove(., "item")))) %>%
   process_ssq() %>%
