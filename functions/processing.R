@@ -87,10 +87,10 @@ process_ssq <- function(ssq_data) {
               question11 + question12 + question13 + question14,
            ssq_desorientation_total = ssq_desorientation * 13.92,
            ssq_total = (ssq_desorientation + ssq_oculomotor + ssq_nausea) * 3.74,
-           vrsq_oculomotor = question1 + question2 + question4 + question5 / 12,
-           vrsq_disorientation = question3 + question10 + question11 + question12 +
-              question13 + question14 / 15,
-           vrsq_total = (vrsq_oculomotor + vrsq_disorientation)/2) %>%
+           vrsq_oculomotor = (question1 + question2 + question4 + question5) * 100/ 12,
+           vrsq_disorientation = (question3 + question10 + question11 + question12 +
+              question13 + question14) * 100 / 15 ,
+           vrsq_total = (vrsq_oculomotor + vrsq_disorientation) / 2) %>%
     ungroup()
   return(ssq_results)
 }
