@@ -32,6 +32,8 @@ knitr::opts_chunk$set(
   fig.height = 6
 )
 
+ROUNDING_DIGITS <- 3
+
 here::i_am("reports/analysis.qmd")
 source(here::here("functions", "visualisation.R"))
 source(here::here("reports", "functions", "reporting.R"))
@@ -538,13 +540,16 @@ We analyzed the total distance participants traveled during the search and retur
 df_data %>%
   mutate(total_distance = distance_items + distance_return) %>%
   ggplot() +
-  geom_histogram(aes(x = log(total_distance)), bins = 30, fill = "darkgreen", alpha = 0.7) +
+  geom_histogram(aes(x = log(total_distance), fill = OpticFlow), bins = 30, alpha = 0.5, position = "identity") +
   theme_minimal(base_size = 14) +
+  theme(legend.position = "bottom") +
   labs(
-    title = "Distribution of Navigated Distance",
+    title = "Distribution of Log of Navigated Distance",
     x = "Log(Distance Traveled in meters)",
-    y = "Frequency"
-  )
+    y = "Frequency",
+    fill = "Movement Mode"
+  ) +
+  scale_fill_brewer(palette = "Set1")
 ```
 
 ### Statistical Model
@@ -557,7 +562,7 @@ To remove extreme outliers, we excluded trials where the z-scored log-transforme
 # Fit GLM with Gamma family
 df_navdistance_model <- df_data %>%
   mutate(total_distance = distance_items + distance_return,
-          z_log_total_distance = abs(scale(log(total_distance)))) %>%
+         z_log_total_distance = abs(scale(log(total_distance)))) %>%
   filter(z_log_total_distance < 3)
 
 glm_distance <- glm(
@@ -566,22 +571,75 @@ glm_distance <- glm(
   data = df_navdistance_model,
   family = Gamma(link = "log")
 )
+
+# Hack to allow the reporting functions to work with GLM output, which does not have the same structure as LMMs
+navdistance_model_table <- summary(report_table(glm_distance))
+if (!"Effects" %in% names(navdistance_model_table)) {
+  navdistance_model_table$Effects <- ifelse(!is.na(navdistance_model_table$Coefficient), "fixed", NA_character_)
+}
+if (!"Group" %in% names(navdistance_model_table)) {
+  navdistance_model_table$Group <- NA_character_
+}
+if (!"t" %in% names(navdistance_model_table) && "z" %in% names(navdistance_model_table)) {
+  navdistance_model_table$t <- navdistance_model_table$z
+}
+```
+
+```{r navigation-distance-boxplot}
+#| fig-cap: "Navigation distance by experimental conditions after outlier exclusion used in the model."
+df_navdistance_model %>%
+  ggplot(aes(x = LevelSize, y = log(total_distance), fill = OpticFlow, color = OpticFlow)) +
+  geom_boxplot(alpha = 0.5, outlier.alpha = 0.3) +
+  geom_jitter(position = position_jitterdodge(jitter.width = 0.2), alpha = 0.3) +
+  facet_wrap(~Vista) +
+  theme_minimal(base_size = 14) +
+  theme(legend.position = "bottom") +
+  labs(
+    title = "Navigation Distance (Log) by Condition",
+    y = "Log(Distance Traveled in meters)",
+    x = "Environment Size",
+    fill = "Movement Mode",
+    color = "Movement Mode"
+  ) +
+  scale_fill_brewer(palette = "Set1") +
+  scale_color_brewer(palette = "Set1")
+```
+
+```{r glm-distance-check}
+#| fig-cap: "Model diagnostics for the generalized linear model of navigation distance (Gamma family, log link)."
+#| fig-height: 12
+#| fig-width: 8
 check_model(glm_distance)
 ```
 
-```{r glm-distance-results}
-#| tbl-cap: Generalized linear model results for total navigation distance (Gamma family, log link)
-display(summary(report_table(glm_distance),
-        title = "Generalized linear model results for total navigation distance (Gamma family, log link)"))
+```{r glm-distance-model-fit-table}
+#| tbl-cap: "Model-level parameters and fit indices for navigation distance model"
+report_model_summary_parameters(navdistance_model_table) %>%
+  tab_header(title = "Model Parameters for Navigation Distance")
+```
+
+```{r glm-distance-predictor-table}
+#| tbl-cap: "Fixed-effect predictor estimates for navigation distance model"
+report_model_parameters(navdistance_model_table) %>%
+  tab_header(title = "Fixed-Effect Predictor Estimates for Navigation Distance Model")
 ```
 
 ### Estimated Marginal Means
 
 ```{r glm-distance-predictions}
-#| tbl-cap: Predicted navigation distances across conditions using GLM with Gamma family and log link
+#| tbl-cap: "Predicted navigation distances across conditions using GLM with Gamma family and log link"
 predict_my_responses(glm_distance) %>%
   report_my_predictions() %>%
-  knitr::kable(align = "lllcc")
+  gt() %>%
+  tab_header(title = "Predicted Navigation Distances Across Experimental Conditions")
+```
+
+```{r navigation-distance-predictions-individual}
+#| tbl-cap: "Marginal predictions for individual factors"
+report_group_predictions(glm_distance) %>%
+  group_by(Predictor) %>%
+  gt() %>%
+  tab_header(title = "Predicted Effects of Experimental Conditions on Navigation Distance")
 ```
 
 ### Key Findings
@@ -591,22 +649,26 @@ The presence of optic flow did not significantly affect the total distance trave
 We also examined the number of teleports participants used during navigation, which may reflect their strategy and confidence in navigating the environment.
 
 ```{r teleports-descriptive}
-#| fig-cap: "Distribution of total navigation distance across trials"
+#| fig-cap: "Distribution of number of teleports across trials"
 ggplot(df_data) +
-  geom_histogram(aes(x = n_teleports), binwidth=1, fill = "darkgreen", alpha = 0.7) + 
+  geom_histogram(aes(x = n_teleports, fill = OpticFlow), binwidth = 1, alpha = 0.7, position = "identity") +
   theme_minimal(base_size = 14) +
+  theme(legend.position = "bottom") +
   labs(
     title = "Distribution of Number of Teleports",
     x = "Number of Teleports",
-    y = "Frequency"
+    y = "Frequency",
+    fill = "Movement Mode"
   ) +
+  scale_fill_brewer(palette = "Set1") +
   geom_vline(xintercept = mean(df_data$n_teleports, na.rm = TRUE) + 3 * sd(df_data$n_teleports, na.rm = TRUE),
              linetype = "dashed", color = "red")
 ```
 
 Removing extreme outliers (|z|) > 3. As the number of teleports represents count data, we are using poisson distribution
 
-## Statistical model
+### Statistical Model
+
 ```{r teleports-model, results='hide'}
 df_model_teleports <- df_data %>%
   mutate(z_n_teleports = abs(scale(n_teleports)[,1])) %>%
@@ -623,31 +685,83 @@ check_overdispersion(glm_teleports)
 
 :::block{.callout-warning}
 Due to overdispersion in the Poisson model, we could refitted the model using a negative binomial distribution to account for the extra variability in the count data.
-
 I am thinking of not doing this for clarity, but we very well might. It is as easilly interpretable in the predicted values
 :::
 
-```{r teleports-overdispersion-model, eval=TRUE}
+```{r teleports-overdispersion-model, results='hide'}
 glm_teleports <- MASS::glm.nb(
   n_teleports ~ OpticFlow + Vista + LevelSize +
     OpticFlow:Vista + OpticFlow:LevelSize,
   data = df_model_teleports
 )
-check_model(glm_teleports)
-summary(glm_teleports)
+
+teleports_model_table <- summary(report_table(glm_teleports))
+if (!"Effects" %in% names(teleports_model_table)) {
+  teleports_model_table$Effects <- ifelse(!is.na(teleports_model_table$Coefficient), "fixed", NA_character_)
+}
+if (!"Group" %in% names(teleports_model_table)) {
+  teleports_model_table$Group <- NA_character_
+}
+if (!"t" %in% names(teleports_model_table) && "z" %in% names(teleports_model_table)) {
+  teleports_model_table$t <- teleports_model_table$z
+}
 ```
 
-```{r glm-teleports-results}
-#| tbl-cap: "Generalized linear model results for number of teleports (Poisson family)"
-display(summary(report_table(glm_teleports),
-        title = "Generalized linear model results for number of teleports (Poisson family)"))
+```{r teleports-boxplot}
+#| fig-cap: "Number of teleports by experimental conditions after outlier exclusion used in the model."
+df_model_teleports %>%
+  ggplot(aes(x = LevelSize, y = n_teleports, fill = OpticFlow, color = OpticFlow)) +
+  geom_boxplot(alpha = 0.5, outlier.alpha = 0.3) +
+  geom_jitter(position = position_jitterdodge(jitter.width = 0.2), alpha = 0.3) +
+  facet_wrap(~Vista) +
+  theme_minimal(base_size = 14) +
+  theme(legend.position = "bottom") +
+  labs(
+    title = "Number of Teleports by Condition",
+    y = "Number of Teleports",
+    x = "Environment Size",
+    fill = "Movement Mode",
+    color = "Movement Mode"
+  ) +
+  scale_fill_brewer(palette = "Set1") +
+  scale_color_brewer(palette = "Set1")
 ```
+
+```{r glm-teleports-check}
+#| fig-cap: "Model diagnostics for the generalized linear model of number of teleports (negative binomial)."
+#| fig-height: 12
+#| fig-width: 8
+check_model(glm_teleports)
+```
+
+```{r glm-teleports-model-fit-table}
+#| tbl-cap: "Model-level parameters and fit indices for teleports model"
+report_model_summary_parameters(teleports_model_table) %>%
+  tab_header(title = "Model Parameters for Number of Teleports")
+```
+
+```{r glm-teleports-predictor-table}
+#| tbl-cap: "Fixed-effect predictor estimates for teleports model"
+report_model_parameters(teleports_model_table) %>%
+  tab_header(title = "Fixed-Effect Predictor Estimates for Number of Teleports Model")
+```
+
+### Estimated Marginal Means
 
 ```{r glm-teleports-predictions}
-#| tbl-cap: Predicted number of teleports across conditions using GLM with Poisson family
+#| tbl-cap: "Predicted number of teleports across conditions using negative binomial model"
 predict_my_responses(glm_teleports) %>%
   report_my_predictions() %>%
-  knitr::kable(align = "lllcc")
+  gt() %>%
+  tab_header(title = "Predicted Number of Teleports Across Experimental Conditions")
+```
+
+```{r teleports-predictions-individual}
+#| tbl-cap: "Marginal predictions for individual factors"
+report_group_predictions(glm_teleports) %>%
+  group_by(Predictor) %>%
+  gt() %>%
+  tab_header(title = "Predicted Effects of Experimental Conditions on Number of Teleports")
 ```
 
 ## Navigation Duration
@@ -655,12 +769,15 @@ predict_my_responses(glm_teleports) %>%
 Finally, we examined the total time participants spent navigating during the search and return phases.
 
 ```{r search-duration-histogram}
-#| fig-cap: Distribution of search duration (log-transformed) by movement mode
-ggplot(df_data, aes(x = log(duration_searching), fill = OpticFlow)) +
-  geom_histogram(bins = 30, alpha = 0.7) +
+#| fig-cap: "Distribution of total navigation duration (log-transformed) by movement mode"
+df_data %>%
+  mutate(total_duration = duration_return + duration_searching) %>%
+  ggplot(aes(x = log(total_duration), fill = OpticFlow)) +
+  geom_histogram(bins = 30, alpha = 0.7, position = "identity") +
   theme_minimal(base_size = 14) +
+  theme(legend.position = "bottom") +
   labs(
-    title = "Search Duration Distribution",
+    title = "Total Navigation Duration Distribution",
     x = "Log(Duration in seconds)",
     y = "Frequency",
     fill = "Movement Mode"
@@ -686,22 +803,74 @@ glm_duration <- glm(
   data = df_model_duration,
   family = Gamma(link = "log")
 )
+
+duration_model_table <- summary(report_table(glm_duration))
+if (!"Effects" %in% names(duration_model_table)) {
+  duration_model_table$Effects <- ifelse(!is.na(duration_model_table$Coefficient), "fixed", NA_character_)
+}
+if (!"Group" %in% names(duration_model_table)) {
+  duration_model_table$Group <- NA_character_
+}
+if (!"t" %in% names(duration_model_table) && "z" %in% names(duration_model_table)) {
+  duration_model_table$t <- duration_model_table$z
+}
+```
+
+```{r navigation-duration-boxplot}
+#| fig-cap: "Navigation duration by experimental conditions after outlier exclusion used in the model."
+df_model_duration %>%
+  ggplot(aes(x = LevelSize, y = log(total_duration), fill = OpticFlow, color = OpticFlow)) +
+  geom_boxplot(alpha = 0.5, outlier.alpha = 0.3) +
+  geom_jitter(position = position_jitterdodge(jitter.width = 0.2), alpha = 0.3) +
+  facet_wrap(~Vista) +
+  theme_minimal(base_size = 14) +
+  theme(legend.position = "bottom") +
+  labs(
+    title = "Navigation Duration (Log) by Condition",
+    y = "Log(Duration in seconds)",
+    x = "Environment Size",
+    fill = "Movement Mode",
+    color = "Movement Mode"
+  ) +
+  scale_fill_brewer(palette = "Set1") +
+  scale_color_brewer(palette = "Set1")
+```
+
+```{r glm-duration-check}
+#| fig-cap: "Model diagnostics for the generalized linear model of navigation duration (Gamma family, log link)."
+#| fig-height: 12
+#| fig-width: 8
 check_model(glm_duration)
 ```
 
-```{r glm-duration-results}
-#| tbl-cap: Generalized linear model results for total navigation duration (Gamma family, log link)
-display(summary(report_table(glm_duration),
-        title = "Generalized linear model results for total navigation duration (Gamma family, log link)"))
+```{r glm-duration-model-fit-table}
+#| tbl-cap: "Model-level parameters and fit indices for navigation duration model"
+report_model_summary_parameters(duration_model_table) %>%
+  tab_header(title = "Model Parameters for Navigation Duration")
+```
+
+```{r glm-duration-predictor-table}
+#| tbl-cap: "Fixed-effect predictor estimates for navigation duration model"
+report_model_parameters(duration_model_table) %>%
+  tab_header(title = "Fixed-Effect Predictor Estimates for Navigation Duration Model")
 ```
 
 ### Estimated Marginal Means
 
 ```{r glm-duration-predictions}
-#| tbl-cap: Predicted navigation durations across conditions
+#| tbl-cap: "Predicted navigation durations across conditions"
 predict_my_responses(glm_duration) %>%
   report_my_predictions() %>%
-  knitr::kable(align = "lllcc")
+  gt() %>%
+  tab_header(title = "Predicted Navigation Durations Across Experimental Conditions")
+```
+
+```{r navigation-duration-predictions-individual}
+#| tbl-cap: "Marginal predictions for individual factors"
+report_group_predictions(glm_duration) %>%
+  group_by(Predictor) %>%
+  gt() %>%
+  tab_header(title = "Predicted Effects of Experimental Conditions on Navigation Duration")
 ```
 
 ### Key Findings
@@ -719,8 +888,8 @@ df_questionnaires %>%
   pivot_longer(cols = -Movement, names_to = "ssq_metric", values_to = "value") %>%
   group_by(ssq_metric, Movement) %>%
   summarize(
-    Mean = round(mean(value, na.rm = TRUE), 2),
-    SD = round(sd(value, na.rm = TRUE), 2),
+    Mean = round(mean(value, na.rm = TRUE), ROUNDING_DIGITS),
+    SD = round(sd(value, na.rm = TRUE), ROUNDING_DIGITS),
     mean_sd = paste0(Mean, " (", SD, ")"),
     .groups = "drop"
   ) %>%
@@ -732,7 +901,8 @@ df_questionnaires %>%
     `Without Optic Flow` = Teleport,
     `With Optic Flow` = OpticFlow,
   ) %>%
-  knitr::kable(align = "lcccc")
+  gt() %>%
+    tab_header(title = "Simulator Sickness Scores by Movement Mode (SSQ and VRSQ)")
 ```
 
 ### Statistical Tests
@@ -761,12 +931,13 @@ df_questionnaires %>%
     `95% CI Upper` = conf.high
   ) %>%
   mutate(
-    `Mean Difference` = round(`Mean Difference`, 2),
-    `t-statistic` = round(`t-statistic`, 2),
-    `p-value` = round(`p-value`, 3),
-    `95% CI Lower` = round(`95% CI Lower`, 2),
-    `95% CI Upper` = round(`95% CI Upper`, 2)
+    `Mean Difference` = round(`Mean Difference`, ROUNDING_DIGITS),
+    `t-statistic` = round(`t-statistic`, ROUNDING_DIGITS),
+    `p-value` = round(`p-value`, ROUNDING_DIGITS),
+    `95% CI Lower` = round(`95% CI Lower`, ROUNDING_DIGITS),
+    `95% CI Upper` = round(`95% CI Upper`, ROUNDING_DIGITS)
   ) %>%
+
   knitr::kable(align = "lccccc")
 ```
 
@@ -783,8 +954,8 @@ df_questionnaires %>%
   pivot_longer(cols = -c(Movement, participant), names_to = "vrleq_metric", values_to = "value") %>%
   group_by(vrleq_metric, Movement) %>%
   summarize(
-    Mean = round(mean(value, na.rm = TRUE), 2),
-    SD = round(sd(value, na.rm = TRUE), 2),
+    Mean = round(mean(value, na.rm = TRUE), ROUNDING_DIGITS),
+    SD = round(sd(value, na.rm = TRUE), ROUNDING_DIGITS),
     mean_sd = paste0(Mean, " (", SD, ")"),
     Min = min(value, na.rm = TRUE),
     Max = max(value, na.rm = TRUE),
@@ -805,7 +976,8 @@ df_questionnaires %>%
     `Mean (With OF)` = mean_sd_OpticFlow,
     `Range (With OF)` = Range_OpticFlow
   ) %>%
-  knitr::kable(align = "lcccccccc")
+  gt() %>%
+    tab_header(title = "VR Embodiment and Presence Scores by Movement Mode (VRLEQ)")
 ```
 
 ```{r vrleq-tests}
@@ -830,13 +1002,14 @@ df_questionnaires %>%
     `95% CI Upper` = conf.high
   ) %>%
   mutate(
-    `Mean Difference` = round(`Mean Difference`, 2),
-    `t-statistic` = round(`t-statistic`, 2),
-    `p-value` = round(`p-value`, 3),
-    `95% CI Lower` = round(`95% CI Lower`, 2),
-    `95% CI Upper` = round(`95% CI Upper`, 2)
+    `Mean Difference` = round(`Mean Difference`, ROUNDING_DIGITS),
+    `t-statistic` = round(`t-statistic`, ROUNDING_DIGITS),
+    `p-value` = round(`p-value`, ROUNDING_DIGITS),
+    `95% CI Lower` = round(`95% CI Lower`, ROUNDING_DIGITS),
+    `95% CI Upper` = round(`95% CI Upper`, ROUNDING_DIGITS)
   ) %>%
-  knitr::kable(align = "lccccc")
+  gt() %>%
+    tab_header(title = "Paired t-tests Comparing VR Embodiment and Presence Between Movement Modes (VRLEQ)")
 ```
 
 # Other Analyses
@@ -846,7 +1019,10 @@ df_questionnaires %>%
 ### Outcome measures differences
 
 ```{r gender-all-metrics}
-df_trials_model %>%
+#| fig-cap: "Distribution of spatial performance metrics by gender "
+#| fig-height: 8
+#| fig-width: 8
+df_gender_comparisons <- df_trials_model %>%
   select(participant, Gender, 
          target_pointed_distance_difference,
          log_abs_pointed_angle_difference = pointed_angle_difference,
@@ -859,8 +1035,9 @@ df_trials_model %>%
   group_by(metric) %>%
   mutate(abs_z_value = abs(scale(value))) %>%
   ungroup() %>%
-  filter(abs_z_value < 3) %>%
-  ggplot(aes(x = value, fill = Gender)) +
+  filter(abs_z_value < 3)
+
+ggplot(df_gender_comparisons, aes(x = value, fill = Gender)) +
   geom_histogram(aes(y=after_stat(density)), position = "identity", bins = 30, alpha = 0.7) +
   facet_wrap(~metric, scales = "free", ncol = 1) +
   theme_minimal(base_size = 14) +
@@ -870,7 +1047,7 @@ df_trials_model %>%
     y = "Density"
   ) +
   scale_fill_brewer(palette = "Set2") +
-  theme(legend.position = "top")
+  theme(legend.position = "bottom")
 ```
 
 There seem to be no significant difference between the genders, with the exception of pointing duration where males seem to bave slightly slower response times.
@@ -883,14 +1060,12 @@ df_questionnaires %>%
   select(starts_with("vrsq_"), Gender, OpticFlow) %>%
   pivot_longer(cols = -c(Gender, OpticFlow), names_to = "ssq_metric", values_to = "value") %>%
   ggplot(aes(y = value, fill = Gender)) +
-  geom_boxplot(alpha = 0.5, outlier.alpha = 0.3) +
-  facet_wrap(~ssq_metric, scales = "free") +
-  theme_minimal(base_size = 14) +
-  labs(
-    title = "Simulator Sickness Scores by Gender and Movement Mode",
-  ) + 
-  scale_fill_brewer(palette = "Set3") +
-  theme(legend.position = "top")
+    geom_boxplot(alpha = 0.5, outlier.alpha = 0.3) +
+    facet_wrap(~ssq_metric, scales = "free") +
+    theme_minimal(base_size = 14) +
+    labs(title = "Simulator Sickness Scores by Gender and Movement Mode") + 
+  scale_fill_brewer(palette = "Set2") +
+  theme(legend.position = "bottom")
 ```
 
 ### Gender and optic flow interaction
@@ -910,75 +1085,8 @@ df_questionnaires %>%
     x = "Score",
     y = "Frequency"
   ) + 
-  scale_fill_brewer(palette = "Set3") +
+  scale_fill_brewer(palette = "Set2") +
   theme(legend.position = "none")
 ```
 
 There does not seem to be any strong gender pattern in the simulator sickness scores, nor any strong interaction between
-
-# Model Diagnostics {.appendix}
-
-This section contains detailed diagnostic checks for the statistical models reported above. These checks validate model assumptions and ensure the reliability of our inferences.
-
-## Distance Error Model Diagnostics
-
-```{r distance-diagnostics}
-#| fig-cap: "Diagnostic plots for the distance error linear mixed-effects model"
-#| fig-height: 8
-check_lmer_model(lmer_pointed_distance)
-```
-
-```{r distance-heteroscedasticity}
-#| fig-cap: "Heteroscedasticity check for distance error model"
-plot(check_heteroscedasticity(lmer_pointed_distance))
-```
-
-```{r distance-homogeneity}
-#| fig-cap: "Homogeneity check for distance error model"
-plot(check_homogeneity(lmer_pointed_distance))
-```
-
-## Angle Error Model Diagnostics
-
-```{r angle-diagnostics}
-#| fig-cap: "Diagnostic checks for the angle error generalized linear mixed-effects model"
-check_lmer_model(lmer_pointed_angle)
-```
-
-```{r angle-residuals}
-#| fig-cap: "Simulated residual diagnostics for angle error model"
-#| fig-height: 8
-simulate_residuals(lmer_pointed_angle) %>%
-  plot()
-```
-
-```{r angle-residuals-check}
-#| fig-cap: "Additional residual checks for angle error model"
-check_residuals(simulate_residuals(lmer_pointed_angle))
-```
-
-```{r angle-homogeneity}
-#| fig-cap: "Homogeneity check for angle error model"
-plot(check_homogeneity(lmer_pointed_angle))
-```
-
-## Pointing Duration Model Diagnostics
-
-```{r duration-diagnostics}
-#| fig-cap: "Comprehensive model diagnostics for pointing response time model"
-#| fig-height: 10
-check_model(lmer_point_duration)
-```
-
-# Summary
-This analysis examined spatial cognition in virtual reality environments across different movement modes and environmental configurations. Key findings include:
-
-1. **Vista spaces improved distance estimation accuracy** - Participants made smaller distance errors in environments with open sightlines (vista spaces) compared to enclosed spaces, regardless of movement mode or environment size.
-
-2. **Environment size affected angular accuracy** - Larger environments led to larger angular pointing errors, but this was not influenced by vista condition or movement mode.
-
-3. **Vista spaces promoted more efficient navigation** - Participants traveled shorter distances in vista spaces, suggesting better spatial awareness and more direct navigation paths.
-
-4. **Optic flow had limited effects** - The presence of optic flow during movement (vs. teleportation without it) did not significantly affect most spatial performance metrics, suggesting that spatial learning may rely more on visual access to the environment than on movement-related visual information.
-
-These findings support the importance of environmental visibility for spatial cognition in virtual environments and have implications for VR application design, particularly for training and wayfinding applications.
