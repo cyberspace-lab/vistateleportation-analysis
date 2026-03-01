@@ -34,12 +34,14 @@ knitr::opts_chunk$set(
 here::i_am("reports/analysis.qmd")
 source(here::here("functions", "visualisation.R"))
 
-df_pointing <- read.csv(here::here("temp", "processed", "pointing20260226.csv"))
-df_distance <- read.csv(here::here("temp", "processed", "distance20260226.csv"))
-df_timing <- read.csv(here::here("temp", "processed", "timing20260226.csv"))
+PROCESSED_DATE <- "20260226"
 
-df_trials <- read.csv(here::here("temp", "processed", "all_combined_trials20260226.csv"))
-df_data <- read.csv(here::here("temp", "processed", "all_combined20260226.csv"))
+df_pointing <- read.csv(here::here("temp", "processed", paste0("pointing", PROCESSED_DATE, ".csv")))
+df_distance <- read.csv(here::here("temp", "processed", paste0("distance", PROCESSED_DATE, ".csv")))
+df_timing <- read.csv(here::here("temp", "processed", paste0("timing", PROCESSED_DATE, ".csv")))
+
+df_trials <- read.csv(here::here("temp", "processed", paste0("all_combined_trials", PROCESSED_DATE, ".csv")))
+df_data <- read.csv(here::here("temp", "processed", paste0("all_combined", PROCESSED_DATE, ".csv")))
 
 df_trials <- df_trials %>%
   mutate(LevelName = str_c(str_remove(LevelName, "Vista|Nonvista"), "_", LevelSize),

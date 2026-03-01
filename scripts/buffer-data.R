@@ -18,17 +18,7 @@ positions <- read_sheet(positions_sheet)
 positions <- positions[, 1:5]
 write.csv(positions, file.path("temp", "positions.csv"), row.names = FALSE)
 
-# Loading experimental data
+# Loading experimental data -------
 data_id <-  as_id("1d5gwCkulAjOccCKRcf0-l9Oy1afY5Hfy")
 drive_download(file = data_id, path = file.path("temp", "data.zip"))
 unzip(file.path("temp", "data.zip"), exdir = file.path("temp", "data"))
-
-# Loading processed data
-dir.create(file.path("temp", "processed"), showWarnings = FALSE)
-processed_data_id <- as_id("1Kc0MbFtfw11-D878F3NCbKDo1qX_Wrz7")
-drive_download(file = processed_data_id,
-               path = file.path("temp", "processed", "combined_data.csv"))
-
-trial_data_id <- as_id("1R49jsVgxh0Vh9FoiczpqIsBx9wIgId_O")
-drive_download(file = trial_data_id,
-               path = file.path("temp", "processed", "trial_data.csv"))

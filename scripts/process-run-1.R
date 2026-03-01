@@ -81,6 +81,6 @@ df_surveys_run1 <-
 df_demog_run1 <- df_questionnaire %>%
   select(ID, Age, Gender) %>%
   mutate(Gender = recode(Gender, "Muž" = "Male", "Žena" = "Female", "Jiné" = "Other"),
-         Age = as.numeric(Age))  
+         Age = as.numeric(Age))
 
 write.csv(df_surveys_run1, "temp/processed/questionnaire_summaries_run1.csv")

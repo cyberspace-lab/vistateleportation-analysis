@@ -2,10 +2,12 @@ library(stringr)
 library(dplyr)
 library(navr)
 
+
 extract_date <- function(filename) {
   date <- str_extract(filename, "\\d+-\\d+")
   return(date)
 }
+
 
 find_session_dates <- function(folder) {
   files <- list.files(folder, pattern = "*.txt")
@@ -16,6 +18,7 @@ find_session_dates <- function(folder) {
   }
   return(as.vector(unique(codes)))
 }
+
 
 load_participants <- function(folder) {
   folders <- list.dirs(folder, full.names = TRUE, recursive = FALSE)
@@ -29,6 +32,7 @@ load_participants <- function(folder) {
   return(participants)
 }
 
+
 load_participant <- function(folder) {
   dates <- find_session_dates(folder)
   sessions <- list()
@@ -39,6 +43,7 @@ load_participant <- function(folder) {
   }
   return(sessions)
 }
+
 
 load_session <- function(folder, date) {
   message("Loading session ", date)
@@ -59,9 +64,11 @@ load_session <- function(folder, date) {
   return(res)
 }
 
+
 has_finished <- function(events_log) {
   return("Finished" %in% events_log$information)
 }
+
 
 open_generic_log <- function(folder, date) {
   log <- find_log(folder, "GenericLogName", date)
@@ -71,6 +78,7 @@ open_generic_log <- function(folder, date) {
   df <- mutate(df, time = as.numeric(str_trim(time)))
   return(df)
 }
+
 
 open_position_log <- function(folder, date) {
   log <- find_log(folder, "position", date)
@@ -85,9 +93,12 @@ open_position_log <- function(folder, date) {
   return(df)
 }
 
+
 open_session_log <- function(folder, date) {
   log <- find_log(folder, "Session", date)
+  return(log)
 }
+
 
 find_log <- function(folder, type, date) {
   list_files <- list.files(folder, pattern = str_glue("*.{type}_{date}.txt"),
@@ -98,4 +109,3 @@ find_log <- function(folder, type, date) {
   return(list_files[1])
   # return the file path
 }
-
