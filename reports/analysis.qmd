@@ -38,7 +38,7 @@ here::i_am("reports/analysis.qmd")
 source(here::here("functions", "visualisation.R"))
 source(here::here("reports", "functions", "reporting.R"))
 
-PROCESSED_DATE <- "20260226"
+PROCESSED_DATE <- "20260301"
 
 df_pointing <- read.csv(here::here("temp", "processed", paste0("pointing", PROCESSED_DATE, ".csv")))
 df_distance <- read.csv(here::here("temp", "processed", paste0("distance", PROCESSED_DATE, ".csv")))
@@ -554,35 +554,25 @@ df_data %>%
 
 ### Statistical Model
 
-As each participant had only a single observation per condition, we used a generalized linear model with a Gamma distribution and log link to analyze the total navigation distance.  
+We used a mixed effect linear model with a Gamma distribution and log link to analyze the total navigation distance. 
 
 To remove extreme outliers, we excluded trials where the z-scored log-transformed total distance was greater than 3.
 
 ```{r glm-distance-analysis, results='hide'}
 # Fit GLM with Gamma family
 df_navdistance_model <- df_data %>%
-  mutate(total_distance = distance_items + distance_return,
+  mutate(total_distance = (distance_items + distance_return),
          z_log_total_distance = abs(scale(log(total_distance)))) %>%
   filter(z_log_total_distance < 3)
 
-glm_distance <- glm(
-  total_distance ~ OpticFlow + Vista + LevelSize +
-    OpticFlow:Vista + OpticFlow:LevelSize,
+lmer_traveled_distance <- glmer(total_distance ~ OpticFlow + Vista + LevelSize +
+    OpticFlow:Vista + OpticFlow:LevelSize + (1|participant),
   data = df_navdistance_model,
-  family = Gamma(link = "log")
+  family = Gamma(link = "log"),
+  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 100000))
 )
 
-# Hack to allow the reporting functions to work with GLM output, which does not have the same structure as LMMs
-navdistance_model_table <- summary(report_table(glm_distance))
-if (!"Effects" %in% names(navdistance_model_table)) {
-  navdistance_model_table$Effects <- ifelse(!is.na(navdistance_model_table$Coefficient), "fixed", NA_character_)
-}
-if (!"Group" %in% names(navdistance_model_table)) {
-  navdistance_model_table$Group <- NA_character_
-}
-if (!"t" %in% names(navdistance_model_table) && "z" %in% names(navdistance_model_table)) {
-  navdistance_model_table$t <- navdistance_model_table$z
-}
+navdistance_model_table <- summary(report_table(lmer_traveled_distance))
 ```
 
 ```{r navigation-distance-boxplot}
@@ -609,7 +599,7 @@ df_navdistance_model %>%
 #| fig-cap: "Model diagnostics for the generalized linear model of navigation distance (Gamma family, log link)."
 #| fig-height: 12
 #| fig-width: 8
-check_model(glm_distance)
+check_model(lmer_traveled_distance)
 ```
 
 ```{r glm-distance-model-fit-table}
@@ -628,7 +618,7 @@ report_model_parameters(navdistance_model_table) %>%
 
 ```{r glm-distance-predictions}
 #| tbl-cap: "Predicted navigation distances across conditions using GLM with Gamma family and log link"
-predict_my_responses(glm_distance) %>%
+predict_my_responses(lmer_traveled_distance) %>%
   report_my_predictions() %>%
   gt() %>%
   tab_header(title = "Predicted Navigation Distances Across Experimental Conditions")
@@ -636,7 +626,7 @@ predict_my_responses(glm_distance) %>%
 
 ```{r navigation-distance-predictions-individual}
 #| tbl-cap: "Marginal predictions for individual factors"
-report_group_predictions(glm_distance) %>%
+report_group_predictions(lmer_traveled_distance) %>%
   group_by(Predictor) %>%
   gt() %>%
   tab_header(title = "Predicted Effects of Experimental Conditions on Navigation Distance")
@@ -646,6 +636,7 @@ report_group_predictions(glm_distance) %>%
 The presence of optic flow did not significantly affect the total distance traveled. However, participants traveled significantly shorter distances in vista spaces compared to non-vista spaces, suggesting more efficient navigation when environmental layout is visible.
 
 ## Number of Teleports
+
 We also examined the number of teleports participants used during navigation, which may reflect their strategy and confidence in navigating the environment.
 
 ```{r teleports-descriptive}
@@ -669,42 +660,40 @@ Removing extreme outliers (|z|) > 3. As the number of teleports represents count
 
 ### Statistical Model
 
+We modeled the number of teleports using a mixed-effects generalized linear model with a Poisson distribution. 
+
 ```{r teleports-model, results='hide'}
 df_model_teleports <- df_data %>%
   mutate(z_n_teleports = abs(scale(n_teleports)[,1])) %>%
   filter(z_n_teleports < 3)
 
-glm_teleports <- glm(
+lmer_teleports <- glmer(
   n_teleports ~ OpticFlow + Vista + LevelSize +
-    OpticFlow:Vista + OpticFlow:LevelSize,
+    OpticFlow:Vista + OpticFlow:LevelSize + (1|participant),
   data = df_model_teleports,
   family = poisson() 
 )
-check_overdispersion(glm_teleports)
+check_overdispersion(lmer_teleports)
 ```
 
-:::block{.callout-warning}
+:::{.callout-warning}
 Due to overdispersion in the Poisson model, we could refitted the model using a negative binomial distribution to account for the extra variability in the count data.
 I am thinking of not doing this for clarity, but we very well might. It is as easilly interpretable in the predicted values
 :::
 
+
+We refitted the model using a negative binomial distribution to account for overdispersion.
+
 ```{r teleports-overdispersion-model, results='hide'}
-glm_teleports <- MASS::glm.nb(
+lmer_teleports <- lme4::glmer.nb(
   n_teleports ~ OpticFlow + Vista + LevelSize +
-    OpticFlow:Vista + OpticFlow:LevelSize,
+    OpticFlow:Vista + OpticFlow:LevelSize + (1|participant),
   data = df_model_teleports
 )
 
-teleports_model_table <- summary(report_table(glm_teleports))
-if (!"Effects" %in% names(teleports_model_table)) {
-  teleports_model_table$Effects <- ifelse(!is.na(teleports_model_table$Coefficient), "fixed", NA_character_)
-}
-if (!"Group" %in% names(teleports_model_table)) {
-  teleports_model_table$Group <- NA_character_
-}
-if (!"t" %in% names(teleports_model_table) && "z" %in% names(teleports_model_table)) {
-  teleports_model_table$t <- teleports_model_table$z
-}
+teleports_model_table <- summary(report_table(lmer_teleports))
+# need to column z to T values so that the report_model_parameters function can work with it
+teleports_model_table$t <- teleports_model_table$z
 ```
 
 ```{r teleports-boxplot}
@@ -731,7 +720,7 @@ df_model_teleports %>%
 #| fig-cap: "Model diagnostics for the generalized linear model of number of teleports (negative binomial)."
 #| fig-height: 12
 #| fig-width: 8
-check_model(glm_teleports)
+check_model(lmer_teleports)
 ```
 
 ```{r glm-teleports-model-fit-table}
@@ -750,18 +739,18 @@ report_model_parameters(teleports_model_table) %>%
 
 ```{r glm-teleports-predictions}
 #| tbl-cap: "Predicted number of teleports across conditions using negative binomial model"
-predict_my_responses(glm_teleports) %>%
+predict_my_responses(lmer_teleports) %>%
   report_my_predictions() %>%
   gt() %>%
-  tab_header(title = "Predicted Number of Teleports Across Experimental Conditions")
+    tab_header(title = "Predicted Number of Teleports Across Experimental Conditions")
 ```
 
 ```{r teleports-predictions-individual}
 #| tbl-cap: "Marginal predictions for individual factors"
-report_group_predictions(glm_teleports) %>%
+report_group_predictions(lmer_teleports) %>%
   group_by(Predictor) %>%
   gt() %>%
-  tab_header(title = "Predicted Effects of Experimental Conditions on Number of Teleports")
+    tab_header(title = "Predicted Effects of Experimental Conditions on Number of Teleports")
 ```
 
 ## Navigation Duration
@@ -787,7 +776,7 @@ df_data %>%
 
 ### Statistical Model
 
-As the navigation duration data were also left-skewed and not normally distributed, we used a generalized linear model with a Gamma distribution and log link. 
+As the navigation duration data were also left-skewed and not normally distributed, we used a generalized mixed effect model with a Gamma distribution and log link. 
 
 We excluded extreme outliers (|z| > 3 on the log-transformed total duration) from the analysis.
 
@@ -797,23 +786,14 @@ df_model_duration <- df_data %>%
          z_log_total_duration = abs(scale(log(total_duration)))) %>%
   filter(z_log_total_duration < 3)
 
-glm_duration <- glm(
+lmer_navigated_duration <- glmer(
   total_duration ~ OpticFlow + Vista + LevelSize +
-    OpticFlow:Vista + OpticFlow:LevelSize,
+    OpticFlow:Vista + OpticFlow:LevelSize + (1|participant),
   data = df_model_duration,
   family = Gamma(link = "log")
 )
 
-duration_model_table <- summary(report_table(glm_duration))
-if (!"Effects" %in% names(duration_model_table)) {
-  duration_model_table$Effects <- ifelse(!is.na(duration_model_table$Coefficient), "fixed", NA_character_)
-}
-if (!"Group" %in% names(duration_model_table)) {
-  duration_model_table$Group <- NA_character_
-}
-if (!"t" %in% names(duration_model_table) && "z" %in% names(duration_model_table)) {
-  duration_model_table$t <- duration_model_table$z
-}
+duration_model_table <- summary(report_table(lmer_navigated_duration))
 ```
 
 ```{r navigation-duration-boxplot}
@@ -840,7 +820,7 @@ df_model_duration %>%
 #| fig-cap: "Model diagnostics for the generalized linear model of navigation duration (Gamma family, log link)."
 #| fig-height: 12
 #| fig-width: 8
-check_model(glm_duration)
+check_model(lmer_navigated_duration)
 ```
 
 ```{r glm-duration-model-fit-table}
@@ -859,18 +839,18 @@ report_model_parameters(duration_model_table) %>%
 
 ```{r glm-duration-predictions}
 #| tbl-cap: "Predicted navigation durations across conditions"
-predict_my_responses(glm_duration) %>%
+predict_my_responses(lmer_navigated_duration) %>%
   report_my_predictions() %>%
   gt() %>%
-  tab_header(title = "Predicted Navigation Durations Across Experimental Conditions")
+    tab_header(title = "Predicted Navigation Durations Across Experimental Conditions")
 ```
 
 ```{r navigation-duration-predictions-individual}
 #| tbl-cap: "Marginal predictions for individual factors"
-report_group_predictions(glm_duration) %>%
+report_group_predictions(lmer_navigated_duration) %>%
   group_by(Predictor) %>%
   gt() %>%
-  tab_header(title = "Predicted Effects of Experimental Conditions on Navigation Duration")
+    tab_header(title = "Predicted Effects of Experimental Conditions on Navigation Duration")
 ```
 
 ### Key Findings
