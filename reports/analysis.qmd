@@ -621,7 +621,6 @@ predict_my_responses(lmer_traveled_distance) %>%
   report_my_predictions() %>%
   gt() %>%
     tab_header(title = "Predicted Navigation Distances Across Experimental Conditions")
-
 ```
 
 ```{r navigation-distance-predictions-individual}

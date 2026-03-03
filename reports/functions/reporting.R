@@ -69,8 +69,9 @@ report_model_summary_parameters <- function(model_table, round_digits = 3) {
 report_model_parameters <- function(model_table, round_digits = 3) {
   out <- model_table %>%
     filter(Effects == "fixed") %>%
-    mutate(`95% CI` = paste0("[", round(CI_low, round_digits), ", ", round(CI_high, round_digits), "]")) %>%
-    select(Parameter, Estimate = Coefficient, `95% CI`, Statistic = t, p) %>%
+    mutate(`95% CI` = paste0("[", round(CI_low, round_digits), ", ", round(CI_high, round_digits), "]"),
+           p.value = papaja::apa_p(p)) %>%
+    select(Parameter, Estimate = Coefficient, `95% CI`, Statistic = t, p = p.value) %>%
     gt() %>%
       fmt_number(columns = c(Estimate, Statistic), decimals = round_digits)
   return(out)
