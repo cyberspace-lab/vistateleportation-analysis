@@ -106,8 +106,8 @@ df_data %>%
   distinct() %>%
   group_by(Gender) %>%
   summarise(
-    `Mean Age` = round(mean(Age), 1),
-    `SD Age` = round(sd(Age), 1),
+    `Mean Age` = round(mean(Age), ROUNDING_DIGITS),
+    `SD Age` = round(sd(Age), ROUNDING_DIGITS),
     `Min Age` = min(Age),
     `Max Age` = max(Age),
     N = n(),
@@ -125,8 +125,8 @@ demo_data <- df_data %>%
   distinct()
 n_female <- sum(demo_data$Gender == "Female")
 n_male <- sum(demo_data$Gender == "Male")
-mean_age <- round(mean(demo_data$Age), 1)
-sd_age <- round(sd(demo_data$Age), 1)
+mean_age <- round(mean(demo_data$Age), ROUNDING_DIGITS)
+sd_age <- round(sd(demo_data$Age), ROUNDING_DIGITS)
 ```
 
 A total of `r n_total` participants completed the study. The sample consisted of `r n_female` females and `r n_male` males, with an average age of `r mean_age` years (SD = `r sd_age`).
@@ -302,7 +302,6 @@ report_model_parameters(distance_model_table) %>%
   tab_header(title = "Fixed-Effect Predictor Estimates for Pointing Distance Error Model")
 report_model_summary_parameters(distance_model_table) %>%
   tab_header(title = "Model Parameters for Pointing Distance Error")
-
 ```
 
 ### Estimated Marginal Means
@@ -621,7 +620,8 @@ report_model_parameters(navdistance_model_table) %>%
 predict_my_responses(lmer_traveled_distance) %>%
   report_my_predictions() %>%
   gt() %>%
-  tab_header(title = "Predicted Navigation Distances Across Experimental Conditions")
+    tab_header(title = "Predicted Navigation Distances Across Experimental Conditions")
+
 ```
 
 ```{r navigation-distance-predictions-individual}
@@ -629,7 +629,7 @@ predict_my_responses(lmer_traveled_distance) %>%
 report_group_predictions(lmer_traveled_distance) %>%
   group_by(Predictor) %>%
   gt() %>%
-  tab_header(title = "Predicted Effects of Experimental Conditions on Navigation Distance")
+    tab_header(title = "Predicted Effects of Experimental Conditions on Navigation Distance")
 ```
 
 ### Key Findings
@@ -1052,7 +1052,6 @@ df_questionnaires %>%
 
 ```{r gender-opticflow-interaction, fig.height=10}
 #| fig-cap: "Simulator sickness scores by gender and movement mode"
-#| 
 df_questionnaires %>%
   select(starts_with("vrsq_"), Gender, OpticFlow) %>%
   pivot_longer(cols = -c(Gender, OpticFlow), names_to = "ssq_metric", values_to = "value") %>%
