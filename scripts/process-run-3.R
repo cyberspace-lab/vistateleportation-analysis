@@ -11,9 +11,10 @@ run3_ssq <- function(ssq_data, movement_type) {
                   ~as.numeric(str_remove(., "item")))) %>%
     rename_with(~paste0("question", seq_along(.)), starts_with("SSQ")) %>%
     process_ssq() %>%
-    select(ID = participant, starts_with(c("ssq_", "vrsq_"))) %>%
+    select(ID = participant, starts_with(c("ssq_", "vrsq_"))) %>% # nolint: object_usage_linter.
     mutate(Movement = movement_type) %>%
-    pivot_longer(cols = -c(ID, Movement), names_to = "score", values_to = "value")
+    pivot_longer(cols = -c(ID, Movement), names_to = "score",
+                 values_to = "value")
   return(res)
 }
 

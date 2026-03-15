@@ -247,12 +247,6 @@ ggplot(aes(x = target_pointed_distance_difference), data = df_trials_model) +
 
 ### Statistical Model
 
-We fitted a linear mixed-effects model to examine the effects of optic flow, environment size, and vista condition on pointing distance errors. The model included the actual distance to the target as a covariate to account for the fact that larger distances might lead to larger errors.
-
-Extreme outliers (|z| > 3) were excluded from the analysis.
-
-Regular mixed effect model with normal distrubution has been used, as the distribution of distance errors was approximately normal around 0-mean. 
-
 ```{r lmer-pointed-distance, results='hide'}
 df_distance_model <- df_trials_model %>%
   mutate(z_target_pointed_distance_difference = abs(scale(target_pointed_distance_difference)[,1])) %>%
@@ -264,9 +258,14 @@ lmer_pointed_distance <- lmer(
     (1|participant),
   data = df_distance_model
 )
-
 distance_model_table <- summary(report_table(lmer_pointed_distance))
 ```
+
+We fitted a linear mixed-effects model to examine the effects of optic flow, environment size, and vista condition on pointing distance errors. The model included the actual distance to the target as a covariate to account for the fact that larger distances might lead to larger errors.
+
+Extreme outliers (|z| > 3) were excluded from the analysis.
+
+Regular mixed effect model with normal distrubution has been used, as the distribution of distance errors was approximately normal around 0-mean. 
 
 ```{r pointed-distance-boxplot}
 #| fig-cap: "Pointing distance errors by experimental conditions. Positive values indicate overshooting, negative values indicate undershooting."
@@ -295,6 +294,12 @@ df_distance_model %>%
 #| fig-width: 8
 check_model(lmer_pointed_distance)
 ```
+
+::: {.callout-caution title="Model Text Results" collapse="true"}
+```{r lmer-pointed-distance-text, results='asis'}
+report_text(lmer_pointed_distance)
+```
+:::
 
 ```{r lmer-pointed-distance-table}
 #| tbl-cap: "Linear mixed-effects model results for pointing distance error" 
@@ -401,6 +406,12 @@ df_trials_model_angle %>%
 check_model(lmer_pointed_angle)
 ```
 
+::: {.callout-caution title="Model Text Results" collapse="true"}
+```{r lmer-pointed-angle-text, results='asis'}
+report_text(lmer_pointed_angle)
+```
+:::
+
 ```{r glmer-pointed-angle-predictor-table}
 #| tbl-cap: "Fixed-effect predictor estimates for pointing angle error model"
 report_model_parameters(pointed_angle_model_table) %>%
@@ -496,6 +507,12 @@ df_trials_model_point_duration %>%
 #| fig-width: 8
 check_model(lmer_point_duration)
 ```
+
+::: {.callout-caution title="Model Text Results" collapse="true"}
+```{r lmer-pointing-duration-text, results='asis'}
+report_text(lmer_point_duration)
+```
+:::
 
 ```{r lmer-pointing-duration-predictor-table}
 #| tbl-cap: "Fixed-effect predictor estimates for pointing response time model"
@@ -601,6 +618,12 @@ df_navdistance_model %>%
 check_model(lmer_traveled_distance)
 ```
 
+::: {.callout-caution title="Model Text Results" collapse="true"}
+```{r lmer-traveled-distance-text, results='asis'}
+report_text(lmer_traveled_distance)
+```
+:::
+
 ```{r glm-distance-model-fit-table}
 #| tbl-cap: "Model-level parameters and fit indices for navigation distance model"
 report_model_summary_parameters(navdistance_model_table) %>%
@@ -680,7 +703,6 @@ Due to overdispersion in the Poisson model, we could refitted the model using a 
 I am thinking of not doing this for clarity, but we very well might. It is as easilly interpretable in the predicted values
 :::
 
-
 We refitted the model using a negative binomial distribution to account for overdispersion.
 
 ```{r teleports-overdispersion-model, results='hide'}
@@ -721,6 +743,12 @@ df_model_teleports %>%
 #| fig-width: 8
 check_model(lmer_teleports)
 ```
+
+::: {.callout-caution title="Model Text Results" collapse="true"}
+```{r lmer-teleports-text, results='asis'}
+report_text(lmer_teleports)
+```
+:::
 
 ```{r glm-teleports-model-fit-table}
 #| tbl-cap: "Model-level parameters and fit indices for teleports model"
@@ -822,6 +850,12 @@ df_model_duration %>%
 check_model(lmer_navigated_duration)
 ```
 
+::: {.callout-caution title="Model Text Results" collapse="true"}
+```{r lmer-navigated-duration-text, results='asis'}
+report_text(lmer_navigated_duration)
+```
+:::
+
 ```{r glm-duration-model-fit-table}
 #| tbl-cap: "Model-level parameters and fit indices for navigation duration model"
 report_model_summary_parameters(duration_model_table) %>%
@@ -890,35 +924,52 @@ We used simple paired t-tests to compare simulator sickness scores between the t
 
 ```{r ssq-tests}
 #| tbl-cap: "Paired t-tests comparing simulator sickness between movement modes"
-df_questionnaires %>%
+df_ssq_wide <- df_questionnaires %>%
   select(c(starts_with("ssq_"), starts_with("vrsq_")), participant, Movement) %>%
   pivot_longer(cols = -c(participant, Movement), names_to = "ssq_metric", values_to = "value") %>%
-  pivot_wider(names_from = Movement, values_from = value, id_cols = c(participant, ssq_metric)) %>%
+  pivot_wider(names_from = Movement, values_from = value, id_cols = c(participant, ssq_metric))
+
+df_ssq_tests <- df_ssq_wide %>%
   group_by(ssq_metric) %>%
   nest() %>%
   mutate(
-    test = map(data, ~ t.test(.x$OpticFlow, .x$Teleport, paired = TRUE) %>% tidy())
-  ) %>%
-  select(ssq_metric, test) %>%
-  unnest(test) %>%
+    t_model = map(data, ~ t.test(.x$OpticFlow, .x$Teleport, paired = TRUE)),
+    test = map(t_model, tidy),
+    descriptives = map(data, ~ tibble(
+      Mean_OF = mean(.x$OpticFlow, na.rm = TRUE),
+      SD_OF = sd(.x$OpticFlow, na.rm = TRUE),
+      Mean_TP = mean(.x$Teleport, na.rm = TRUE),
+      SD_TP = sd(.x$Teleport, na.rm = TRUE)
+    ))
+  )
+
+df_ssq_tests %>%
+  unnest(c(test, descriptives)) %>%
   select(
     Metric = ssq_metric,
+    `Optic Flow M` = Mean_OF,
+    `Optic Flow SD` = SD_OF,
+    `Teleport M` = Mean_TP,
+    `Teleport SD` = SD_TP,
     `Mean Difference` = estimate,
     `t-statistic` = statistic,
     `p-value` = p.value,
     `95% CI Lower` = conf.low,
     `95% CI Upper` = conf.high
   ) %>%
-  mutate(
-    `Mean Difference` = round(`Mean Difference`, ROUNDING_DIGITS),
-    `t-statistic` = round(`t-statistic`, ROUNDING_DIGITS),
-    `p-value` = round(`p-value`, ROUNDING_DIGITS),
-    `95% CI Lower` = round(`95% CI Lower`, ROUNDING_DIGITS),
-    `95% CI Upper` = round(`95% CI Upper`, ROUNDING_DIGITS)
-  ) %>%
-
-  knitr::kable(align = "lccccc")
+  mutate(across(where(is.numeric), ~ round(.x, ROUNDING_DIGITS))) %>%
+  knitr::kable(align = "lcccccccccc")
 ```
+
+:::{.callout-caution title="Paired t-test Results" collapse="true"}
+```{r ssq-tests-text, results='asis'}
+for(i in 1:nrow(df_ssq_tests)) {
+cat(paste0("**Metric: ", df_ssq_tests$ssq_metric[i]), "**\n")
+cat(report_text(df_ssq_tests$t_model[[i]]))
+cat("\n------------------------------\n")
+}
+```
+:::
 
 Looking at the results from the paired t-tests, there were multiple significant differences in simulator sickness scores between the two movement modes across all SSQ and VRSQ metrics. 
 
