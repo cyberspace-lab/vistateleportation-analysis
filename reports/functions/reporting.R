@@ -1,5 +1,6 @@
 library(dplyr)
 library(ggeffects)
+library(gt)
 
 predict_my_responses <- function(model) {
   dat <- predict_response(model, terms = c("OpticFlow", "Vista", "LevelSize"),
@@ -16,7 +17,8 @@ report_my_predictions <- function(predictions, round_digits = 3) {
       Vista = group,
       LevelSize = facet,
       `Predicted Value` = round(predicted, round_digits),
-      `95% CI` = paste0("[", round(conf.low, round_digits), ", ", round(conf.high, round_digits), "]")
+      `95% CI` = paste0("[", round(conf.low, round_digits),
+                        ", ", round(conf.high, round_digits), "]")
     ) %>%
     select(OpticFlow, Vista, LevelSize, `Predicted Value`, `95% CI`)
   return(out)
@@ -69,10 +71,14 @@ report_model_summary_parameters <- function(model_table, round_digits = 3) {
 report_model_parameters <- function(model_table, round_digits = 3) {
   out <- model_table %>%
     filter(Effects == "fixed") %>%
-    mutate(`95% CI` = paste0("[", round(CI_low, round_digits), ", ", round(CI_high, round_digits), "]"),
+    mutate(`95% CI` = paste0("[", round(CI_low, round_digits),
+                             ", ", round(CI_high, round_digits), "]"),
            p.value = papaja::apa_p(p)) %>%
-    select(Parameter, Estimate = Coefficient, Std.Estimate = Std_Coefficient,`95% CI`, Statistic = t, p = p.value) %>%
+    select(Parameter, Estimate = Coefficient,
+           Std.Estimate = Std_Coefficient,
+           `95% CI`, Statistic = t, p = p.value) %>%
     gt() %>%
-      fmt_number(columns = c(Estimate, Statistic), decimals = round_digits)
+      fmt_number(columns = c(Estimate, Std.Estimate, Statistic),
+                 decimals = round_digits)
   return(out)
 }
