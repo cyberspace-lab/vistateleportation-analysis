@@ -305,6 +305,7 @@ report_text(lmer_pointed_distance)
 #| tbl-cap: "Linear mixed-effects model results for pointing distance error" 
 report_model_parameters(distance_model_table) %>%
   tab_header(title = "Fixed-Effect Predictor Estimates for Pointing Distance Error Model")
+distance_model_table$Std_coeff
 report_model_summary_parameters(distance_model_table) %>%
   tab_header(title = "Model Parameters for Pointing Distance Error")
 ```
@@ -378,6 +379,7 @@ lmer_pointed_angle <- df_trials_model_angle %>%
     family = Gamma(link = "log")
   )
 pointed_angle_model_table <- summary(report_table(lmer_pointed_angle))
+colnames(pointed_angle_model_table)
 ```
 
 ```{r pointed-angle-boxplot}

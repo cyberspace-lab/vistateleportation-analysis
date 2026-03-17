@@ -57,12 +57,12 @@ report_model_summary_parameters <- function(model_table, round_digits = 3) {
       filter(Effects == "random") %>%
       transmute(Parameter = paste0("Random effect SD (", Group, ")"),
                 Value = Coefficient),
-      model_table %>%
-        filter(!is.na(Fit)) %>%
-        transmute(Parameter, Value = Fit)
-      ) %>% 
-  gt() %>%
-    fmt_number(columns = Value, decimals = round_digits)
+    model_table %>%
+      filter(!is.na(Fit)) %>%
+      transmute(Parameter, Value = Fit)
+  ) %>% 
+    gt() %>%
+      fmt_number(columns = Value, decimals = round_digits)
   return(out)
 }
 
@@ -71,7 +71,7 @@ report_model_parameters <- function(model_table, round_digits = 3) {
     filter(Effects == "fixed") %>%
     mutate(`95% CI` = paste0("[", round(CI_low, round_digits), ", ", round(CI_high, round_digits), "]"),
            p.value = papaja::apa_p(p)) %>%
-    select(Parameter, Estimate = Coefficient, `95% CI`, Statistic = t, p = p.value) %>%
+    select(Parameter, Estimate = Coefficient, Std.Estimate = Std_Coefficient,`95% CI`, Statistic = t, p = p.value) %>%
     gt() %>%
       fmt_number(columns = c(Estimate, Statistic), decimals = round_digits)
   return(out)
