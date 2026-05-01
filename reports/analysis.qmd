@@ -232,7 +232,6 @@ Performance on training trials was consistent across different experimental runs
 
 We first examined how accurately participants estimated distances to target objects. The distance error represents the difference between the actual distance to the target and the distance to the location they indicated.
 
-
 ```{r pointing-distance-histogram}
 #| fig-cap: "Distribution of pointing distance errors showing potential outliers"
 ggplot(aes(x = target_pointed_distance_difference), data = df_trials_model) +
@@ -1085,7 +1084,6 @@ ggplot(df_gender_comparisons, aes(x = value, fill = Gender)) +
 There seem to be no significant difference between the genders, with the exception of pointing duration where males seem to bave slightly slower response times.
 
 ### Simulator Sickness by Gender
-
 ```{r ssq-gender}
 #| tbl-cap: "Simulator sickness scores by gender (SSQ metrics)"
 df_questionnaires %>%
@@ -1121,3 +1119,144 @@ df_questionnaires %>%
 ```
 
 There does not seem to be any strong gender pattern in the simulator sickness scores, nor any strong interaction between
+
+## Correlation between estimated distance and traveled distance and teleports
+
+```{r calculating overall distnace error in each condition}
+df_pooled_distance_error <- df_trials_model %>%
+  group_by(participant, OpticFlow, LevelSize, Vista) %>%
+  mutate(total_distance = (distance_items + distance_return)) %>%
+  summarize(mean_distance_error = mean(target_pointed_distance_difference, na.rm = TRUE),
+            mean_abs_distance_error = mean(abs(target_pointed_distance_difference), na.rm = TRUE),
+            median_traveled_distance = median(total_distance, na.rm = TRUE),
+            n_teleports = mean(n_teleports, na.rm = TRUE),
+            mean_traveled_distance = mean(total_distance, na.rm = TRUE),
+            .groups = "drop")
+View(df_pooled_distance_error)
+```
+
+### Correlation between estimated distance and traveled distance
+
+```{r correlation-distance-error-traveled-distance}
+#| fig-cap: "Correlation between mean distance error and navigation behavior across conditions. Top row: traveled distance. Bottom row: number of teleports."
+df_pooled_distance_error %>%
+  pivot_longer(
+    cols = c(mean_traveled_distance,
+            median_traveled_distance),
+    names_to = "navigation_metric",
+    values_to = "value"
+  ) %>%
+  ggplot(aes(x = value, y = mean_distance_error, color = OpticFlow)) +
+    geom_point(size = 3, alpha = 0.7) +
+    geom_smooth(method = "lm", se = TRUE) +
+    facet_grid(
+      navigation_metric ~ LevelSize + Vista,
+      scales = "free"
+    ) +
+  theme_minimal(base_size = 14) +
+  labs(
+    title = "Correlation between Mean Distance Error and Navigation Behavior",
+    x = "Mean Distance Error (meters)",
+    y = NULL,
+    color = "Movement Mode"
+  ) +
+  scale_color_brewer(palette = "Set1") +
+  theme(legend.position = "bottom")
+
+df_pooled_distance_error %>%
+  ggplot(aes(x = n_teleports, y = mean_distance_error, color = OpticFlow)) +
+    geom_point(size = 3, alpha = 0.7) +
+    geom_smooth(method = "lm", se = TRUE) +
+    facet_grid(
+      LevelSize ~ Vista,
+      scales = "free"
+    ) +
+  theme_minimal(base_size = 14) +
+  labs(
+    title = "Correlation between Mean Distance Error and Number of Teleports",
+    x = "Number of Teleports",
+    y = NULL,
+    color = "Movement Mode"
+  ) +
+  scale_color_brewer(palette = "Set1") +
+  theme(legend.position = "bottom")
+```
+
+### Effect of Traveled Distance on Distance Estimates
+
+We next examined whether the distance participants traveled during the search phase predicted their subsequent distance estimation error, and whether this relationship differed between vista and non-vista environments or between optic flow conditions.
+
+We firstly scaled the total distance to bettter fit the model. The scaling was done within each level size to account for the fact that participants naturally traveled longer distances in larger environments. This could confound the relationship between traveled distance and distance estimation error, as any effect of traveled distance could be driven by the level size rather than the actual distance traveled. By scaling the total distance within each level size, we can better isolate the effect of traveled distance on distance estimation error while controlling for the influence of level size.
+
+```{r navdistance-effect-model, results='hide'}
+df_navdistance_effect_model <- df_trials_model %>%
+  mutate(total_distance = distance_items + distance_return) %>%
+  filter(!is.na(total_distance) & !is.na(target_pointed_distance_difference)) %>%
+  group_by(LevelSize) %>%
+  mutate(total_distance_scaled = scale(total_distance)[,1]) %>%
+  ungroup()
+
+lmer_navdistance_effect <- lmer(
+  target_pointed_distance_difference ~ total_distance_scaled * Vista +
+    total_distance_scaled * OpticFlow + LevelSize +
+    (1|participant),
+  data = df_navdistance_effect_model
+)
+navdistance_effect_model_table <- summary(report_table(lmer_navdistance_effect))
+```
+
+```{r navdistance-effect-scatter}
+#| fig-cap: "Relationship between traveled distance during search and distance estimation error, split by vista condition and movement mode."
+df_navdistance_effect_model %>%
+  ggplot(aes(x = total_distance, y = target_pointed_distance_difference, color = OpticFlow)) +
+  geom_point(alpha = 0.2, size = 1.5) +
+  geom_smooth(method = "lm", se = TRUE) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "gray40") +
+  facet_grid(LevelSize ~ Vista, labeller = label_both) +
+  theme_minimal(base_size = 14) +
+  labs(
+    title = "Traveled Distance vs. Distance Estimation Error",
+    x = "Total Traveled Distance (meters)",
+    y = "Distance Estimation Error (meters)",
+    color = "Movement Mode"
+  ) +
+  scale_color_brewer(palette = "Set1") +
+  theme(legend.position = "none")
+```
+
+```{r navdistance-effect-model-check}
+#| fig-cap: "Model diagnostics for the effect of traveled distance on distance estimation error."
+#| fig-height: 12
+#| fig-width: 8
+check_model(lmer_navdistance_effect)
+```
+
+::: {.callout-caution title="Model Text Results" collapse="true"}
+```{r navdistance-effect-text, results='asis'}
+report_text(lmer_navdistance_effect)
+```
+:::
+
+```{r navdistance-effect-table}
+#| tbl-cap: "Linear mixed-effects model results for the effect of traveled distance on distance estimation error"
+report_model_parameters(navdistance_effect_model_table) %>%
+  tab_header(title = "Fixed-Effect Predictor Estimates for Traveled Distance Effect Model")
+navdistance_effect_model_table$Std_coeff
+report_model_summary_parameters(navdistance_effect_model_table) %>%
+  tab_header(title = "Model Parameters for Traveled Distance Effect on Distance Estimation")
+```
+
+### Estimated Marginal Means
+
+```{r navdistance-effect-predictions}
+#| tbl-cap: "Predicted distance errors across all experimental conditions for the traveled distance effect model"
+predict_my_responses(lmer_navdistance_effect) %>%
+  report_my_predictions() %>%
+  gt() %>%
+    tab_header(title = "Predicted Distance Errors Across Experimental Conditions")
+
+report_group_predictions(lmer_navdistance_effect) %>%
+  group_by(Predictor) %>%
+  gt() %>%
+    tab_header(title = "Predicted Effects of Traveled Distance, Vista, and Optic Flow on Distance Estimation Error")
+```
