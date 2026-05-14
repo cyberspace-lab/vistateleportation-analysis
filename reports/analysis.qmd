@@ -97,6 +97,46 @@ In all models the reference levels and intercepts are as follows:
   
 Any beta coefficients represent the change in the outcome variable when moving from the reference level to the other level of the factor, holding all other variables constant. For clarity and clearer interpretation of interactions, marginal means and predicted values are also reported.
 
+## Outcome Variables Overview
+
+The following table summarizes the raw descriptive statistics (mean, median, SD, min, max) for all outcome variables analyzed in this report. No outlier filtering or transformations are applied here; values are computed across all available trials/observations.
+
+```{r outcome-descriptives}
+#| tbl-cap: "Descriptive statistics for all outcome variables (raw values, no outlier exclusion)"
+df_outcomes_trial <- df_trials_model %>%
+  transmute(
+    `Pointing Distance Error (m)` = target_pointed_distance_difference,
+    `Pointing Angle Error (deg, signed)` = pointed_angle_difference,
+    `Pointing Angle Error (deg, absolute)` = abs(pointed_angle_difference),
+    `Pointing Response Time (s)` = pointing_duration,
+    `Proportional Distance Error` = target_pointed_distance_difference / pointingpoint_target_distance
+  )
+
+df_outcomes_session <- df_data %>%
+  transmute(
+    `Navigation Distance (m)` = distance_items + distance_return,
+    `Navigation Duration (s)` = duration_searching + duration_return,
+    `Number of Teleports` = n_teleports
+  )
+
+bind_rows(
+  df_outcomes_trial %>% pivot_longer(everything(), names_to = "Variable", values_to = "value"),
+  df_outcomes_session %>% pivot_longer(everything(), names_to = "Variable", values_to = "value")
+) %>%
+  group_by(Variable) %>%
+  summarize(
+    N = sum(!is.na(value)),
+    Mean = round(mean(value, na.rm = TRUE), ROUNDING_DIGITS),
+    Median = round(median(value, na.rm = TRUE), ROUNDING_DIGITS),
+    SD = round(sd(value, na.rm = TRUE), ROUNDING_DIGITS),
+    Min = round(min(value, na.rm = TRUE), ROUNDING_DIGITS),
+    Max = round(max(value, na.rm = TRUE), ROUNDING_DIGITS),
+    .groups = "drop"
+  ) %>%
+  gt() %>%
+    tab_header(title = "Descriptive Statistics of Outcome Variables")
+```
+
 # Participant Characteristics
 
 ```{r descriptives}
@@ -286,7 +326,6 @@ df_distance_model %>%
   scale_color_brewer(palette = "Set1")
 ```
 
-
 ```{r pointed-distance-model-check}
 #| fig-cap: "Model diagnostics for the linear mixed-effects model of pointing distance error."
 #| fig-height: 12
@@ -327,6 +366,7 @@ report_group_predictions(lmer_pointed_distance) %>%
 ### Key Findings
 
 Participants made smaller distance estimation errors in vista spaces (environments with open sightlines) compared to non-vista spaces, regardless of movement mode or environment size. This suggests that visual access to the environment improves distance estimation accuracy.
+
 
 ## Pointing Angle Error
 
@@ -1132,7 +1172,6 @@ df_pooled_distance_error <- df_trials_model %>%
             n_teleports = mean(n_teleports, na.rm = TRUE),
             mean_traveled_distance = mean(total_distance, na.rm = TRUE),
             .groups = "drop")
-View(df_pooled_distance_error)
 ```
 
 ### Correlation between estimated distance and traveled distance
@@ -1259,4 +1298,100 @@ report_group_predictions(lmer_navdistance_effect) %>%
   group_by(Predictor) %>%
   gt() %>%
     tab_header(title = "Predicted Effects of Traveled Distance, Vista, and Optic Flow on Distance Estimation Error")
+```
+
+
+# Proportional Pointing Distance Error
+
+To potentially check for the statistical model of the distance error, we also examined the proportional distance error, which is calculated as the difference between the pointed distance and the actual target distance divided by the actual target distance. This metric provides a relative measure of distance estimation error that accounts for the fact that larger distances may naturally lead to larger absolute errors.
+
+```{r proportional-distance-histogram}
+#| fig-cap: "Distribution of proportional distance errors showing potential outliers"
+ggplot(aes(x = target_pointed_distance_difference/pointingpoint_target_distance), data = df_trials_model) +
+  geom_histogram(bins = 30, fill = "steelblue", alpha = 0.7) +
+  facet_wrap(~LevelSize) +
+  theme_minimal(base_size = 14) +
+  labs(
+    title = "Distribution of Pointing Distance Errors",
+    x = "Proportional Distance Error",
+    y = "Frequency"
+  )
+```
+
+### Statistical Model
+
+```{r lmer-proportional-distance, results='hide'}
+df_proportional_distance_model <- df_trials_model %>%
+  mutate(z_target_pointed_distance_difference = abs(scale(target_pointed_distance_difference)[,1]),
+  proportional_distance_error = target_pointed_distance_difference/pointingpoint_target_distance) %>%
+  filter(z_target_pointed_distance_difference < 3)
+
+lmer_proportional_distance <- lmer(
+  proportional_distance_error ~ OpticFlow + LevelSize + Vista +
+    OpticFlow:LevelSize + OpticFlow:Vista +
+    (1|participant),
+  data = df_proportional_distance_model
+)
+proportional_distance_model_table <- summary(report_table(lmer_proportional_distance))
+proportional_distance_model_table
+```
+
+We fitted a linear mixed-effects model to examine the effects of optic flow, environment size, and vista condition on proportional distance error. Extreme outliers (|z| > 3) were excluded from the analysis.
+
+Regular mixed effect model with normal distrubution has been used, as the distribution of distance errors was approximately normal around 0-mean. 
+
+```{r proportional-distance-boxplot}
+#| fig-cap: "Proportional distance errors by experimental conditions. Positive values indicate overshooting, negative values indicate undershooting."
+df_proportional_distance_model %>%
+  ggplot(aes(x = LevelSize, y = proportional_distance_error, fill = OpticFlow, color = OpticFlow)) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "gray40") +
+  geom_boxplot(alpha = 0.5, outlier.alpha = 0.3) +
+  geom_jitter(position = position_jitterdodge(jitter.width = 0.2), alpha = 0.3) +
+  facet_wrap(~Vista) +
+  theme_minimal(base_size = 14) +
+  labs(
+    title = "Proportional Distance Error by Condition",
+    y = "Distance Error (meters)",
+    x = "Environment Size",
+    fill = "Movement Mode",
+    color = "Movement Mode"
+  ) +
+  scale_fill_brewer(palette = "Set1") +
+  scale_color_brewer(palette = "Set1")
+```
+
+```{r proportional-distance-model-check}
+#| fig-cap: "Model diagnostics for the linear mixed-effects model of pointing distance error."
+#| fig-height: 12
+#| fig-width: 8
+check_model(lmer_proportional_distance)
+```
+
+::: {.callout-caution title="Model Text Results" collapse="true"}
+```{r lmer-proportional-distance-text, results='asis'}
+report_text(lmer_proportional_distance)
+```
+:::
+
+```{r lmer-proportional-distance-table}
+#| tbl-cap: "Linear mixed-effects model results for proportional distance error" 
+report_model_parameters(proportional_distance_model_table) %>%
+  tab_header(title = "Fixed-Effect Predictor Estimates for Proportional Distance Error Model")
+report_model_summary_parameters(proportional_distance_model_table) %>%
+  tab_header(title = "Model Parameters for Proportional Distance Error")
+```
+
+### Estimated Marginal Means
+
+```{r lmer-proportional-distance-predictions}
+#| tbl-cap: "Predicted distance errors across all experimental conditions"
+predict_my_responses(lmer_proportional_distance) %>%
+  report_my_predictions() %>%
+  gt() %>%
+    tab_header(title = "Predicted Distance Errors Across Experimental Conditions")
+
+report_group_predictions(lmer_proportional_distance) %>% 
+  group_by(Predictor) %>%
+  gt() %>%
+    tab_header(title = "Predicted Effects of Experimental Conditions on Proportional Distance Error")
 ```
