@@ -317,11 +317,12 @@ df_distance_model %>%
   theme_minimal(base_size = 14) +
   labs(
     title = "Pointing Distance Error by Condition",
-    y = "Distance Error (meters)",
+    y = "Distance Error (virtual units)",
     x = "Environment Size",
     fill = "Movement Mode",
     color = "Movement Mode"
   ) +
+  theme(legend.position = "bottom") +
   scale_fill_brewer(palette = "Set1") +
   scale_color_brewer(palette = "Set1")
 ```
@@ -698,7 +699,7 @@ report_group_predictions(lmer_traveled_distance) %>%
 ### Key Findings
 The presence of optic flow did not significantly affect the total distance traveled. However, participants traveled significantly shorter distances in vista spaces compared to non-vista spaces, suggesting more efficient navigation when environmental layout is visible.
 
-## Number of Teleports
+## Number of Teleportation Jumps
 
 We also examined the number of teleports participants used during navigation, which may reflect their strategy and confidence in navigating the environment.
 
@@ -768,14 +769,15 @@ df_model_teleports %>%
   theme_minimal(base_size = 14) +
   theme(legend.position = "bottom") +
   labs(
-    title = "Number of Teleports by Condition",
-    y = "Number of Teleports",
+    title = "Number of Teleportation Jumps by Condition",
+    y = "Number of Teleportation Jumps",
     x = "Environment Size",
     fill = "Movement Mode",
     color = "Movement Mode"
   ) +
   scale_fill_brewer(palette = "Set1") +
   scale_color_brewer(palette = "Set1")
+ggsave("teleports_boxplot.jpg", width = 8, height = 6, dpi = 300)
 ```
 
 ```{r glm-teleports-check}
